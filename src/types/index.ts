@@ -1,0 +1,29 @@
+export interface StrudelConfig {
+  notes?: string;
+  sound?: string;
+  palindrome?: boolean;
+  room?: string;
+  roomsize?: string;
+  roomfade?: string;
+  roomlp?: string;
+  roomdim?: string;
+  cpm?: string;
+  lpf?: string;
+  distort?: string;
+  gain?: string;
+  pan?: string;
+  rev?: boolean;
+  jux?: string;
+  phaser?: string;
+  phaserdepth?: string;
+  postgain?: string;
+  size?: string;
+  compressor?: string;
+  crush?: string;
+  sustain?: string;
+  release?: string;
+  attack?: string;
+  scale?: string;
+  fast?: string;
+  slow?: string;
+}

@@ -1,0 +1,9 @@
+{
+  "id": "drum-machine",
+  "name": "Drum Machine",
+  "skipBuild": true,
+  "description": "Drum Machine prototype built in React Flow.",
+  "tags": [],
+  "hidden": true,
+  "published": false
+}
