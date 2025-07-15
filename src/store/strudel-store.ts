@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { StrudelConfig } from '@/types';
-import { PATTERN_BUILDERS } from '@/lib/pattern-builders';
 
 type StrudelStore = {
   config: Record<string, StrudelConfig>;
@@ -12,7 +11,6 @@ type StrudelStore = {
   updateNode: (nodeId: string, value: Partial<StrudelConfig>) => void;
   removeNodeConfig: (nodeId: string) => void;
   setPattern: (pattern: string) => void;
-  buildPattern: (nodeId: string) => string;
   muteNode: (nodeId: string) => void;
   unmuteNode: (nodeId: string) => void;
   isNodeMuted: (nodeId: string) => boolean;
@@ -168,28 +166,5 @@ export const useStrudelStore = create<StrudelStore>((set, get) => ({
 
   isGroupPaused: (groupId: string) => {
     return !!get().pausedGroups[groupId];
-  },
-
-  buildPattern: (nodeId: string) => {
-    const config = get().config[nodeId] || {};
-
-    const patternParts = Object.keys(PATTERN_BUILDERS)
-      .map((key) => {
-        const value = config[key as keyof StrudelConfig];
-
-        if (key in PATTERN_BUILDERS && value !== undefined) {
-          const builder = PATTERN_BUILDERS[key];
-          return builder(value);
-        }
-        return '';
-      })
-      .filter(Boolean);
-
-    // Return "no pattern" if patternParts is empty
-    if (patternParts.length === 0) {
-      return 'no pattern';
-    }
-
-    return `$: ${patternParts.join('')}`;
   },
 }));

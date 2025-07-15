@@ -1,19 +1,11 @@
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { Button } from '@/components/ui/button';
-import { useMemo } from 'react';
 
 export function JuxNode({ id, data }: WorkflowNodeProps) {
-  const strudelStore = useStrudelStore();
-  const config = useMemo(
-    () => strudelStore.config[id] || {},
-    [id, strudelStore.config]
-  );
   const updateNode = useStrudelStore((state) => state.updateNode);
-
-  // Extract value or set default
-  const effect = config.jux || 'rev';
+  const effect = useStrudelStore((state) => state.config[id]?.jux || 'rev');
 
   // Available jux effects
   const effects = [
@@ -62,3 +54,12 @@ export function JuxNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+// Define the strudel output transformation
+(JuxNode as any).strudelOutput = (node: AppNode, strudelString: string) => {
+  const jux = useStrudelStore.getState().config[node.id]?.jux;
+  if (!jux) return strudelString;
+
+  const juxCall = `jux(${jux})`;
+  return strudelString ? `${strudelString}.${juxCall}` : juxCall;
+};

@@ -1,16 +1,11 @@
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { Slider } from '@/components/ui/slider';
-import { useMemo } from 'react';
 
 export function RoomNode({ id, data }: WorkflowNodeProps) {
-  const strudelStore = useStrudelStore();
-  const config = useMemo(
-    () => strudelStore.config[id] || {},
-    [id, strudelStore.config]
-  );
   const updateNode = useStrudelStore((state) => state.updateNode);
+  const config = useStrudelStore((state) => state.config[id] || {});
 
   // Extract values or set defaults
   const room = config.room ? parseFloat(config.room) : 0;
@@ -95,3 +90,26 @@ export function RoomNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+// Define the strudel output transformation
+RoomNode.strudelOutput = (node: AppNode, strudelString: string) => {
+  const config = useStrudelStore.getState().config[node.id] || {};
+  const room = config.room;
+  const roomsize = config.roomsize;
+  const roomfade = config.roomfade;
+  const roomlp = config.roomlp;
+  const roomdim = config.roomdim;
+
+  const calls = [];
+
+  if (room) calls.push(`room("${room}")`);
+  if (roomsize) calls.push(`rsize(${roomsize})`);
+  if (roomfade) calls.push(`rfade(${roomfade})`);
+  if (roomlp) calls.push(`rlp(${roomlp})`);
+  if (roomdim) calls.push(`rdim(${roomdim})`);
+
+  if (calls.length === 0) return strudelString;
+
+  const roomCalls = calls.join('.');
+  return strudelString ? `${strudelString}.${roomCalls}` : roomCalls;
+};

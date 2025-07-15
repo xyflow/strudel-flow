@@ -1,19 +1,11 @@
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { Slider } from '@/components/ui/slider';
-import { useMemo } from 'react';
 
 export function CrushNode({ id, data }: WorkflowNodeProps) {
-  const strudelStore = useStrudelStore();
-  const config = useMemo(
-    () => strudelStore.config[id] || {},
-    [id, strudelStore.config]
-  );
   const updateNode = useStrudelStore((state) => state.updateNode);
-
-  // Extract value or set default
-  const crush = config.crush ? parseFloat(config.crush) : 16;
+  const crush = useStrudelStore((state) => state.config[id]?.crush ? parseFloat(state.config[id].crush!) : 16);
 
   // Handler for crush changes
   const handleCrushChange = (value: number[]) => {
@@ -40,3 +32,12 @@ export function CrushNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+// Define the strudel output transformation
+(CrushNode as any).strudelOutput = (node: AppNode, strudelString: string) => {
+  const crush = useStrudelStore.getState().config[node.id]?.crush;
+  if (!crush) return strudelString;
+  
+  const crushCall = `crush("${crush}")`;
+  return strudelString ? `${strudelString}.${crushCall}` : crushCall;
+};

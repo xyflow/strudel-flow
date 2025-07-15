@@ -1,6 +1,6 @@
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { useEffect } from 'react';
 
 export function PalindromeNode({ id, data }: WorkflowNodeProps) {
@@ -13,3 +13,12 @@ export function PalindromeNode({ id, data }: WorkflowNodeProps) {
 
   return <WorkflowNode id={id} data={data}></WorkflowNode>;
 }
+
+// Define the strudel output transformation
+PalindromeNode.strudelOutput = (node: AppNode, strudelString: string) => {
+  const palindrome = useStrudelStore.getState().config[node.id]?.palindrome;
+  if (!palindrome) return strudelString;
+  
+  const palindromeCall = `palindrome()`;
+  return strudelString ? `${strudelString}.${palindromeCall}` : palindromeCall;
+};

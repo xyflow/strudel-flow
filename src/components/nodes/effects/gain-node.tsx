@@ -1,19 +1,11 @@
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { Slider } from '@/components/ui/slider';
-import { useMemo } from 'react';
 
 export function GainNode({ id, data }: WorkflowNodeProps) {
-  const strudelStore = useStrudelStore();
-  const config = useMemo(
-    () => strudelStore.config[id] || {},
-    [id, strudelStore.config]
-  );
   const updateNode = useStrudelStore((state) => state.updateNode);
-
-  // Extract value or set default
-  const gain = config.gain ? parseFloat(config.gain) : 1;
+  const gain = useStrudelStore((state) => state.config[id]?.gain ? parseFloat(state.config[id].gain!) : 1);
 
   // Handler for gain changes
   const handleGainChange = (value: number[]) => {
@@ -49,3 +41,12 @@ export function GainNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+// Define the strudel output transformation
+GainNode.strudelOutput = (node: AppNode, strudelString: string) => {
+  const gain = useStrudelStore.getState().config[node.id]?.gain;
+  if (!gain) return strudelString;
+  
+  const gainCall = `gain(${gain})`;
+  return strudelString ? `${strudelString}.${gainCall}` : gainCall;
+};

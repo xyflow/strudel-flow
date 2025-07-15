@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -344,3 +344,18 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+// Define the strudel output transformation
+(PadNode as any).strudelOutput = (node: AppNode, strudelString: string) => {
+  const notes = useStrudelStore.getState().config[node.id]?.notes;
+  const scale = useStrudelStore.getState().config[node.id]?.scale;
+
+  if (!notes) return strudelString;
+
+  const calls = [];
+  calls.push(`n("${notes}")`);
+  if (scale) calls.push(`scale("${scale}")`);
+
+  const notePattern = calls.join('.');
+  return strudelString ? `${strudelString}.${notePattern}` : notePattern;
+};

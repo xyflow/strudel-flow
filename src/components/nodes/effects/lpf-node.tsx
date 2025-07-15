@@ -1,19 +1,14 @@
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { Slider } from '@/components/ui/slider';
-import { useMemo } from 'react';
 
 export function LpfNode({ id, data }: WorkflowNodeProps) {
-  const strudelStore = useStrudelStore();
-  const config = useMemo(
-    () => strudelStore.config[id] || {},
-    [id, strudelStore.config]
-  );
   const updateNode = useStrudelStore((state) => state.updateNode);
+  const lpfValue = useStrudelStore((state) => state.config[id]?.lpf || '1000 1');
 
   // Extract values or set defaults
-  const parts = config.lpf ? config.lpf.split(' ') : ['1000', '1'];
+  const parts = lpfValue.split(' ');
   const frequency = parseFloat(parts[0]) || 1000;
   const resonance = parseFloat(parts[1]) || 1;
 
@@ -67,3 +62,12 @@ export function LpfNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+// Define the strudel output transformation
+LpfNode.strudelOutput = (node: AppNode, strudelString: string) => {
+  const lpf = useStrudelStore.getState().config[node.id]?.lpf;
+  if (!lpf) return strudelString;
+  
+  const lpfCall = `lpf("${lpf}")`;
+  return strudelString ? `${strudelString}.${lpfCall}` : lpfCall;
+};

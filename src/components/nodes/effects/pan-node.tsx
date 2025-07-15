@@ -1,19 +1,11 @@
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { Slider } from '@/components/ui/slider';
-import { useMemo } from 'react';
 
 export function PanNode({ id, data }: WorkflowNodeProps) {
-  const strudelStore = useStrudelStore();
-  const config = useMemo(
-    () => strudelStore.config[id] || {},
-    [id, strudelStore.config]
-  );
   const updateNode = useStrudelStore((state) => state.updateNode);
-
-  // Extract value or set default
-  const pan = config.pan ? parseFloat(config.pan) : 0.5;
+  const pan = useStrudelStore((state) => state.config[id]?.pan ? parseFloat(state.config[id].pan!) : 0.5);
 
   // Get pan description
   const getPanDescription = () => {
@@ -70,3 +62,12 @@ export function PanNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+// Define the strudel output transformation
+PanNode.strudelOutput = (node: AppNode, strudelString: string) => {
+  const pan = useStrudelStore.getState().config[node.id]?.pan;
+  if (!pan) return strudelString;
+  
+  const panCall = `pan(${pan})`;
+  return strudelString ? `${strudelString}.${panCall}` : panCall;
+};

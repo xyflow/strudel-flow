@@ -5,6 +5,7 @@
 import { Edge } from '@xyflow/react';
 import { AppNode } from '@/components/nodes';
 import { useStrudelStore } from '@/store/strudel-store';
+import { getNodeStrudelOutput } from './node-registry';
 
 /**
  * Find all nodes connected to a given node (including the node itself)
@@ -44,9 +45,12 @@ export function generateGroupId(nodeIds: string[]): string {
  * Find all connected groups with their IDs
  */
 export function findAllGroups(nodes: AppNode[], edges: Edge[]): Array<{ groupId: string; nodeIds: string[] }> {
+  // Filter nodes that have strudelOutput methods
   const patternNodes = nodes.filter((node) => {
     const config = useStrudelStore.getState().config[node.id];
-    return config && Object.keys(config).length > 0;
+    const hasConfig = config && Object.keys(config).length > 0;
+    const hasStrudelOutput = !!(node.type && getNodeStrudelOutput(node.type));
+    return hasConfig || hasStrudelOutput;
   });
 
   const processedNodes = new Set<string>();
@@ -56,9 +60,12 @@ export function findAllGroups(nodes: AppNode[], edges: Edge[]): Array<{ groupId:
     if (!processedNodes.has(node.id)) {
       const connectedNodeIds = findConnectedNodeIds(node.id, edges);
       const nodeIds = Array.from(connectedNodeIds).filter((nodeId) => {
-        // Only include nodes that have configurations
+        // Only include nodes that have strudelOutput methods
         const config = useStrudelStore.getState().config[nodeId];
-        return config && Object.keys(config).length > 0;
+        const hasConfig = config && Object.keys(config).length > 0;
+        const nodeType = nodes.find(n => n.id === nodeId)?.type;
+        const hasStrudelOutput = !!(nodeType && getNodeStrudelOutput(nodeType));
+        return hasConfig || hasStrudelOutput;
       });
 
       // Mark all nodes in this group as processed

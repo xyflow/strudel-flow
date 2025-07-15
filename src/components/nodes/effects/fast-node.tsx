@@ -1,20 +1,12 @@
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useMemo } from 'react';
 
 export function FastNode({ id, data }: WorkflowNodeProps) {
-  const strudelStore = useStrudelStore();
-  const config = useMemo(
-    () => strudelStore.config[id] || {},
-    [id, strudelStore.config]
-  );
   const updateNode = useStrudelStore((state) => state.updateNode);
-
-  // Extract value or set default
-  const factor = config.fast ? parseFloat(config.fast) : 2;
+  const factor = useStrudelStore((state) => state.config[id]?.fast ? parseFloat(state.config[id].fast!) : 2);
 
   const handleFactorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(event.target.value);
@@ -65,3 +57,12 @@ export function FastNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+// Define the strudel output transformation
+(FastNode as any).strudelOutput = (node: AppNode, strudelString: string) => {
+  const fast = useStrudelStore.getState().config[node.id]?.fast;
+  if (!fast) return strudelString;
+  
+  const fastCall = `fast(${fast})`;
+  return strudelString ? `${strudelString}.${fastCall}` : fastCall;
+};

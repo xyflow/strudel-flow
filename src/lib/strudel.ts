@@ -5,7 +5,7 @@
 import { Edge } from '@xyflow/react';
 import { AppNode } from '@/components/nodes';
 import { useStrudelStore } from '@/store/strudel-store';
-import { PATTERN_BUILDERS } from './pattern-builders';
+import { getNodeStrudelOutput } from './node-registry';
 import { 
   findAllGroups, 
   hasTopLevelNode 
@@ -15,48 +15,31 @@ import {
 export { findConnectedNodeIds, generateGroupId, findAllGroups } from './graph-utils';
 
 /**
- * Merge node configurations within a group
+ * Build pattern for a single node using its strudelOutput method
  */
-function mergeNodeConfigurations(nodeIds: string[]): Record<string, string | boolean | undefined> {
-  return nodeIds.reduce<Record<string, string | boolean | undefined>>((acc, nodeId) => {
-    const config = useStrudelStore.getState().config[nodeId] || {};
-    return { ...acc, ...config };
-  }, {});
-}
-
-/**
- * Build pattern parts from configuration using pattern builders
- */
-function buildPatternParts(config: Record<string, string | boolean | undefined>): string[] {
-  return Object.keys(PATTERN_BUILDERS)
-    .map((key) => {
-      const value = config[key];
-      // Skip CPM here - we'll handle it globally
-      if (key === 'cpm') return '';
-      if (key in PATTERN_BUILDERS && value !== undefined) {
-        const builder = PATTERN_BUILDERS[key];
-        return builder(value);
-      }
-      return '';
-    })
-    .filter(Boolean);
-}
-
-/**
- * Format a pattern string for a group
- */
-function formatGroupPattern(patternParts: string[], isTopLevel: boolean): string {
-  if (patternParts.length === 0) {
-    return 'no pattern';
+function buildNodePattern(node: AppNode, inputPattern: string = ''): string {
+  const strudelOutput = getNodeStrudelOutput(node.type);
+  
+  if (strudelOutput) {
+    return strudelOutput(node, inputPattern);
   }
+  
+  // No strudelOutput method found - return input pattern unchanged
+  return inputPattern;
+}
 
-  // Join with dots, but remove leading dot if it's a top-level node
-  const joinedPattern = patternParts.join('.');
-  const finalPattern = isTopLevel && joinedPattern.startsWith('.')
-    ? joinedPattern.substring(1)
-    : joinedPattern;
-
-  return `$: ${finalPattern}`;
+/**
+ * Build pattern for a group of connected nodes
+ */
+function buildGroupPattern(nodeIds: string[], nodes: AppNode[]): string {
+  // Get nodes in order (you might want to implement proper ordering based on edges)
+  const sortedNodes = nodeIds
+    .map(id => nodes.find(n => n.id === id))
+    .filter(Boolean) as AppNode[];
+  
+  return sortedNodes.reduce((pattern, node) => {
+    return buildNodePattern(node, pattern);
+  }, '');
 }
 
 /**
@@ -69,26 +52,23 @@ export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
   // Find all connected groups
   const groups = findAllGroups(nodes, edges);
 
-  // Build patterns for each group by merging configurations
+  // Build patterns for each group
   const patterns = groups.map((group) => {
-    // Check if any node in the group is a top-level node (no incoming edges)
+    const pattern = buildGroupPattern(group.nodeIds, nodes);
     const isTopLevel = hasTopLevelNode(group.nodeIds, edges);
-
-    // Merge all configurations in the group
-    const mergedConfig = mergeNodeConfigurations(group.nodeIds);
-
-    // Build pattern parts
-    const patternParts = buildPatternParts(mergedConfig);
-
+    
+    if (!pattern) return '';
+    
     // Format the final pattern
-    return formatGroupPattern(patternParts, isTopLevel);
-  });
+    const finalPattern = isTopLevel && pattern.startsWith('.')
+      ? pattern.substring(1)
+      : pattern;
+    
+    return `$: ${finalPattern}`;
+  }).filter(Boolean);
 
-  // Filter out empty patterns
-  const validPatterns = patterns.filter((pattern) => pattern !== 'no pattern');
-
-  // If no valid patterns, return empty string so workflow stops
-  if (validPatterns.length === 0) {
+  // If no valid patterns, return empty string
+  if (patterns.length === 0) {
     return '';
   }
 
@@ -99,7 +79,7 @@ export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
     output += `setcpm(${cpm})\n`;
   }
 
-  output += validPatterns.join('\n');
+  output += patterns.join('\n');
 
   return output;
 }

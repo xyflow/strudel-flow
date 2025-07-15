@@ -1,20 +1,12 @@
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useMemo } from 'react';
 
 export function SlowNode({ id, data }: WorkflowNodeProps) {
-  const strudelStore = useStrudelStore();
-  const config = useMemo(
-    () => strudelStore.config[id] || {},
-    [id, strudelStore.config]
-  );
   const updateNode = useStrudelStore((state) => state.updateNode);
-
-  // Extract value or set default
-  const factor = config.slow ? parseFloat(config.slow) : 0.5;
+  const factor = useStrudelStore((state) => state.config[id]?.slow ? parseFloat(state.config[id].slow!) : 0.5);
 
   const handleFactorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(event.target.value);
@@ -25,6 +17,15 @@ export function SlowNode({ id, data }: WorkflowNodeProps) {
 
   const handlePresetClick = (presetValue: number) => {
     updateNode(id, { slow: presetValue.toString() });
+  };
+
+  // Define the strudel output transformation
+  (SlowNode as any).strudelOutput = (node: AppNode, strudelString: string) => {
+    const slow = useStrudelStore.getState().config[node.id]?.slow;
+    if (!slow) return strudelString;
+    
+    const slowCall = `slow(${slow})`;
+    return strudelString ? `${strudelString}.${slowCall}` : slowCall;
   };
 
   return (
