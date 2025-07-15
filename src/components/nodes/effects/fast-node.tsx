@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 
 export function FastNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const factor = useStrudelStore((state) => state.config[id]?.fast ? parseFloat(state.config[id].fast!) : 2);
+  const factor = useStrudelStore((state) =>
+    state.config[id]?.fast ? parseFloat(state.config[id].fast!) : 2
+  );
 
   const handleFactorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(event.target.value);
@@ -23,7 +25,7 @@ export function FastNode({ id, data }: WorkflowNodeProps) {
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-3 p-3 bg-card rounded-lg border">
         <label className="text-sm font-medium text-card-foreground">Fast</label>
-        
+
         {/* Preset buttons */}
         <div className="grid grid-cols-3 gap-1">
           {[1.5, 2, 3, 4, 6, 8].map((preset) => (
@@ -41,7 +43,9 @@ export function FastNode({ id, data }: WorkflowNodeProps) {
 
         {/* Custom input */}
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-muted-foreground">Custom Factor:</label>
+          <label className="text-xs text-muted-foreground">
+            Custom Factor:
+          </label>
           <Input
             type="number"
             value={factor}
@@ -58,11 +62,10 @@ export function FastNode({ id, data }: WorkflowNodeProps) {
   );
 }
 
-// Define the strudel output transformation
-(FastNode as any).strudelOutput = (node: AppNode, strudelString: string) => {
+FastNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const fast = useStrudelStore.getState().config[node.id]?.fast;
   if (!fast) return strudelString;
-  
+
   const fastCall = `fast(${fast})`;
   return strudelString ? `${strudelString}.${fastCall}` : fastCall;
 };

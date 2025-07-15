@@ -5,23 +5,31 @@ import { Slider } from '@/components/ui/slider';
 
 export function DistortNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const distortValue = useStrudelStore((state) => state.config[id]?.distort || '0.5');
+  const distortValue = useStrudelStore(
+    (state) => state.config[id]?.distort || '0.5'
+  );
 
   // Extract values or set defaults
-  const amount = distortValue.includes(':') ? parseFloat(distortValue.split(':')[0]) : parseFloat(distortValue);
-  const postgain = distortValue.includes(':') ? parseFloat(distortValue.split(':')[1]) : 1;
+  const amount = distortValue.includes(':')
+    ? parseFloat(distortValue.split(':')[0])
+    : parseFloat(distortValue);
+  const postgain = distortValue.includes(':')
+    ? parseFloat(distortValue.split(':')[1])
+    : 1;
 
   // Handler for distortion amount changes
   const handleAmountChange = (value: number[]) => {
     const newAmount = value[0];
-    const distortValue = postgain !== 1 ? `${newAmount}:${postgain}` : `${newAmount}`;
+    const distortValue =
+      postgain !== 1 ? `${newAmount}:${postgain}` : `${newAmount}`;
     updateNode(id, { distort: distortValue });
   };
 
   // Handler for postgain changes
   const handlePostgainChange = (value: number[]) => {
     const newPostgain = value[0];
-    const distortValue = newPostgain !== 1 ? `${amount}:${newPostgain}` : `${amount}`;
+    const distortValue =
+      newPostgain !== 1 ? `${amount}:${newPostgain}` : `${amount}`;
     updateNode(id, { distort: distortValue });
   };
 
@@ -68,11 +76,10 @@ export function DistortNode({ id, data }: WorkflowNodeProps) {
   );
 }
 
-// Define the strudel output transformation
 DistortNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const distort = useStrudelStore.getState().config[node.id]?.distort;
   if (!distort) return strudelString;
-  
+
   const distortCall = `distort(${distort})`;
   return strudelString ? `${strudelString}.${distortCall}` : distortCall;
 };

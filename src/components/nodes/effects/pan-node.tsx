@@ -5,7 +5,9 @@ import { Slider } from '@/components/ui/slider';
 
 export function PanNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const pan = useStrudelStore((state) => state.config[id]?.pan ? parseFloat(state.config[id].pan!) : 0.5);
+  const pan = useStrudelStore((state) =>
+    state.config[id]?.pan ? parseFloat(state.config[id].pan!) : 0.5
+  );
 
   // Get pan description
   const getPanDescription = () => {
@@ -30,14 +32,16 @@ export function PanNode({ id, data }: WorkflowNodeProps) {
               {pan.toFixed(2)} ({getPanDescription()})
             </span>
           </div>
-          <div className="relative">          <Slider
-            value={[pan]}
-            onValueChange={handlePanChange}
-            min={0}
-            max={1}
-            step={0.01}
-            className="w-full"
-          />
+          <div className="relative">
+            {' '}
+            <Slider
+              value={[pan]}
+              onValueChange={handlePanChange}
+              min={0}
+              max={1}
+              step={0.01}
+              className="w-full"
+            />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>L</span>
               <span>C</span>
@@ -63,11 +67,10 @@ export function PanNode({ id, data }: WorkflowNodeProps) {
   );
 }
 
-// Define the strudel output transformation
 PanNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const pan = useStrudelStore.getState().config[node.id]?.pan;
   if (!pan) return strudelString;
-  
+
   const panCall = `pan(${pan})`;
   return strudelString ? `${strudelString}.${panCall}` : panCall;
 };

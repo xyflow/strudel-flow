@@ -1,6 +1,6 @@
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { DRUM_OPTIONS } from '@/data/sound-options';
@@ -84,3 +84,12 @@ export function DrumNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+DrumNode.strudelOutput = (node: AppNode, strudelString: string) => {
+  const config = useStrudelStore.getState().config[node.id];
+  const sound = config?.sound;
+
+  if (!sound) return strudelString;
+
+  return strudelString ? `${strudelString}.${sound}` : sound;
+};

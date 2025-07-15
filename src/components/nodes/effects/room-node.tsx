@@ -91,7 +91,6 @@ export function RoomNode({ id, data }: WorkflowNodeProps) {
   );
 }
 
-// Define the strudel output transformation
 RoomNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const config = useStrudelStore.getState().config[node.id] || {};
   const room = config.room;

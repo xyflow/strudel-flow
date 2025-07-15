@@ -5,7 +5,9 @@ import { Slider } from '@/components/ui/slider';
 
 export function CrushNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const crush = useStrudelStore((state) => state.config[id]?.crush ? parseFloat(state.config[id].crush!) : 16);
+  const crush = useStrudelStore((state) =>
+    state.config[id]?.crush ? parseFloat(state.config[id].crush!) : 16
+  );
 
   // Handler for crush changes
   const handleCrushChange = (value: number[]) => {
@@ -33,11 +35,10 @@ export function CrushNode({ id, data }: WorkflowNodeProps) {
   );
 }
 
-// Define the strudel output transformation
-(CrushNode as any).strudelOutput = (node: AppNode, strudelString: string) => {
+CrushNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const crush = useStrudelStore.getState().config[node.id]?.crush;
   if (!crush) return strudelString;
-  
+
   const crushCall = `crush("${crush}")`;
   return strudelString ? `${strudelString}.${crushCall}` : crushCall;
 };

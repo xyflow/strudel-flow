@@ -5,7 +5,9 @@ import { Slider } from '@/components/ui/slider';
 
 export function LpfNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const lpfValue = useStrudelStore((state) => state.config[id]?.lpf || '1000 1');
+  const lpfValue = useStrudelStore(
+    (state) => state.config[id]?.lpf || '1000 1'
+  );
 
   // Extract values or set defaults
   const parts = lpfValue.split(' ');
@@ -63,11 +65,10 @@ export function LpfNode({ id, data }: WorkflowNodeProps) {
   );
 }
 
-// Define the strudel output transformation
 LpfNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const lpf = useStrudelStore.getState().config[node.id]?.lpf;
   if (!lpf) return strudelString;
-  
+
   const lpfCall = `lpf("${lpf}")`;
   return strudelString ? `${strudelString}.${lpfCall}` : lpfCall;
 };

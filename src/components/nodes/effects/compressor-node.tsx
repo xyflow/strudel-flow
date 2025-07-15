@@ -1,18 +1,13 @@
-import { useMemo } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { Input } from '@/components/ui/input';
 
 export function CompressorNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const nodeConfig = useStrudelStore((state) => state.config[id]);
-  
-  const config = useMemo(() => {
-    return {
-      compressor: nodeConfig?.compressor || '-20:20:10:.002:.02',
-    };
-  }, [nodeConfig?.compressor]);
+  const compressor = useStrudelStore(
+    (state) => state.config[id]?.compressor || '-20:20:10:.002:.02'
+  );
 
   return (
     <WorkflowNode id={id} data={data}>
@@ -29,7 +24,7 @@ export function CompressorNode({ id, data }: WorkflowNodeProps) {
             </label>
             <Input
               type="text"
-              value={config.compressor}
+              value={compressor}
               onChange={(e) => updateNode(id, { compressor: e.target.value })}
               className="h-7"
               placeholder="-20:20:10:.002:.02"
@@ -67,3 +62,11 @@ export function CompressorNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+CompressorNode.strudelOutput = (node: AppNode, strudelString: string) => {
+  const compressor = useStrudelStore.getState().config[node.id]?.compressor;
+  if (!compressor) return strudelString;
+
+  const compressorCall = `compressor("${compressor}")`;
+  return strudelString ? `${strudelString}.${compressorCall}` : compressorCall;
+};

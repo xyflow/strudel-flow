@@ -5,20 +5,13 @@ import { Slider } from '@/components/ui/slider';
 
 export function SustainNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const sustain = useStrudelStore((state) => state.config[id]?.sustain ? parseFloat(state.config[id].sustain!) : 0.5);
+  const sustain = useStrudelStore((state) =>
+    state.config[id]?.sustain ? parseFloat(state.config[id].sustain!) : 0.5
+  );
 
   // Handler for sustain changes
   const handleSustainChange = (value: number[]) => {
     updateNode(id, { sustain: value[0].toString() });
-  };
-
-  // Define the strudel output transformation
-  (SustainNode as any).strudelOutput = (node: AppNode, strudelString: string) => {
-    const sustain = useStrudelStore.getState().config[node.id]?.sustain;
-    if (!sustain) return strudelString;
-    
-    const sustainCall = `sustain(${sustain})`;
-    return strudelString ? `${strudelString}.${sustainCall}` : sustainCall;
   };
 
   return (
@@ -41,3 +34,11 @@ export function SustainNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+SustainNode.strudelOutput = (node: AppNode, strudelString: string) => {
+  const sustain = useStrudelStore.getState().config[node.id]?.sustain;
+  if (!sustain) return strudelString;
+
+  const sustainCall = `sustain(${sustain})`;
+  return strudelString ? `${strudelString}.${sustainCall}` : sustainCall;
+};

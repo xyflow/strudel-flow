@@ -55,8 +55,7 @@ export function JuxNode({ id, data }: WorkflowNodeProps) {
   );
 }
 
-// Define the strudel output transformation
-(JuxNode as any).strudelOutput = (node: AppNode, strudelString: string) => {
+JuxNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const jux = useStrudelStore.getState().config[node.id]?.jux;
   if (!jux) return strudelString;
 

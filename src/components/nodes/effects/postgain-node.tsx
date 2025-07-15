@@ -1,19 +1,13 @@
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { Slider } from '@/components/ui/slider';
-import { useMemo } from 'react';
 
 export function PostGainNode({ id, data }: WorkflowNodeProps) {
-  const strudelStore = useStrudelStore();
-  const config = useMemo(
-    () => strudelStore.config[id] || {},
-    [id, strudelStore.config]
-  );
   const updateNode = useStrudelStore((state) => state.updateNode);
-
-  // Extract value or set default
-  const postgain = config.postgain ? parseFloat(config.postgain) : 1.5;
+  const postgain = useStrudelStore((state) =>
+    state.config[id]?.postgain ? parseFloat(state.config[id].postgain!) : 1.5
+  );
 
   // Handler for postgain changes
   const handlePostgainChange = (value: number[]) => {
@@ -40,3 +34,11 @@ export function PostGainNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+PostGainNode.strudelOutput = (node: AppNode, strudelString: string) => {
+  const postgain = useStrudelStore.getState().config[node.id]?.postgain;
+  if (!postgain) return strudelString;
+
+  const postgainCall = `postgain(${postgain})`;
+  return strudelString ? `${strudelString}.${postgainCall}` : postgainCall;
+};

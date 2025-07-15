@@ -38,11 +38,10 @@ export function SampleSelect({ id, data }: WorkflowNodeProps) {
   );
 }
 
-// Define the strudel output transformation
 SampleSelect.strudelOutput = (node: AppNode, strudelString: string) => {
   const sound = useStrudelStore.getState().config[node.id]?.sound;
   if (!sound) return strudelString;
-  
+
   const soundCall = `sound("${sound}")`;
   return strudelString ? `${strudelString}.${soundCall}` : soundCall;
 };

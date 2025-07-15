@@ -5,7 +5,9 @@ import { Slider } from '@/components/ui/slider';
 
 export function AttackNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const attack = useStrudelStore((state) => parseFloat(state.config[id]?.attack || '0.01'));
+  const attack = useStrudelStore((state) =>
+    parseFloat(state.config[id]?.attack || '0.01')
+  );
 
   return (
     <WorkflowNode id={id} data={data}>
@@ -16,7 +18,9 @@ export function AttackNode({ id, data }: WorkflowNodeProps) {
           </label>
           <Slider
             value={[attack]}
-            onValueChange={(value) => updateNode(id, { attack: value[0].toString() })}
+            onValueChange={(value) =>
+              updateNode(id, { attack: value[0].toString() })
+            }
             min={0.001}
             max={2.0}
             step={0.001}
@@ -28,11 +32,10 @@ export function AttackNode({ id, data }: WorkflowNodeProps) {
   );
 }
 
-// Define the strudel output transformation
-(AttackNode as any).strudelOutput = (node: AppNode, strudelString: string) => {
+AttackNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const attack = useStrudelStore.getState().config[node.id]?.attack;
   if (!attack) return strudelString;
-  
+
   const attackCall = `attack("${attack}")`;
   return strudelString ? `${strudelString}.${attackCall}` : attackCall;
 };

@@ -5,7 +5,9 @@ import { Slider } from '@/components/ui/slider';
 
 export function GainNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const gain = useStrudelStore((state) => state.config[id]?.gain ? parseFloat(state.config[id].gain!) : 1);
+  const gain = useStrudelStore((state) =>
+    state.config[id]?.gain ? parseFloat(state.config[id].gain!) : 1
+  );
 
   // Handler for gain changes
   const handleGainChange = (value: number[]) => {
@@ -42,11 +44,10 @@ export function GainNode({ id, data }: WorkflowNodeProps) {
   );
 }
 
-// Define the strudel output transformation
 GainNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const gain = useStrudelStore.getState().config[node.id]?.gain;
   if (!gain) return strudelString;
-  
+
   const gainCall = `gain(${gain})`;
   return strudelString ? `${strudelString}.${gainCall}` : gainCall;
 };

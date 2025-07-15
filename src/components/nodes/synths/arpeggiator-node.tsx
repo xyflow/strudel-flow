@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import {
@@ -67,6 +67,28 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
     return /[0-9]/.test(notePattern);
   }, [notePattern]);
 
+  // Update store when pattern changes (needed for strudelOutput method)
+  useEffect(() => {
+    const nodeUpdate: { notes: string; scale?: string } = {
+      notes: notePattern,
+    };
+
+    if (hasNotes) {
+      const finalScale = `${selectedKey}${octave}:${selectedScaleType}`;
+      nodeUpdate.scale = finalScale;
+    }
+
+    updateNode(id, nodeUpdate);
+  }, [
+    notePattern,
+    hasNotes,
+    id,
+    updateNode,
+    selectedKey,
+    selectedScaleType,
+    octave,
+  ]);
+
   // Handle step pad click - cycle through states
   const handleStepClick = (stepIndex: number) => {
     setStepStates((prev) => {
@@ -127,29 +149,6 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
 
     return 'bg-muted text-muted-foreground border-border hover:bg-muted/70';
   };
-
-  // Update node when pattern changes
-  useEffect(() => {
-    // Only include scale if there are notes
-    const nodeUpdate: { notes: string; scale?: string } = {
-      notes: notePattern,
-    };
-
-    if (hasNotes) {
-      const finalScale = `${selectedKey}${octave}:${selectedScaleType}`;
-      nodeUpdate.scale = finalScale;
-    }
-
-    updateNode(id, nodeUpdate);
-  }, [
-    notePattern,
-    hasNotes,
-    id,
-    updateNode,
-    selectedKey,
-    selectedScaleType,
-    octave,
-  ]);
 
   return (
     <WorkflowNode id={id} data={data}>
@@ -271,3 +270,18 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+ArpeggiatorNode.strudelOutput = (node: AppNode, strudelString: string) => {
+  const config = useStrudelStore.getState().config[node.id];
+  const notes = config?.notes;
+  const scale = config?.scale;
+
+  if (!notes || !scale) return strudelString;
+
+  // Check if pattern has any notes
+  const hasNotes = /[0-9]/.test(notes);
+  if (!hasNotes) return strudelString;
+
+  const noteCall = `note("${notes}").scale("${scale}")`;
+  return strudelString ? `${strudelString}.${noteCall}` : noteCall;
+};

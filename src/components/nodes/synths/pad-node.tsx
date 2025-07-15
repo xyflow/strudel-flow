@@ -345,8 +345,7 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
   );
 }
 
-// Define the strudel output transformation
-(PadNode as any).strudelOutput = (node: AppNode, strudelString: string) => {
+PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const notes = useStrudelStore.getState().config[node.id]?.notes;
   const scale = useStrudelStore.getState().config[node.id]?.scale;
 

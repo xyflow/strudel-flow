@@ -1,19 +1,13 @@
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps } from '..';
+import { WorkflowNodeProps, AppNode } from '..';
 import { Slider } from '@/components/ui/slider';
-import { useMemo } from 'react';
 
 export function SizeNode({ id, data }: WorkflowNodeProps) {
-  const strudelStore = useStrudelStore();
-  const config = useMemo(
-    () => strudelStore.config[id] || {},
-    [id, strudelStore.config]
-  );
   const updateNode = useStrudelStore((state) => state.updateNode);
-
-  // Extract value or set default
-  const size = config.size ? parseFloat(config.size) : 4;
+  const size = useStrudelStore((state) =>
+    state.config[id]?.size ? parseFloat(state.config[id].size!) : 4
+  );
 
   // Handler for size changes
   const handleSizeChange = (value: number[]) => {
@@ -40,3 +34,11 @@ export function SizeNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+SizeNode.strudelOutput = (node: AppNode, strudelString: string) => {
+  const size = useStrudelStore.getState().config[node.id]?.size;
+  if (!size) return strudelString;
+
+  const sizeCall = `size(${size})`;
+  return strudelString ? `${strudelString}.${sizeCall}` : sizeCall;
+};
