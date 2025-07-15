@@ -1,7 +1,7 @@
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { DRUM_OPTIONS } from '@/data/sound-options';
 import {
@@ -58,7 +58,7 @@ export function DrumNode({ id, data }: WorkflowNodeProps) {
   };
 
   // Update strudel pattern based on pad states
-  useMemo(() => {
+  useEffect(() => {
     const pattern = generateDrumPattern(padStates, DRUM_OPTIONS);
     updateNode(id, { sound: pattern });
   }, [padStates, id, updateNode]);
