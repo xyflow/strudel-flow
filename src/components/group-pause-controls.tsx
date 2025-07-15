@@ -1,6 +1,6 @@
 import { useAppStore } from '@/store/app-context';
 import { useStrudelStore } from '@/store/strudel-store';
-import { findAllGroups } from '@/lib/strudel';
+import { findAllGroups } from '@/lib/graph-utils';
 import { Button } from '@/components/ui/button';
 import { Pause, Play } from 'lucide-react';
 

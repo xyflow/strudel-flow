@@ -20,7 +20,6 @@ export function findConnectedNodeIds(
     if (visited.has(id)) return;
     visited.add(id);
 
-    // Follow edges in both directions
     edges.forEach((edge) => {
       if (edge.source === id) {
         visit(edge.target);
@@ -35,32 +34,16 @@ export function findConnectedNodeIds(
 }
 
 /**
- * Generate a consistent group ID for a set of connected nodes
- */
-export function generateGroupId(nodeIds: string[]): string {
-  return nodeIds.sort().join('-');
-}
-
-/**
  * Find all connected groups with their IDs
  */
 export function findAllGroups(nodes: AppNode[], edges: Edge[]): Array<{ groupId: string; nodeIds: string[] }> {
-  // Filter nodes that have strudelOutput methods
-  const patternNodes = nodes.filter((node) => {
-    const config = useStrudelStore.getState().config[node.id];
-    const hasConfig = config && Object.keys(config).length > 0;
-    const hasStrudelOutput = !!(node.type && getNodeStrudelOutput(node.type));
-    return hasConfig || hasStrudelOutput;
-  });
-
   const processedNodes = new Set<string>();
   const groups: Array<{ groupId: string; nodeIds: string[] }> = [];
 
-  patternNodes.forEach((node) => {
+  nodes.forEach((node) => {
     if (!processedNodes.has(node.id)) {
       const connectedNodeIds = findConnectedNodeIds(node.id, edges);
       const nodeIds = Array.from(connectedNodeIds).filter((nodeId) => {
-        // Only include nodes that have strudelOutput methods
         const config = useStrudelStore.getState().config[nodeId];
         const hasConfig = config && Object.keys(config).length > 0;
         const nodeType = nodes.find(n => n.id === nodeId)?.type;
@@ -68,29 +51,14 @@ export function findAllGroups(nodes: AppNode[], edges: Edge[]): Array<{ groupId:
         return hasConfig || hasStrudelOutput;
       });
 
-      // Mark all nodes in this group as processed
       nodeIds.forEach((nodeId) => processedNodes.add(nodeId));
 
       if (nodeIds.length > 0) {
-        const groupId = generateGroupId(nodeIds);
+        const groupId = nodeIds.sort().join('-');
         groups.push({ groupId, nodeIds });
       }
     }
   });
 
   return groups;
-}
-
-/**
- * Check if a node has any incoming edges (is not a top-level node)
- */
-export function hasIncomingEdges(nodeId: string, edges: Edge[]): boolean {
-  return edges.some((edge) => edge.target === nodeId);
-}
-
-/**
- * Check if any node in a group is a top-level node (no incoming edges)
- */
-export function hasTopLevelNode(nodeIds: string[], edges: Edge[]): boolean {
-  return nodeIds.some((nodeId) => !hasIncomingEdges(nodeId, edges));
 }

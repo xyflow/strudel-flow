@@ -8,9 +8,6 @@ import { useStrudelStore } from '@/store/strudel-store';
 import { getNodeStrudelOutput } from './node-registry';
 import { findAllGroups } from './graph-utils';
 
-// Re-export for backward compatibility
-export { findConnectedNodeIds, generateGroupId, findAllGroups } from './graph-utils';
-
 /**
  * Generate complete Strudel output from nodes and edges
  */

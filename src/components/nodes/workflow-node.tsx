@@ -25,7 +25,7 @@ import PatternPopup from '@/components/pattern-popup';
 import { useStrudelStore } from '@/store/strudel-store';
 import { BaseHandle } from '@/components/base-handle';
 import { Position } from '@xyflow/react';
-import { findConnectedNodeIds } from '@/lib/strudel';
+import { findConnectedNodeIds } from '@/lib/graph-utils';
 
 function WorkflowNode({
   id,
