@@ -23,8 +23,6 @@ export const DEFAULT_CLICK_SEQUENCE: CellState[] = [
 
 export const DRUM_CLICK_SEQUENCE: CellState[] = [...DEFAULT_CLICK_SEQUENCE];
 
-export const PAD_CLICK_SEQUENCE: CellState[] = [...DEFAULT_CLICK_SEQUENCE];
-
 /**
  * Get the next cell state in a click sequence
  */
@@ -140,21 +138,37 @@ export function applyRowModifier(pattern: string, modifier: CellState): string {
 }
 
 /**
- * Initialize row modifiers array for given number of steps
+ * Get context menu value string for radio group
  */
-export function initializeRowModifiers(steps: number): CellState[] {
-  return Array(steps).fill({ type: 'off' });
+export function getContextMenuValue(cellState: CellState): string {
+  if (cellState.type === 'replicate') return `replicate-${cellState.count}`;
+  if (cellState.type === 'slow') return `slow-${cellState.count}`;
+  if (cellState.type === 'elongate') return `elongate-${cellState.duration}`;
+  if (cellState.type === 'speed') return `speed-${cellState.multiplier}`;
+  return cellState.type;
 }
 
 /**
- * Update row modifiers when steps change
+ * Parse context menu value string back to CellState
  */
-export function updateRowModifiersForSteps(
-  current: CellState[],
-  newSteps: number
-): CellState[] {
-  return Array.from(
-    { length: newSteps },
-    (_, idx) => current[idx] || { type: 'off' }
-  );
+export function parseContextMenuValue(value: string): CellState {
+  if (value === 'off') {
+    return { type: 'off' };
+  } else if (value === 'normal') {
+    return { type: 'normal' };
+  } else if (value.startsWith('replicate-')) {
+    const count = parseInt(value.split('-')[1]);
+    return { type: 'replicate', count };
+  } else if (value.startsWith('slow-')) {
+    const count = parseInt(value.split('-')[1]);
+    return { type: 'slow', count };
+  } else if (value.startsWith('elongate-')) {
+    const duration = parseInt(value.split('-')[1]);
+    return { type: 'elongate', duration };
+  } else if (value.startsWith('speed-')) {
+    const multiplier = parseInt(value.split('-')[1]);
+    return { type: 'speed', multiplier };
+  } else {
+    return { type: 'off' };
+  }
 }

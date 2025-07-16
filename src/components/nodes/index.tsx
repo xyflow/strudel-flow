@@ -7,7 +7,6 @@ import { SampleSelect } from './sounds/sample-select';
 
 // Synths
 import { PadNode } from './synths/pad-node';
-import { DrumPadNode } from './synths/drum-pad-node';
 import { DrumNode } from './synths/drum-node';
 import { ArpeggiatorNode } from './synths/arpeggiator-node';
 
@@ -50,7 +49,12 @@ export type WorkflowNodeProps = NodeProps<Node<WorkflowNodeData>> & {
 export type NodeConfig = {
   id: AppNodeType;
   title: string;
-  category: 'Sound Sources' | 'Audio Effects' | 'Time Effects' | 'Pattern Effects' | 'Room Simulation';
+  category:
+    | 'Sound Sources'
+    | 'Audio Effects'
+    | 'Time Effects'
+    | 'Pattern Effects'
+    | 'Room Simulation';
   status?: 'loading' | 'success' | 'error' | 'initial';
   sound?: string;
   notes?: string;
@@ -63,12 +67,6 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     title: 'Pad Node',
     category: 'Sound Sources',
     icon: 'Spline',
-  },
-  'drum-pad-node': {
-    id: 'drum-pad-node',
-    title: 'Drum Machine Node',
-    category: 'Sound Sources',
-    icon: 'Music',
   },
   'arpeggiator-node': {
     id: 'arpeggiator-node',
@@ -201,7 +199,6 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
 export const nodeTypes = {
   'sample-select': SampleSelect,
   'pad-node': PadNode,
-  'drum-pad-node': DrumPadNode,
   'arpeggiator-node': ArpeggiatorNode,
   'lpf-node': LpfNode,
   'distort-node': DistortNode,
@@ -258,7 +255,6 @@ export function createNodeByType({
 
 export type AppNode =
   | Node<WorkflowNodeData, 'pad-node'>
-  | Node<WorkflowNodeData, 'drum-pad-node'>
   | Node<WorkflowNodeData, 'arpeggiator-node'>
   | Node<WorkflowNodeData, 'lpf-node'>
   | Node<WorkflowNodeData, 'distort-node'>

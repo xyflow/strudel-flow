@@ -20,16 +20,15 @@ import { KEY_OPTIONS, SCALE_TYPE_OPTIONS } from '@/data/sound-options';
 import {
   useStepManagement,
   useGridAsStepSequencer,
-  PAD_CLICK_SEQUENCE,
-  getNextCellState,
-  getCellStateDisplay,
-  getCellStateColor,
   createButtonKey,
   getButtonGroupIndex,
   createGroupsFromSelection,
   clearSelectionForStep,
   getButtonClasses,
-  generateGridPattern,
+  applyRowModifier,
+  getCellStateDisplay,
+  ModifierContextMenu,
+  CellState,
 } from './shared';
 
 const generateNotes = () => [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`];
@@ -50,9 +49,58 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
     setSelectedButtons,
     soundGroups: noteGroups,
     setSoundGroups: setNoteGroups,
-    rowModifiers,
-    setRowModifiers,
   } = useGridAsStepSequencer(steps, notes.length);
+
+  // Individual button modifiers - instead of row modifiers
+  const [buttonModifiers, setButtonModifiers] = useState<
+    Record<string, CellState>
+  >({});
+
+  // Get modifier state for a specific button
+  const getButtonModifier = (stepIdx: number, noteIdx: number): CellState => {
+    const key = createButtonKey(stepIdx, noteIdx);
+    return buttonModifiers[key] || { type: 'off' };
+  };
+
+  // Set modifier state for a specific button
+  const setButtonModifier = (
+    stepIdx: number,
+    noteIdx: number,
+    state: CellState
+  ) => {
+    const key = createButtonKey(stepIdx, noteIdx);
+    setButtonModifiers((prev) => ({
+      ...prev,
+      [key]: state,
+    }));
+  };
+
+  // Handle context menu for button modifiers
+  const handleModifierSelect = (
+    stepIdx: number,
+    noteIdx: number,
+    modifier: CellState
+  ) => {
+    // Set the modifier
+    setButtonModifier(stepIdx, noteIdx, modifier);
+    
+    // Also turn on the button if it's not already on (but only if modifier is not 'off')
+    if (modifier.type !== 'off') {
+      setGrid((prev) => {
+        const next = prev.map((row) => [...row]);
+        if (!next[stepIdx][noteIdx]) {
+          next[stepIdx][noteIdx] = true;
+        }
+        return next;
+      });
+    }
+  };
+
+  // Get display text for a button with modifier
+  const getButtonDisplayText = (stepIdx: number, noteIdx: number): string => {
+    const modifier = getButtonModifier(stepIdx, noteIdx);
+    return getCellStateDisplay(modifier);
+  };
 
   // Toggle a note at a step
   const toggleCell = (
@@ -92,7 +140,14 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
       // Normal click: toggle the note
       setGrid((prev) => {
         const next = prev.map((row) => [...row]);
+        const wasOn = next[stepIdx][noteIdx];
         next[stepIdx][noteIdx] = !next[stepIdx][noteIdx];
+        
+        // If turning off the button, also clear its modifier
+        if (wasOn && !next[stepIdx][noteIdx]) {
+          setButtonModifier(stepIdx, noteIdx, { type: 'off' });
+        }
+        
         return next;
       });
     }
@@ -103,31 +158,47 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
     return selectedButtons.has(createButtonKey(stepIdx, noteIdx));
   };
 
-  // Handle row modifier click - cycle through PAD_CLICK_SEQUENCE
-  const handleRowModifierClick = (stepIdx: number) => {
-    setRowModifiers((prev) => {
-      const next = [...prev];
-      const currentState = next[stepIdx];
-      const nextState = getNextCellState(currentState, PAD_CLICK_SEQUENCE);
-      next[stepIdx] = nextState;
-      return next;
-    });
-  };
+  // Handle row modifier click - REMOVED: No longer needed as we use individual button modifiers
 
   // Combine octave, key and scale type to create final scale string
   const getFinalScale = () => {
     return `${selectedKey}${octave}:${selectedScaleType}`;
   };
 
-  // Update strudel whenever grid, rowModifiers, or noteGroups changes
+  // Update strudel whenever grid, buttonModifiers, or noteGroups changes
   useEffect(() => {
-    const pattern = generateGridPattern(
-      grid,
-      noteGroups,
-      rowModifiers,
-      notes,
-      mode
-    );
+    // Custom pattern generation using individual button modifiers
+    const stepPatterns = grid.map((row, stepIdx) => {
+      // Get active individual notes with their modifiers
+      const individualNotes = row
+        .map((on, noteIdx) => {
+          if (!on) return null;
+          const note = notes[noteIdx];
+          const modifier = getButtonModifier(stepIdx, noteIdx);
+          return applyRowModifier(note, modifier);
+        })
+        .filter(Boolean);
+
+      // Get groups for this step and convert to patterns
+      const stepGroups = noteGroups[stepIdx] || [];
+      const groupPatterns = stepGroups.map((group) => {
+        const groupNoteValues = group.map((noteIdx) => notes[noteIdx]);
+        return `<${groupNoteValues.join(' ')}>`;
+      });
+
+      // Combine individual notes and groups
+      const allPatterns = [...individualNotes, ...groupPatterns];
+
+      if (allPatterns.length === 0) return '';
+
+      // Both modes use brackets, but different separators
+      const separator = mode === 'arp' ? ' ' : ', ';
+      const notesPattern = allPatterns.join(separator);
+      return `[${notesPattern}]`;
+    });
+
+    // Filter out empty patterns and join with spaces
+    const pattern = stepPatterns.filter(Boolean).join(' ');
 
     // Only include scale if there are actual notes (not empty)
     const nodeUpdate: { notes: string; scale?: string } = { notes: pattern };
@@ -144,7 +215,7 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     grid,
-    rowModifiers,
+    buttonModifiers,
     noteGroups,
     notes,
     mode,
@@ -167,6 +238,9 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
                   noteGroups
                 );
                 const isInGroup = groupIndex >= 0;
+                const modifier = getButtonModifier(stepIdx, noteIdx);
+                const hasModifier = modifier.type !== 'off' && modifier.type !== 'normal';
+                const modifierText = getButtonDisplayText(stepIdx, noteIdx);
 
                 const buttonClass = getButtonClasses(
                   isSelected,
@@ -175,24 +249,31 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
                   on
                 );
 
+                const finalClass = buttonClass;
+
                 return (
-                  <button
+                  <ModifierContextMenu
                     key={noteIdx}
-                    className={buttonClass}
-                    onClick={(event) => toggleCell(stepIdx, noteIdx, event)}
-                  />
+                    currentState={modifier}
+                    onModifierSelect={(newModifier) => 
+                      handleModifierSelect(stepIdx, noteIdx, newModifier)
+                    }
+                    label="Note Modifiers"
+                  >
+                    <button
+                      className={finalClass}
+                      onClick={(event) => toggleCell(stepIdx, noteIdx, event)}
+                      title={
+                        hasModifier
+                          ? `Modified: ${modifier.type} - Right-click to change`
+                          : 'Right-click for modifier options'
+                      }
+                    >
+                      {modifierText}
+                    </button>
+                  </ModifierContextMenu>
                 );
               })}
-              {/* Row modifier button */}
-              <button
-                className={`w-12 h-11 font-mono rounded-md transition-all duration-200 shadow-sm ${getCellStateColor(
-                  rowModifiers[stepIdx]
-                )} ring-1 ring-offset-1 ring-primary/20 hover:shadow-md active:shadow-inner active:bg-opacity-80`}
-                onClick={() => handleRowModifierClick(stepIdx)}
-                title="Click to cycle through effects"
-              >
-                {getCellStateDisplay(rowModifiers[stepIdx])}
-              </button>
             </div>
           ))}
         </div>
@@ -333,6 +414,17 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
                       onClick={() => setSelectedButtons(new Set())}
                     >
                       Clear Selection
+                    </Button>
+                  )}
+
+                  {Object.keys(buttonModifiers).length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs px-2"
+                      onClick={() => setButtonModifiers({})}
+                    >
+                      Clear All Modifiers
                     </Button>
                   )}
                 </div>

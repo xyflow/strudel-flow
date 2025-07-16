@@ -10,7 +10,6 @@ import {
   cleanupSelectedButtonsForSteps,
   createButtonKey,
 } from './button-utils';
-import { updateRowModifiersForSteps } from './cell-state-utils';
 
 /**
  * Hook for managing step count and cleanup
@@ -28,13 +27,9 @@ export function useStepSequencerState(steps: number) {
   const [selectedSounds, setSelectedSounds] = useState<SoundSelection>({});
   const [selectedButtons, setSelectedButtons] = useState<Set<string>>(new Set());
   const [soundGroups, setSoundGroups] = useState<Record<number, number[][]>>({});
-  const [rowModifiers, setRowModifiers] = useState<CellState[]>(
-    Array(steps).fill({ type: 'off' })
-  );
 
   // Update state when steps change
   useEffect(() => {
-    setRowModifiers((prev) => updateRowModifiersForSteps(prev, steps));
     setSelectedSounds((prev) => cleanupSelectedSoundsForSteps(prev, steps));
     setSoundGroups((prev) => cleanupSoundGroupsForSteps(prev, steps));
     setSelectedButtons((prev) => cleanupSelectedButtonsForSteps(prev, steps));
@@ -47,8 +42,6 @@ export function useStepSequencerState(steps: number) {
     setSelectedButtons,
     soundGroups,
     setSoundGroups,
-    rowModifiers,
-    setRowModifiers,
   };
 }
 
@@ -105,7 +98,5 @@ export function useGridAsStepSequencer(steps: number, noteCount: number) {
     setSelectedButtons: baseState.setSelectedButtons,
     soundGroups: baseState.soundGroups,
     setSoundGroups: baseState.setSoundGroups,
-    rowModifiers: baseState.rowModifiers,
-    setRowModifiers: baseState.setRowModifiers,
   };
 }
