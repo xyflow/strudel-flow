@@ -3,7 +3,6 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { CellState, SoundSelection } from './types';
 import {
   cleanupSelectedSoundsForSteps,
   cleanupSoundGroupsForSteps,
@@ -16,7 +15,7 @@ import {
  */
 export function useStepManagement(initialSteps: number = 4) {
   const [steps, setSteps] = useState(initialSteps);
-  
+
   return { steps, setSteps };
 }
 
@@ -24,9 +23,15 @@ export function useStepManagement(initialSteps: number = 4) {
  * Hook for managing step sequencer state with automatic cleanup
  */
 export function useStepSequencerState(steps: number) {
-  const [selectedSounds, setSelectedSounds] = useState<SoundSelection>({});
-  const [selectedButtons, setSelectedButtons] = useState<Set<string>>(new Set());
-  const [soundGroups, setSoundGroups] = useState<Record<number, number[][]>>({});
+  const [selectedSounds, setSelectedSounds] = useState<Record<string, number>>(
+    {}
+  );
+  const [selectedButtons, setSelectedButtons] = useState<Set<string>>(
+    new Set()
+  );
+  const [soundGroups, setSoundGroups] = useState<Record<number, number[][]>>(
+    {}
+  );
 
   // Update state when steps change
   useEffect(() => {
@@ -46,15 +51,6 @@ export function useStepSequencerState(steps: number) {
 }
 
 /**
- * Hook for managing simple pad states (like drum machine)
- */
-export function usePadStates(initialStates: Record<string, CellState>) {
-  const [padStates, setPadStates] = useState<Record<string, CellState>>(initialStates);
-  
-  return { padStates, setPadStates };
-}
-
-/**
  * Hook for managing grid-based state using existing step sequencer utilities
  * Converts boolean grid to selectedSounds format for compatibility
  */
@@ -62,7 +58,7 @@ export function useGridAsStepSequencer(steps: number, noteCount: number) {
   const [grid, setGrid] = useState<boolean[][]>(
     Array.from({ length: steps }, () => Array(noteCount).fill(false))
   );
-  
+
   const baseState = useStepSequencerState(steps);
 
   // Convert grid to selectedSounds format (use index 0 to indicate "on")
@@ -83,9 +79,15 @@ export function useGridAsStepSequencer(steps: number, noteCount: number) {
   useEffect(() => {
     setGrid((prev) =>
       Array.from({ length: steps }, (_, idx) =>
-        prev[idx] ? 
-          prev[idx].slice(0, noteCount).concat(Array(Math.max(0, noteCount - (prev[idx]?.length || 0))).fill(false)) : 
-          Array(noteCount).fill(false)
+        prev[idx]
+          ? prev[idx]
+              .slice(0, noteCount)
+              .concat(
+                Array(Math.max(0, noteCount - (prev[idx]?.length || 0))).fill(
+                  false
+                )
+              )
+          : Array(noteCount).fill(false)
       )
     );
   }, [steps, noteCount]);
@@ -93,7 +95,7 @@ export function useGridAsStepSequencer(steps: number, noteCount: number) {
   return {
     grid,
     setGrid,
-    selectedSounds, // Virtual selectedSounds for compatibility
+    selectedSounds,
     selectedButtons: baseState.selectedButtons,
     setSelectedButtons: baseState.setSelectedButtons,
     soundGroups: baseState.soundGroups,

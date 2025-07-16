@@ -2,8 +2,6 @@
  * Utility functions for button grouping and sound selection
  */
 
-import { SoundSelection } from './types';
-
 /**
  * Generate button key from step and track indices
  */
@@ -78,9 +76,7 @@ export function clearSelectionForStep(
   stepIdx: number
 ): Set<string> {
   return new Set(
-    Array.from(selectedButtons).filter(
-      (key) => !key.startsWith(`${stepIdx}-`)
-    )
+    Array.from(selectedButtons).filter((key) => !key.startsWith(`${stepIdx}-`))
   );
 }
 
@@ -88,9 +84,9 @@ export function clearSelectionForStep(
  * Clean up selected sounds when steps change
  */
 export function cleanupSelectedSoundsForSteps(
-  selectedSounds: SoundSelection,
+  selectedSounds: Record<string, number>,
   maxSteps: number
-): SoundSelection {
+) {
   const newSounds = { ...selectedSounds };
   Object.keys(newSounds).forEach((key) => {
     const [stepIdx] = parseButtonKey(key);
@@ -136,21 +132,6 @@ export function cleanupSelectedButtonsForSteps(
 }
 
 /**
- * Get all grouped track indices for a step
- */
-export function getGroupedTrackIndices(
-  stepIdx: number,
-  soundGroups: Record<number, number[][]>
-): Set<number> {
-  const groupedTrackIndices = new Set<number>();
-  const stepGroups = soundGroups[stepIdx] || [];
-  stepGroups.forEach((group) => {
-    group.forEach((trackIdx) => groupedTrackIndices.add(trackIdx));
-  });
-  return groupedTrackIndices;
-}
-
-/**
  * Get group colors for UI
  */
 export const GROUP_COLORS = [
@@ -192,8 +173,7 @@ export function getButtonClasses(
       'bg-muted text-muted-foreground border-border hover:bg-muted/70 hover:shadow-md';
   }
 
-  buttonClass +=
-    ' hover:shadow-md active:shadow-inner active:bg-opacity-80';
+  buttonClass += ' hover:shadow-md active:shadow-inner active:bg-opacity-80';
 
   return buttonClass;
 }

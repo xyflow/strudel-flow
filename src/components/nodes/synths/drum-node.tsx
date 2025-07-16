@@ -1,12 +1,11 @@
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DRUM_OPTIONS } from '@/data/sound-options';
 import {
   CellState,
-  usePadStates,
   getCellStateDisplay,
   generateDrumPattern,
   ModifierContextMenu,
@@ -24,7 +23,8 @@ export function DrumNode({ id, data }: WorkflowNodeProps) {
     return states;
   }, []);
 
-  const { padStates, setPadStates } = usePadStates(initialStates);
+  const [padStates, setPadStates] =
+    useState<Record<string, CellState>>(initialStates);
 
   // Handle pad click - simple on/off toggle
   const handlePadClick = (sound: string) => {
