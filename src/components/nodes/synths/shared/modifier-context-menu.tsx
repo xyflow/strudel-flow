@@ -8,7 +8,7 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import { getContextMenuValue, parseContextMenuValue } from './cell-state-utils';
-import { CellState } from './types';
+import { CellState } from './';
 import { ReactNode } from 'react';
 
 export interface ModifierContextMenuProps {
@@ -59,9 +59,7 @@ export function ModifierContextMenu({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>
-        {children}
-      </ContextMenuTrigger>
+      <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
       <ContextMenuContent className="w-48">
         <ContextMenuLabel>{label}</ContextMenuLabel>
         <ContextMenuSeparator />
@@ -75,9 +73,9 @@ export function ModifierContextMenu({
               {option.label}
             </ContextMenuRadioItem>
           ))}
-          
+
           <ContextMenuSeparator />
-          
+
           {/* Replicate options */}
           <ContextMenuLabel>Replicate</ContextMenuLabel>
           {MODIFIER_OPTIONS.replicate.map((option) => (
@@ -85,9 +83,9 @@ export function ModifierContextMenu({
               {option.label}
             </ContextMenuRadioItem>
           ))}
-          
+
           <ContextMenuSeparator />
-          
+
           {/* Slow options */}
           <ContextMenuLabel>Slow</ContextMenuLabel>
           {MODIFIER_OPTIONS.slow.map((option) => (
@@ -95,9 +93,9 @@ export function ModifierContextMenu({
               {option.label}
             </ContextMenuRadioItem>
           ))}
-          
+
           <ContextMenuSeparator />
-          
+
           {/* Elongate options */}
           <ContextMenuLabel>Elongate</ContextMenuLabel>
           {MODIFIER_OPTIONS.elongate.map((option) => (
@@ -105,9 +103,9 @@ export function ModifierContextMenu({
               {option.label}
             </ContextMenuRadioItem>
           ))}
-          
+
           <ContextMenuSeparator />
-          
+
           {/* Speed options */}
           <ContextMenuLabel>Speed</ContextMenuLabel>
           {MODIFIER_OPTIONS.speed.map((option) => (

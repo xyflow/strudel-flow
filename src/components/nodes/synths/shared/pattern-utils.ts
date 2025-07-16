@@ -2,7 +2,7 @@
  * Utility functions for pattern generation
  */
 
-import { CellState, SoundSelection } from './types';
+import { CellState } from './';
 import { applyRowModifier } from './cell-state-utils';
 import { getGroupedTrackIndices } from './button-utils';
 
@@ -12,7 +12,7 @@ import { getGroupedTrackIndices } from './button-utils';
 export function generateStepPattern(
   steps: number,
   tracks: number[],
-  selectedSounds: SoundSelection,
+  selectedSounds: Record<string, number>,
   soundGroups: Record<number, number[][]>,
   rowModifiers: CellState[],
   soundOptions: string[]
@@ -105,7 +105,7 @@ export function generateNotePattern(
 ): string {
   const stepPatterns = Array.from({ length: steps }, (_, stepIdx) => {
     const stepNotes: string[] = [];
-    
+
     for (let trackIdx = 0; trackIdx < tracks.length; trackIdx++) {
       const buttonKey = `${stepIdx}-${trackIdx}`;
       const noteIndex = selectedNotes[buttonKey];
@@ -136,7 +136,7 @@ export function generateGridPattern(
   const stepPatterns = grid.map((row, stepIdx) => {
     // Get active individual notes
     const individualNotes = row
-      .map((on, noteIdx) => on ? notes[noteIdx] : null)
+      .map((on, noteIdx) => (on ? notes[noteIdx] : null))
       .filter(Boolean);
 
     // Get groups for this step and convert to patterns
@@ -148,14 +148,14 @@ export function generateGridPattern(
 
     // Combine individual notes and groups
     const allPatterns = [...individualNotes, ...groupPatterns];
-    
+
     if (allPatterns.length === 0) return '';
 
     // Both modes use brackets, but different separators
     const separator = mode === 'arp' ? ' ' : ', ';
     const notesPattern = allPatterns.join(separator);
     const basePattern = `[${notesPattern}]`;
-    
+
     return applyRowModifier(basePattern, rowModifiers[stepIdx]);
   });
 

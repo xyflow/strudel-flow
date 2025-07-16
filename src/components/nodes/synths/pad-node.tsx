@@ -25,8 +25,8 @@ import {
   createGroupsFromSelection,
   clearSelectionForStep,
   getButtonClasses,
-  applyRowModifier,
   getCellStateDisplay,
+  applyRowModifier,
   ModifierContextMenu,
   CellState,
 } from './shared';
@@ -83,7 +83,7 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
   ) => {
     // Set the modifier
     setButtonModifier(stepIdx, noteIdx, modifier);
-    
+
     // Also turn on the button if it's not already on (but only if modifier is not 'off')
     if (modifier.type !== 'off') {
       setGrid((prev) => {
@@ -142,12 +142,12 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
         const next = prev.map((row) => [...row]);
         const wasOn = next[stepIdx][noteIdx];
         next[stepIdx][noteIdx] = !next[stepIdx][noteIdx];
-        
+
         // If turning off the button, also clear its modifier
         if (wasOn && !next[stepIdx][noteIdx]) {
           setButtonModifier(stepIdx, noteIdx, { type: 'off' });
         }
-        
+
         return next;
       });
     }
@@ -239,7 +239,8 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
                 );
                 const isInGroup = groupIndex >= 0;
                 const modifier = getButtonModifier(stepIdx, noteIdx);
-                const hasModifier = modifier.type !== 'off' && modifier.type !== 'normal';
+                const hasModifier =
+                  modifier.type !== 'off' && modifier.type !== 'normal';
                 const modifierText = getButtonDisplayText(stepIdx, noteIdx);
 
                 const buttonClass = getButtonClasses(
@@ -255,7 +256,7 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
                   <ModifierContextMenu
                     key={noteIdx}
                     currentState={modifier}
-                    onModifierSelect={(newModifier) => 
+                    onModifierSelect={(newModifier) =>
                       handleModifierSelect(stepIdx, noteIdx, newModifier)
                     }
                     label="Note Modifiers"

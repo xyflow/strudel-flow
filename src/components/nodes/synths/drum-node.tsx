@@ -7,10 +7,7 @@ import { DRUM_OPTIONS } from '@/data/sound-options';
 import {
   CellState,
   usePadStates,
-  DRUM_CLICK_SEQUENCE,
-  getNextCellState,
   getCellStateDisplay,
-  getCellStateColor,
   generateDrumPattern,
   ModifierContextMenu,
 } from './shared';
@@ -29,11 +26,12 @@ export function DrumNode({ id, data }: WorkflowNodeProps) {
 
   const { padStates, setPadStates } = usePadStates(initialStates);
 
-  // Handle pad click - cycle through DRUM_CLICK_SEQUENCE
+  // Handle pad click - simple on/off toggle
   const handlePadClick = (sound: string) => {
     setPadStates((prev) => {
       const currentState = prev[sound];
-      const nextState = getNextCellState(currentState, DRUM_CLICK_SEQUENCE);
+      const nextState: CellState =
+        currentState.type === 'off' ? { type: 'normal' } : { type: 'off' };
       return {
         ...prev,
         [sound]: nextState,
@@ -62,12 +60,6 @@ export function DrumNode({ id, data }: WorkflowNodeProps) {
     return sound.substring(0, 3);
   };
 
-  // Get pad color based on state
-  const getPadColor = (sound: string) => {
-    const state = padStates[sound];
-    return getCellStateColor(state);
-  };
-
   // Update strudel pattern based on pad states
   useEffect(() => {
     const pattern = generateDrumPattern(padStates, DRUM_OPTIONS);
@@ -82,15 +74,15 @@ export function DrumNode({ id, data }: WorkflowNodeProps) {
             <ModifierContextMenu
               key={sound}
               currentState={padStates[sound]}
-              onModifierSelect={(modifier) => handleModifierSelect(sound, modifier)}
+              onModifierSelect={(modifier) =>
+                handleModifierSelect(sound, modifier)
+              }
               label="Drum Modifiers"
             >
               <Button
-                className={`w-12 h-11 border transition-all duration-200 shadow-sm text-xs font-mono ${getPadColor(
-                  sound
-                )} hover:shadow-md active:shadow-inner active:bg-opacity-80`}
+                className={`w-12 h-11 border transition-all duration-200 shadow-sm text-xs font-mono hover:shadow-md active:shadow-inner active:bg-opacity-80`}
                 onClick={() => handlePadClick(sound)}
-                title={`${sound} - Click to cycle through effects, right-click for direct access`}
+                title={`${sound} - Click to toggle, right-click for modifiers`}
               >
                 {getPadDisplay(sound)}
               </Button>
@@ -109,5 +101,7 @@ DrumNode.strudelOutput = (node: AppNode, strudelString: string) => {
   if (!sound) return strudelString;
 
   const quotedSound = `"${sound}"`;
-  return strudelString ? `${strudelString}.sound(${quotedSound})` : `sound(${quotedSound})`;
+  return strudelString
+    ? `${strudelString}.sound(${quotedSound})`
+    : `sound(${quotedSound})`;
 };
