@@ -263,5 +263,6 @@ DrumPadNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   if (!sound) return strudelString;
 
-  return strudelString ? `${strudelString}.${sound}` : sound;
+  const quotedSound = `"${sound}"`;
+  return strudelString ? `${strudelString}.sound(${quotedSound})` : `sound(${quotedSound})`;
 };
