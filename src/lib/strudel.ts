@@ -6,14 +6,15 @@ import { Edge } from '@xyflow/react';
 import { AppNode } from '@/components/nodes';
 import { useStrudelStore } from '@/store/strudel-store';
 import { getNodeStrudelOutput } from './node-registry';
+import { findConnectedComponents } from './graph-utils';
 
 /**
- * Generate complete Strudel output from nodes and edges
+ * Extract node patterns and types from nodes
  */
-export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
-  const cpm = useStrudelStore.getState().cpm;
-  
-  // Get all individual node patterns
+function extractNodeData(nodes: AppNode[]): { 
+  nodePatterns: Map<string, string>; 
+  nodeTypes: Map<string, string>; 
+} {
   const nodePatterns = new Map<string, string>();
   const nodeTypes = new Map<string, string>();
   
@@ -28,81 +29,127 @@ export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
     }
   });
   
-  // If there are no edges, just return all patterns separately
-  if (edges.length === 0) {
-    const patterns = Array.from(nodePatterns.values());
-    if (patterns.length === 0) return '';
-    const result = patterns.map(pattern => `$: ${pattern}`).join('\n');
-    return cpm ? `setcpm(${cpm})\n${result}` : result;
-  }
+  return { nodePatterns, nodeTypes };
+}
+
+/**
+ * Handle the case where there are no edges (all nodes are isolated)
+ */
+function handleIsolatedNodes(nodePatterns: Map<string, string>, cpm: number | string | null): string {
+  const patterns = Array.from(nodePatterns.values());
+  if (patterns.length === 0) return '';
+  const result = patterns.map(pattern => `$: ${pattern}`).join('\n');
+  return cpm ? `setcpm(${cpm})\n${result}` : result;
+}
+
+/**
+ * Determine if a node type is an effect node
+ */
+function isEffectNode(nodeType: string): boolean {
+  return nodeType === 'sample-select' || 
+         (nodeType?.includes('-node') && !nodeType?.includes('pad') && !nodeType?.includes('drum'));
+}
+
+/**
+ * Separate nodes into source and effect categories
+ */
+function categorizeNodes(component: string[], nodeTypes: Map<string, string>): {
+  sourceNodes: string[];
+  effectNodes: string[];
+} {
+  const sourceNodes: string[] = [];
+  const effectNodes: string[] = [];
   
-  // Find connected components
-  const components = findConnectedComponents(nodes, edges);
-  const finalPatterns: string[] = [];
-  
-  components.forEach(component => {
-    // Separate source nodes (pads, drums) from effect nodes (sounds, effects)
-    const sourceNodes: string[] = [];
-    const effectNodes: string[] = [];
-    
-    component.forEach(nodeId => {
-      const nodeType = nodeTypes.get(nodeId);
-      // Effect nodes are those that modify existing patterns
-      if (nodeType === 'sample-select' || 
-          nodeType?.includes('-node') && !nodeType?.includes('pad') && !nodeType?.includes('drum')) {
-        effectNodes.push(nodeId);
-      } else {
-        // Source nodes are pads, drums, arpeggiators - they generate patterns
-        sourceNodes.push(nodeId);
-      }
-    });
-    
-    // Build base pattern from source nodes
-    let basePattern = '';
-    if (sourceNodes.length === 0) {
-      // Only effect nodes - treat as regular pattern
-      const patterns = component
-        .map(nodeId => nodePatterns.get(nodeId))
-        .filter(Boolean) as string[];
-      
-      if (patterns.length === 1) {
-        basePattern = patterns[0];
-      } else if (patterns.length > 1) {
-        basePattern = `stack(${patterns.join(', ')})`;
-      }
+  component.forEach(nodeId => {
+    const nodeType = nodeTypes.get(nodeId);
+    if (nodeType && isEffectNode(nodeType)) {
+      effectNodes.push(nodeId);
     } else {
-      // Source nodes exist
-      const sourcePatterns = sourceNodes
-        .map(nodeId => nodePatterns.get(nodeId))
-        .filter(Boolean) as string[];
-      
-      if (sourcePatterns.length === 1) {
-        basePattern = sourcePatterns[0];
-      } else if (sourcePatterns.length > 1) {
-        basePattern = `stack(${sourcePatterns.join(', ')})`;
-      }
-    }
-    
-    // Apply effect nodes to the base pattern
-    let finalPattern = basePattern;
-    effectNodes.forEach(nodeId => {
-      const nodeType = nodeTypes.get(nodeId);
-      if (nodeType) {
-        const strudelOutput = getNodeStrudelOutput(nodeType);
-        if (strudelOutput) {
-          const node = nodes.find(n => n.id === nodeId);
-          if (node) {
-            finalPattern = strudelOutput(node, finalPattern);
-          }
-        }
-      }
-    });
-    
-    if (finalPattern) {
-      finalPatterns.push(finalPattern);
+      // Source nodes are pads, drums, arpeggiators - they generate patterns
+      sourceNodes.push(nodeId);
     }
   });
   
+  return { sourceNodes, effectNodes };
+}
+
+/**
+ * Build base pattern from source nodes
+ */
+function buildBasePattern(sourceNodes: string[], nodePatterns: Map<string, string>): string {
+  const sourcePatterns = sourceNodes
+    .map(nodeId => nodePatterns.get(nodeId))
+    .filter(Boolean) as string[];
+  
+  if (sourcePatterns.length === 0) return '';
+  if (sourcePatterns.length === 1) return sourcePatterns[0];
+  return `stack(${sourcePatterns.join(', ')})`;
+}
+
+/**
+ * Apply effect nodes to a base pattern
+ */
+function applyEffectNodes(
+  basePattern: string, 
+  effectNodes: string[], 
+  nodeTypes: Map<string, string>, 
+  nodes: AppNode[]
+): string {
+  let finalPattern = basePattern;
+  
+  effectNodes.forEach(nodeId => {
+    const nodeType = nodeTypes.get(nodeId);
+    if (nodeType) {
+      const strudelOutput = getNodeStrudelOutput(nodeType);
+      if (strudelOutput) {
+        const node = nodes.find(n => n.id === nodeId);
+        if (node) {
+          finalPattern = strudelOutput(node, finalPattern);
+        }
+      }
+    }
+  });
+  
+  return finalPattern;
+}
+
+/**
+ * Process a single connected component
+ */
+function processComponent(
+  component: string[], 
+  nodePatterns: Map<string, string>, 
+  nodeTypes: Map<string, string>, 
+  nodes: AppNode[]
+): string {
+  const { sourceNodes, effectNodes } = categorizeNodes(component, nodeTypes);
+  
+  // Build base pattern from source nodes
+  let basePattern = '';
+  if (sourceNodes.length === 0) {
+    // Only effect nodes - treat as regular pattern
+    const patterns = component
+      .map(nodeId => nodePatterns.get(nodeId))
+      .filter(Boolean) as string[];
+    
+    if (patterns.length === 1) {
+      basePattern = patterns[0];
+    } else if (patterns.length > 1) {
+      basePattern = `stack(${patterns.join(', ')})`;
+    }
+  } else {
+    // Source nodes exist
+    basePattern = buildBasePattern(sourceNodes, nodePatterns);
+  }
+  
+  // Apply effect nodes to the base pattern
+  return applyEffectNodes(basePattern, effectNodes, nodeTypes, nodes);
+}
+
+/**
+ * Format final result with CPM if needed
+ */
+function formatFinalResult(finalPatterns: string[], cpm: number | string | null): string {
   if (finalPatterns.length === 0) return '';
   
   const result = finalPatterns.map(pattern => `$: ${pattern}`).join('\n');
@@ -110,37 +157,30 @@ export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
 }
 
 /**
- * Find connected components in the graph
+ * Generate complete Strudel output from nodes and edges
  */
-function findConnectedComponents(nodes: AppNode[], edges: Edge[]): string[][] {
-  const visited = new Set<string>();
-  const components: string[][] = [];
+export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
+  const cpm = useStrudelStore.getState().cpm;
   
-  nodes.forEach(node => {
-    if (!visited.has(node.id)) {
-      const component: string[] = [];
-      dfs(node.id, visited, component, edges);
-      if (component.length > 0) {
-        components.push(component);
-      }
+  // Extract node patterns and types
+  const { nodePatterns, nodeTypes } = extractNodeData(nodes);
+  
+  // If there are no edges, just return all patterns separately
+  if (edges.length === 0) {
+    return handleIsolatedNodes(nodePatterns, cpm);
+  }
+  
+  // Find connected components
+  const components = findConnectedComponents(nodes, edges);
+  const finalPatterns: string[] = [];
+  
+  // Process each component
+  components.forEach(component => {
+    const finalPattern = processComponent(component, nodePatterns, nodeTypes, nodes);
+    if (finalPattern) {
+      finalPatterns.push(finalPattern);
     }
   });
   
-  return components;
-}
-
-/**
- * Depth-first search to find connected nodes
- */
-function dfs(nodeId: string, visited: Set<string>, component: string[], edges: Edge[]) {
-  visited.add(nodeId);
-  component.push(nodeId);
-  
-  edges.forEach(edge => {
-    if (edge.source === nodeId && !visited.has(edge.target)) {
-      dfs(edge.target, visited, component, edges);
-    } else if (edge.target === nodeId && !visited.has(edge.source)) {
-      dfs(edge.source, visited, component, edges);
-    }
-  });
+  return formatFinalResult(finalPatterns, cpm);
 }

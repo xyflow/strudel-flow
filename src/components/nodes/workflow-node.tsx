@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import {
   Play,
   Pause,
@@ -25,7 +25,7 @@ import PatternPopup from '@/components/pattern-popup';
 import { useStrudelStore } from '@/store/strudel-store';
 import { BaseHandle } from '@/components/base-handle';
 import { Position } from '@xyflow/react';
-import { findConnectedNodeIds } from '@/lib/graph-utils';
+import { findConnectedComponents } from '@/lib/graph-utils';
 
 function WorkflowNode({
   id,
@@ -47,13 +47,19 @@ function WorkflowNode({
   const pauseGroup = useStrudelStore((state) => state.pauseGroup);
   const unpauseGroup = useStrudelStore((state) => state.unpauseGroup);
   const isGroupPaused = useStrudelStore((state) => state.isGroupPaused);
-  const { removeNode, edges } = useAppStore((state) => state);
+  const { removeNode, edges, nodes } = useAppStore((state) => state);
 
   const isMuted = isNodeMuted(id);
 
-  // Find all connected nodes for this group
-  const connectedNodeIds = findConnectedNodeIds(id, edges);
-  const groupId = Array.from(connectedNodeIds).sort().join('-');
+  // Find all connected nodes for this group using findConnectedComponents
+  const { connectedNodeIds, groupId } = useMemo(() => {
+    const allComponents = findConnectedComponents(nodes, edges);
+    const connectedComponent = allComponents.find(component => component.includes(id)) || [id];
+    const nodeIds = new Set(connectedComponent);
+    const gId = Array.from(nodeIds).sort().join('-');
+    return { connectedNodeIds: nodeIds, groupId: gId };
+  }, [nodes, edges, id]);
+
   const isGroupCurrentlyPaused = isGroupPaused(groupId);
 
   const onPlay = useCallback(() => {
