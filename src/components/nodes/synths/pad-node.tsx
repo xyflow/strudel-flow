@@ -31,7 +31,7 @@ import {
   CellState,
 } from './shared';
 
-const generateNotes = () => [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`];
+const generateNotes = () => [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`];
 
 export function PadNode({ id, data }: WorkflowNodeProps) {
   const [notes] = useState(generateNotes());
@@ -254,7 +254,7 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
 
                 return (
                   <ModifierContextMenu
-                    key={noteIdx}
+                    key={`${stepIdx}-${noteIdx}`}
                     currentState={modifier}
                     onModifierSelect={(newModifier) =>
                       handleModifierSelect(stepIdx, noteIdx, newModifier)
@@ -331,11 +331,11 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
 
                   {/* Octave control */}
                   <div className="flex items-center gap-1">
-                    <span className="text-xs">Oct: {octave}</span>
+                    <span className="text-xs">Oct: {octave} </span>
                     <Button
                       variant="secondary"
                       size="sm"
-                      className="h-7 w-7 p-0"
+                      className="h-7 w-7 p-0 ml-2"
                       onClick={() => setOctave((prev) => Math.max(prev - 1, 2))}
                     >
                       -
@@ -359,7 +359,7 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
                     <Button
                       variant="secondary"
                       size="sm"
-                      className="h-7 w-7 p-0"
+                      className="h-7 w-7 p-0 ml-2"
                       onClick={() => setSteps((prev) => Math.max(prev - 1, 1))}
                     >
                       -
@@ -415,17 +415,6 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
                       onClick={() => setSelectedButtons(new Set())}
                     >
                       Clear Selection
-                    </Button>
-                  )}
-
-                  {Object.keys(buttonModifiers).length > 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs px-2"
-                      onClick={() => setButtonModifiers({})}
-                    >
-                      Clear All Modifiers
                     </Button>
                   )}
                 </div>

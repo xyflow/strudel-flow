@@ -45,7 +45,7 @@ export default function Workflow() {
         nodeTypes={nodeTypes}
         onDragOver={onDragOver}
         onDrop={onDrop}
-        nodeDragThreshold={20}
+        nodeDragThreshold={30}
         onNodeDragStart={onNodeDragStart}
         onNodeDragStop={onNodeDragStop}
         colorMode={colorMode}
