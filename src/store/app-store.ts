@@ -20,6 +20,7 @@ export type AppState = {
   nodes: AppNode[];
   edges: Edge[];
   colorMode: ColorMode;
+  theme: string;
   draggedNodes: Map<string, AppNode>;
   connectionSites: Map<string, PotentialConnection>;
 };
@@ -53,6 +54,7 @@ export type AppActions = {
   addEdge: (edge: Edge) => void;
   removeEdge: (edgeId: string) => void;
   onConnect: OnConnect;
+  setTheme: (theme: string) => void;
   onEdgesChange: OnEdgesChange<Edge>;
   onNodeDragStart: OnNodeDrag<AppNode>;
   onNodeDragStop: OnNodeDrag<AppNode>;
@@ -64,6 +66,7 @@ export const defaultState: AppState = {
   nodes: initialNodes,
   edges: initialEdges,
   colorMode: 'light',
+  theme: '',
   draggedNodes: new Map(),
   connectionSites: new Map(),
 };
@@ -131,7 +134,7 @@ export const createAppStore = (initialState: AppState = defaultState) => {
         };
         get().addEdge(newEdge);
       },
-
+      setTheme: (theme) => set({ theme }),
       toggleDarkMode: () =>
         set((state) => ({
           colorMode: state.colorMode === 'dark' ? 'light' : 'dark',

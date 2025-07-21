@@ -8,18 +8,25 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 import { useAppStore } from '@/store/app-context';
+import { useThemeCss } from '@/hooks/use-theme-css';
+import { ReactNode } from 'react';
 
-function CheckItem({
+function SettingsItem({
   title,
   description,
-  checked,
-  onCheckedChange,
+  control,
 }: {
   title: string;
   description: string;
-  checked: boolean;
-  onCheckedChange: () => void;
+  control: ReactNode;
 }) {
   return (
     <div className="flex flex-row items-center justify-between rounded-lg border p-4 mb-2">
@@ -27,13 +34,14 @@ function CheckItem({
         <span className="text-base font-bold">{title}</span>
         <p>{description}.</p>
       </div>
-      <Switch checked={checked} onCheckedChange={onCheckedChange} />
+      {control}
     </div>
   );
 }
 
 export function SettingsDialog() {
   const state = useAppStore((state) => state);
+  useThemeCss(state.theme);
 
   return (
     <Dialog>
@@ -47,11 +55,34 @@ export function SettingsDialog() {
         <DialogHeader>
           <DialogTitle className="mb-2">Settings</DialogTitle>
         </DialogHeader>
-        <CheckItem
+        <SettingsItem
           title="Dark Mode"
           description="Toggle to switch to dark mode"
-          checked={state.colorMode === 'dark'}
-          onCheckedChange={state.toggleDarkMode}
+          control={
+            <Switch
+              checked={state.colorMode === 'dark'}
+              onCheckedChange={state.toggleDarkMode}
+            />
+          }
+        />
+        <SettingsItem
+          title="Theme"
+          description="Choose your UI theme"
+          control={
+            <Select value={state.theme} onValueChange={state.setTheme}>
+              <SelectTrigger className="ml-2 w-[180px]">
+                <SelectValue placeholder="Select theme" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="amber-minimal">Amber</SelectItem>
+                <SelectItem value="cosmic-night">Cosmic Night</SelectItem>
+                <SelectItem value="neo-brutalism">Neo Brutalism</SelectItem>
+                <SelectItem value="quantum-rose">Quantum Rose</SelectItem>
+                <SelectItem value="supabase">Supabase</SelectItem>
+                {/* Add more themes here */}
+              </SelectContent>
+            </Select>
+          }
         />
       </DialogContent>
     </Dialog>
