@@ -5,10 +5,12 @@ import { nodeTypes } from '@/components/nodes';
 import { useAppStore } from '@/store/app-context';
 import { WorkflowControls } from './controls';
 import { useDragAndDrop } from './useDragAndDrop';
+import { useUrlStateLoader } from '@/hooks/use-url-state';
 
 const defaultEdgeOptions = { type: 'smootstep' };
 
 export default function Workflow() {
+  useUrlStateLoader();
   const {
     nodes,
     edges,

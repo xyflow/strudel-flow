@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { NotebookText, Timer } from 'lucide-react';
 import { PatternPanelWithCopy } from '@/components/pattern-panel';
 import { CPM } from '../cpm';
+import { ShareUrlPopover } from '@/components/share-url-popover';
 
 export function WorkflowControls() {
   const [isPatternPanelVisible, setPatternPanelVisible] = useState(false);
@@ -17,15 +18,20 @@ export function WorkflowControls() {
         <button
           className="p-2 rounded bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition"
           onClick={() => setPatternPanelVisible((prev) => !prev)}
+          title="Toggle Pattern Panel"
         >
           <NotebookText className="w-5 h-5" />
         </button>
         <button
           className="p-2 rounded bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition"
           onClick={() => setCpmPanelVisible((prev) => !prev)}
+          title="Toggle CPM Panel"
         >
           <Timer className="w-5 h-5" />
         </button>
+
+        <ShareUrlPopover />
+
         <PatternPanelWithCopy isVisible={isPatternPanelVisible} />
       </Panel>
       <Panel

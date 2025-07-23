@@ -66,7 +66,7 @@ export const defaultState: AppState = {
   nodes: initialNodes,
   edges: initialEdges,
   colorMode: 'light',
-  theme: '',
+  theme: 'supabase',
   draggedNodes: new Map(),
   connectionSites: new Map(),
 };

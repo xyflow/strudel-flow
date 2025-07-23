@@ -75,6 +75,7 @@ export function SettingsDialog() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="amber-minimal">Amber</SelectItem>
+                <SelectItem value="brutal">Brutal</SelectItem>
                 <SelectItem value="cosmic-night">Cosmic Night</SelectItem>
                 <SelectItem value="neo-brutalism">Neo Brutalism</SelectItem>
                 <SelectItem value="quantum-rose">Quantum Rose</SelectItem>
