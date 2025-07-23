@@ -83,7 +83,10 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
   // Individual button modifiers - restored from saved state
   const [buttonModifiers, setButtonModifiers] = useState<
     Record<string, CellState>
-  >(savedInternalState?.buttonModifiers || {});
+  >({});
+
+  // Track if button modifiers have been restored
+  const [hasRestoredModifiers, setHasRestoredModifiers] = useState(false);
 
   // State restoration flag to ensure we only restore once
   const [hasRestoredState, setHasRestoredState] = useState(false);
@@ -105,6 +108,16 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
             savedInternalState.grid
           );
           setGrid(savedInternalState.grid);
+        }
+
+        // Restore button modifiers for visual display
+        if (savedInternalState.buttonModifiers) {
+          console.log(
+            `PadNode ${id} - Restoring button modifiers:`,
+            savedInternalState.buttonModifiers
+          );
+          setButtonModifiers(savedInternalState.buttonModifiers);
+          setHasRestoredModifiers(true);
         }
 
         // Restore other state
@@ -148,6 +161,17 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
       );
     }
   }, [grid, id, hasRestoredState]);
+
+  // Debug: Log current button modifiers to verify restoration
+  useEffect(() => {
+    if (hasRestoredModifiers) {
+      console.log(`PadNode ${id} - Current button modifiers:`, buttonModifiers);
+      console.log(
+        `PadNode ${id} - Has modifiers:`,
+        Object.keys(buttonModifiers).length > 0
+      );
+    }
+  }, [buttonModifiers, id, hasRestoredModifiers]);
 
   // Save internal state whenever it changes
   useEffect(() => {
@@ -380,7 +404,7 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
                   console.log(
                     `PadNode ${id} - Button [${stepIdx}][${noteIdx}]: on=${on}, buttonClass includes primary=${buttonClass.includes(
                       'bg-primary'
-                    )}`
+                    )}, modifierText='${modifierText}', hasModifier=${hasModifier}`
                   );
                 }
 
