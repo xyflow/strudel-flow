@@ -64,7 +64,8 @@ export function PresetPopover() {
               🎵 Try It Out! - Presets
             </h4>
             <p className="text-xs text-muted-foreground mb-3">
-              Load example patterns to get started or spark inspiration!
+              Load example patterns to get started or spark inspiration! Each
+              preset includes patterns, settings, and visual themes.
             </p>
           </div>
 

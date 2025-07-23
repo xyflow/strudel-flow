@@ -10,14 +10,21 @@ import { StrudelConfig } from '@/types';
  * Hook to load state from URL parameters on app startup
  */
 export function useUrlStateLoader() {
-  const { setNodes, setEdges } = useAppStore((state) => state);
+  const { setNodes, setEdges, setTheme, setColorMode } = useAppStore(
+    (state) => state
+  );
   const strudelStore = useStrudelStore();
 
   useEffect(() => {
     const urlState = loadStateFromUrl();
 
     if (urlState) {
-      console.log('Loading state from URL:', urlState);
+      console.log('🔄 Loading state from URL:', {
+        theme: urlState.theme,
+        colorMode: urlState.colorMode,
+        nodeCount: urlState.nodes.length,
+        edgeCount: urlState.edges.length,
+      });
 
       // Cast the nodes to AppNode type since they come from JSON deserialization
       const nodes = urlState.nodes as AppNode[];
@@ -26,6 +33,16 @@ export function useUrlStateLoader() {
       // Restore nodes and edges first (this will trigger PadNode components to restore their internal states)
       setNodes(nodes);
       setEdges(edges);
+
+      // Restore theme settings
+      if (urlState.theme) {
+        console.log('Restoring theme:', urlState.theme);
+        setTheme(urlState.theme);
+      }
+      if (urlState.colorMode) {
+        console.log('Restoring color mode:', urlState.colorMode);
+        setColorMode(urlState.colorMode);
+      }
 
       // Restore Strudel configuration and set everything to paused groups
       if (urlState.strudelConfig) {

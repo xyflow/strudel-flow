@@ -42,6 +42,7 @@ export type ConnectionHandle = {
 
 export type AppActions = {
   toggleDarkMode: () => void;
+  setColorMode: (colorMode: ColorMode) => void;
   onNodesChange: OnNodesChange<AppNode>;
   setNodes: (nodes: AppNode[]) => void;
   addNode: (node: AppNode) => void;
@@ -139,6 +140,7 @@ export const createAppStore = (initialState: AppState = defaultState) => {
         set((state) => ({
           colorMode: state.colorMode === 'dark' ? 'light' : 'dark',
         })),
+      setColorMode: (colorMode) => set({ colorMode }),
 
       onNodeDragStart: (_, __, nodes) => {
         set({ draggedNodes: new Map(nodes.map((node) => [node.id, node])) });

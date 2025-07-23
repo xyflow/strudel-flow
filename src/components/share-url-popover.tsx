@@ -16,13 +16,20 @@ export function ShareUrlPopover() {
   const [isCopied, setIsCopied] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const { nodes, edges } = useAppStore((state) => state);
+  const { nodes, edges, theme, colorMode } = useAppStore((state) => state);
   const strudelStore = useStrudelStore();
 
   const handleCopyUrl = async () => {
     try {
       // Capture the current Strudel config BEFORE pausing (so we get the full patterns)
       const currentStrudelConfig = { ...strudelStore.config };
+
+      console.log('💾 Saving URL state:', {
+        theme,
+        colorMode,
+        nodeCount: nodes.length,
+        edgeCount: edges.length,
+      });
 
       // Now pause all groups to prepare for sharing
       const connectedComponents = findConnectedComponents(nodes, edges);
@@ -44,7 +51,9 @@ export function ShareUrlPopover() {
       const shareableUrl = generateShareableUrl(
         nodes,
         edges,
-        currentStrudelConfig
+        currentStrudelConfig,
+        theme,
+        colorMode
       );
       await navigator.clipboard.writeText(shareableUrl);
       setIsCopied(true);
@@ -59,7 +68,13 @@ export function ShareUrlPopover() {
   };
 
   // Generate URL for display (without pausing) - this is just for preview
-  const displayUrl = generateShareableUrl(nodes, edges, strudelStore.config);
+  const displayUrl = generateShareableUrl(
+    nodes,
+    edges,
+    strudelStore.config,
+    theme,
+    colorMode
+  );
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
@@ -78,7 +93,7 @@ export function ShareUrlPopover() {
             <p className="text-xs text-muted-foreground mb-3">
               Copy this URL to share your current workflow state with others.
               All groups will be paused when copied, and the shared state will
-              include all button states, settings, and patterns.
+              include all button states, settings, patterns, and visual themes.
             </p>
           </div>
 
@@ -113,8 +128,9 @@ export function ShareUrlPopover() {
           <div className="text-xs text-muted-foreground">
             <p>
               The URL contains your nodes, edges, positions, button states,
-              patterns, and all configurations. When opened, the workflow will
-              start in paused mode.
+              patterns, theme settings, dark/light mode, and all configurations.
+              When opened, the workflow will start in paused mode with the exact
+              same visual appearance.
             </p>
           </div>
         </div>
