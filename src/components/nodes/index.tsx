@@ -9,6 +9,7 @@ import { SampleSelect } from './sounds/sample-select';
 import { PadNode } from './synths/pad-node';
 import { DrumNode } from './synths/drum-node';
 import { ArpeggiatorNode } from './synths/arpeggiator-node';
+import { ChordNode } from './synths/chord-node';
 
 // Effects
 import { PalindromeNode } from './effects/palindrome-node';
@@ -79,6 +80,12 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     title: 'Drum Node',
     category: 'Sound Sources',
     icon: 'Spline',
+  },
+  'chord-node': {
+    id: 'chord-node',
+    title: 'Chord Node',
+    category: 'Sound Sources',
+    icon: 'Music2',
   },
   'sample-select': {
     id: 'sample-select',
@@ -208,6 +215,7 @@ export const nodeTypes = {
   'jux-node': JuxNode,
   'phaser-node': PhaserNode,
   'drum-node': DrumNode,
+  'chord-node': ChordNode,
   'palindrome-node': PalindromeNode,
   'room-node': RoomNode,
   'postgain-node': PostGainNode,
@@ -275,7 +283,8 @@ export type AppNode =
   | Node<WorkflowNodeData, 'fast-node'>
   | Node<WorkflowNodeData, 'slow-node'>
   | Node<WorkflowNodeData, 'size-node'>
-  | Node<WorkflowNodeData, 'drum-node'>;
+  | Node<WorkflowNodeData, 'drum-node'>
+  | Node<WorkflowNodeData, 'chord-node'>;
 
 export type AppNodeType = NonNullable<AppNode['type']>;
 
