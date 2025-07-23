@@ -1,271 +1,259 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
+import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { KEY_OPTIONS, SCALE_TYPE_OPTIONS } from '@/data/sound-options';
-import { useStepManagement } from './shared';
+import { StrudelConfig } from '@/types';
 
-// Step states for arpeggiator pads
-type StepState = { type: 'off' } | { type: 'note'; noteNumber: number };
+// Define the internal state interface for URL persistence
+interface ArpeggiatorNodeInternalState {
+  selectedPattern: string;
+  selectedOctaves: number;
+  selectedSpeed: string;
+  selectedChordType: string;
+  selectedKey: string;
+}
 
-// Default 16-step grid
-const DEFAULT_STEPS = 16;
+const ARP_PATTERNS = [
+  { id: 'up', label: 'Up', pattern: '0 2 4' },
+  { id: 'down', label: 'Down', pattern: '4 2 0' },
+  { id: 'up-down', label: 'Up-Down', pattern: '0 2 4 2' },
+  { id: 'down-up', label: 'Down-Up', pattern: '4 2 0 2' },
+  { id: 'inside-out', label: 'Inside-Out', pattern: '2 0 4' },
+  { id: 'outside-in', label: 'Outside-In', pattern: '0 4 2' },
+  { id: 'random', label: 'Random', pattern: '[0 2 4]' },
+  { id: 'octave', label: 'Octave', pattern: '0 2 4 7' },
+];
+
+const OCTAVE_RANGES = [
+  { octaves: 1, label: '1 Octave' },
+  { octaves: 2, label: '2 Octaves' },
+  { octaves: 3, label: '3 Octaves' },
+  { octaves: 4, label: '4 Octaves' },
+];
+
+const SPEED_OPTIONS = [
+  { id: 'slow', label: 'Slow', speed: 0.5 },
+  { id: 'normal', label: 'Normal', speed: 1 },
+  { id: 'fast', label: 'Fast', speed: 2 },
+  { id: 'veryfast', label: 'Very Fast', speed: 4 },
+  { id: 'triplets', label: 'Triplets', speed: 1.5 },
+  { id: 'dotted', label: 'Dotted', speed: 0.75 },
+];
+
+const CHORD_TYPES = [
+  { id: 'triad', label: 'Triad', notes: '0 2 4' },
+  { id: 'seventh', label: '7th', notes: '0 2 4 6' },
+  { id: 'ninth', label: '9th', notes: '0 2 4 6 8' },
+  { id: 'sus4', label: 'Sus4', notes: '0 3 4' },
+  { id: 'add9', label: 'Add9', notes: '0 2 4 8' },
+  { id: 'minor', label: 'Minor', notes: '0 2 4' },
+];
+
+const KEYS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
 export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
-  const [selectedKey, setSelectedKey] = useState('C');
-  const [selectedScaleType, setSelectedScaleType] = useState('major');
-  const [octave, setOctave] = useState(4);
-  const { steps: numSteps, setSteps: setNumSteps } = useStepManagement(8);
   const updateNode = useStrudelStore((state) => state.updateNode);
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // State for each step pad
-  const [stepStates, setStepStates] = useState<Record<number, StepState>>(
-    () => {
-      const initialStates: Record<number, StepState> = {};
-      for (let i = 0; i < DEFAULT_STEPS; i++) {
-        initialStates[i] = { type: 'off' };
-      }
-      return initialStates;
-    }
+  // Get internal state from node data if it exists (for URL restoration)
+  const savedInternalState = (
+    data as { internalState?: ArpeggiatorNodeInternalState }
+  )?.internalState;
+
+  // Initialize state with saved values or defaults
+  const [selectedPattern, setSelectedPattern] = useState(
+    savedInternalState?.selectedPattern || 'up'
+  );
+  const [selectedOctaves, setSelectedOctaves] = useState(
+    savedInternalState?.selectedOctaves || 1
+  );
+  const [selectedSpeed, setSelectedSpeed] = useState(
+    savedInternalState?.selectedSpeed || 'normal'
+  );
+  const [selectedChordType, setSelectedChordType] = useState(
+    savedInternalState?.selectedChordType || 'triad'
+  );
+  const [selectedKey, setSelectedKey] = useState(
+    savedInternalState?.selectedKey || 'C'
   );
 
-  // Generate pattern based on current step states
-  const notePattern = useMemo(() => {
-    const sequence: string[] = [];
+  // State restoration flag to ensure we only restore once
+  const [hasRestoredState, setHasRestoredState] = useState(false);
 
-    // Only process up to numSteps
-    for (let i = 0; i < numSteps; i++) {
-      const state = stepStates[i];
-
-      if (state.type === 'off') {
-        sequence.push('~');
-      } else if (state.type === 'note') {
-        sequence.push(state.noteNumber.toString());
-      }
-    }
-
-    return sequence.join(' ');
-  }, [stepStates, numSteps]);
-
-  // Check if pattern has any notes
-  const hasNotes = useMemo(() => {
-    return /[0-9]/.test(notePattern);
-  }, [notePattern]);
-
-  // Update store when pattern changes (needed for strudelOutput method)
+  // Restore state from saved internal state
   useEffect(() => {
-    const nodeUpdate: { notes: string; scale?: string } = {
-      notes: notePattern,
+    if (savedInternalState && !hasRestoredState) {
+      setSelectedPattern(savedInternalState.selectedPattern);
+      setSelectedOctaves(savedInternalState.selectedOctaves);
+      setSelectedSpeed(savedInternalState.selectedSpeed);
+      setSelectedChordType(savedInternalState.selectedChordType);
+      setSelectedKey(savedInternalState.selectedKey);
+      setHasRestoredState(true);
+    }
+  }, [savedInternalState, hasRestoredState, id]);
+
+  // Save internal state whenever it changes
+  useEffect(() => {
+    const internalState: ArpeggiatorNodeInternalState = {
+      selectedPattern,
+      selectedOctaves,
+      selectedSpeed,
+      selectedChordType,
+      selectedKey,
     };
 
-    if (hasNotes) {
-      const finalScale = `${selectedKey}${octave}:${selectedScaleType}`;
-      nodeUpdate.scale = finalScale;
-    }
-
-    updateNode(id, nodeUpdate);
+    updateNodeData(id, { internalState });
   }, [
-    notePattern,
-    hasNotes,
-    id,
-    updateNode,
+    selectedPattern,
+    selectedOctaves,
+    selectedSpeed,
+    selectedChordType,
     selectedKey,
-    selectedScaleType,
-    octave,
+    id,
+    updateNodeData,
   ]);
 
-  // Handle step pad click - cycle through states
-  const handleStepClick = (stepIndex: number) => {
-    setStepStates((prev) => {
-      const currentState = prev[stepIndex];
-      let nextState: StepState;
+  // Update strudel whenever settings change
+  useEffect(() => {
+    const patternData = ARP_PATTERNS.find((p) => p.id === selectedPattern);
+    const speedData = SPEED_OPTIONS.find((s) => s.id === selectedSpeed);
+    const chordData = CHORD_TYPES.find((c) => c.id === selectedChordType);
 
-      if (currentState.type === 'off') {
-        // Off -> First note (0)
-        nextState = { type: 'note', noteNumber: 0 };
-      } else if (currentState.type === 'note') {
-        const currentNoteNumber = currentState.noteNumber;
-
-        if (currentNoteNumber < 9) {
-          // Next note number (0-9)
-          nextState = { type: 'note', noteNumber: currentNoteNumber + 1 };
-        } else {
-          // If at max note number, go back to off
-          nextState = { type: 'off' };
-        }
-      } else {
-        // Rest -> Off
-        nextState = { type: 'off' };
-      }
-
-      return {
-        ...prev,
-        [stepIndex]: nextState,
+    if (patternData && speedData && chordData) {
+      const config: Partial<StrudelConfig> = {
+        arpPattern: patternData.pattern,
+        arpOctaves: selectedOctaves,
+        arpSpeed: speedData.speed.toString(),
+        arpChordType: chordData.notes,
+        arpKey: selectedKey,
       };
-    });
-  };
 
-  // Get display text for step pad
-  const getStepDisplay = (stepIndex: number) => {
-    const state = stepStates[stepIndex];
-
-    if (state.type === 'off') {
-      return '';
+      updateNode(id, config);
     }
+  }, [
+    selectedPattern,
+    selectedOctaves,
+    selectedSpeed,
+    selectedChordType,
+    selectedKey,
+    id,
+    updateNode,
+  ]);
 
-    if (state.type === 'note') {
-      return state.noteNumber.toString();
-    }
-
-    return '';
-  };
-
-  // Get pad color based on state
-  const getStepColor = (stepIndex: number) => {
-    const state = stepStates[stepIndex];
-
-    if (state.type === 'off') {
-      return 'bg-muted text-muted-foreground border-border hover:bg-muted/70 hover:shadow-md';
-    }
-
-    if (state.type === 'note') {
-      return 'bg-blue-500 hover:bg-blue-600 text-white border-border';
-    }
-
-    return 'bg-muted text-muted-foreground border-border hover:bg-muted/70';
-  };
+  const getCurrentPattern = () =>
+    ARP_PATTERNS.find((p) => p.id === selectedPattern);
+  const getCurrentSpeed = () =>
+    SPEED_OPTIONS.find((s) => s.id === selectedSpeed);
+  const getCurrentChordType = () =>
+    CHORD_TYPES.find((c) => c.id === selectedChordType);
 
   return (
     <WorkflowNode id={id} data={data}>
-      <div className="flex flex-col gap-3 p-4 bg-card text-card-foreground rounded-md min-w-80">
-        {/* Step Grid */}
-        <div className="space-y-2">
-          <div className="grid grid-cols-8 gap-1">
-            {Array.from({ length: DEFAULT_STEPS }, (_, i) => {
-              const stepDisplay = getStepDisplay(i);
-              const stepColor = getStepColor(i);
-
-              return (
-                <Button
-                  key={i}
-                  className={`w-12 h-31 border transition-all duration-200 shadow-sm text-xs font-mono ${stepColor} hover:shadow-md active:shadow-inner active:bg-opacity-80 ${
-                    i >= numSteps ? 'opacity-30' : ''
-                  }`}
-                  onClick={() => handleStepClick(i)}
-                  title={`Step ${i + 1} - Click to cycle through notes/off${
-                    i >= numSteps ? ' (inactive)' : ''
-                  }`}
-                  disabled={i >= numSteps}
-                >
-                  {stepDisplay}
-                </Button>
-              );
-            })}
-          </div>
-          {/* Number of Steps */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Steps: {numSteps}</label>
-            <Slider
-              value={[numSteps]}
-              onValueChange={(value) => setNumSteps(value[0])}
-              min={1}
-              max={16}
-              step={1}
-              className="w-full"
-            />
+      <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md min-w-80">
+        {/* Pattern Selection */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-mono font-medium">Pattern</label>
+          <div className="grid grid-cols-4 gap-1">
+            {ARP_PATTERNS.map((pattern) => (
+              <Button
+                key={pattern.id}
+                variant={selectedPattern === pattern.id ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedPattern(pattern.id)}
+              >
+                {pattern.label}
+              </Button>
+            ))}
           </div>
         </div>
 
-        {/* Controls Accordion */}
-        <Accordion type="single" collapsible>
-          <AccordionItem value="controls">
-            <AccordionTrigger className="text-xs font-mono py-2">
-              Controls
-            </AccordionTrigger>
-            <AccordionContent className="overflow-hidden">
-              <div className="flex flex-col gap-2 text-xs font-mono w-full">
-                {/* Row 1 */}
-                <div className="flex flex-wrap gap-2">
-                  {/* Key selector */}
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs">Key:</span>
-                    <Select value={selectedKey} onValueChange={setSelectedKey}>
-                      <SelectTrigger className="w-16 h-7 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {KEY_OPTIONS.map((key) => (
-                          <SelectItem key={key.value} value={key.value}>
-                            {key.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+        {/* Octave Range */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-mono font-medium">Octave Range</label>
+          <div className="grid grid-cols-4 gap-1">
+            {OCTAVE_RANGES.map((range) => (
+              <Button
+                key={range.octaves}
+                variant={
+                  selectedOctaves === range.octaves ? 'default' : 'outline'
+                }
+                size="sm"
+                onClick={() => setSelectedOctaves(range.octaves)}
+              >
+                {range.label}
+              </Button>
+            ))}
+          </div>
+        </div>
 
-                  {/* Scale type selector */}
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs">Scale:</span>
-                    <Select
-                      value={selectedScaleType}
-                      onValueChange={setSelectedScaleType}
-                    >
-                      <SelectTrigger className="w-24 h-7 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SCALE_TYPE_OPTIONS.map((scaleType) => (
-                          <SelectItem
-                            key={scaleType.value}
-                            value={scaleType.value}
-                          >
-                            {scaleType.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+        {/* Speed */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-mono font-medium">Speed</label>
+          <div className="grid grid-cols-3 gap-1">
+            {SPEED_OPTIONS.map((speed) => (
+              <Button
+                key={speed.id}
+                variant={selectedSpeed === speed.id ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedSpeed(speed.id)}
+              >
+                {speed.label}
+              </Button>
+            ))}
+          </div>
+        </div>
 
-                  {/* Octave control */}
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs">Oct: {octave}</span>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="h-7 w-7 p-0"
-                      onClick={() => setOctave((prev) => Math.max(prev - 1, 2))}
-                    >
-                      -
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="h-7 w-7 p-0"
-                      onClick={() => setOctave((prev) => Math.min(prev + 1, 8))}
-                    >
-                      +
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        {/* Chord Type */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-mono font-medium">Chord Type</label>
+          <div className="grid grid-cols-3 gap-1">
+            {CHORD_TYPES.map((chord) => (
+              <Button
+                key={chord.id}
+                variant={selectedChordType === chord.id ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedChordType(chord.id)}
+              >
+                {chord.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Key Selection */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-mono font-medium">Key</label>
+          <div className="grid grid-cols-6 gap-1">
+            {KEYS.map((key) => (
+              <Button
+                key={key}
+                variant={selectedKey === key ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedKey(key)}
+              >
+                {key}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Current Selection Display */}
+        <div className="text-xs font-mono bg-muted px-2 py-1 rounded">
+          <div className="font-bold">
+            {getCurrentPattern()?.label} • {getCurrentChordType()?.label} •{' '}
+            {getCurrentSpeed()?.label}
+          </div>
+          <div className="opacity-70">
+            Key: {selectedKey} • {selectedOctaves} octave
+            {selectedOctaves > 1 ? 's' : ''}
+          </div>
+          <div className="mt-1">
+            n("{getCurrentPattern()?.pattern}").scale("{selectedKey}
+            4:major").fast({getCurrentSpeed()?.speed})
+          </div>
+        </div>
       </div>
     </WorkflowNode>
   );
@@ -273,15 +261,21 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
 
 ArpeggiatorNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const config = useStrudelStore.getState().config[node.id];
-  const notes = config?.notes;
-  const scale = config?.scale;
+  const pattern = config?.arpPattern;
+  const octaves = config?.arpOctaves;
+  const speed = config?.arpSpeed;
+  const chordType = config?.arpChordType;
+  const key = config?.arpKey;
 
-  if (!notes || !scale) return strudelString;
+  if (!pattern || !octaves || !speed || !chordType || !key)
+    return strudelString;
 
-  // Check if pattern has any notes
-  const hasNotes = /[0-9]/.test(notes);
-  if (!hasNotes) return strudelString;
+  // Build the arpeggiator call
+  let arpCall = `n("${pattern}").scale("${key}4:major")`;
 
-  const noteCall = `note("${notes}").scale("${scale}")`;
-  return strudelString ? `${strudelString}.${noteCall}` : noteCall;
+  if (parseFloat(speed) !== 1) {
+    arpCall += `.fast(${speed})`;
+  }
+
+  return strudelString ? `${strudelString}.stack(${arpCall})` : arpCall;
 };

@@ -51,11 +51,17 @@ function handleIsolatedNodes(
 function isEffectNode(nodeType: string): boolean {
   return (
     nodeType === 'sample-select' ||
+    nodeType === 'drum-sounds' ||
+    nodeType === 'probability-node' ||
     (nodeType?.includes('-node') &&
       !nodeType?.includes('pad') &&
       !nodeType?.includes('drum') &&
       !nodeType?.includes('chord') &&
-      !nodeType?.includes('arpeggiator'))
+      !nodeType?.includes('arpeggiator') &&
+      !nodeType?.includes('custom') &&
+      !nodeType?.includes('sound-palette') &&
+      !nodeType?.includes('polyrhythm') &&
+      !nodeType?.includes('piano'))
   );
 }
 

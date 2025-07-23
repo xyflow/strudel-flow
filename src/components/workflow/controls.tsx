@@ -6,6 +6,7 @@ import { PatternPanelWithCopy } from '@/components/pattern-panel';
 import { CPM } from '../cpm';
 import { ShareUrlPopover } from '@/components/share-url-popover';
 import { PresetPopover } from '@/components/preset-popover';
+import { AppInfoPopover } from '@/components/app-info-popover';
 
 export function WorkflowControls() {
   const [isPatternPanelVisible, setPatternPanelVisible] = useState(false);
@@ -16,6 +17,8 @@ export function WorkflowControls() {
       <ZoomSlider position="bottom-left" className="bg-card" />
 
       <Panel position="top-right" className="flex flex-col items-end gap-4">
+        <AppInfoPopover />
+
         <button
           className="p-2 rounded bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition"
           onClick={() => setPatternPanelVisible((prev) => !prev)}

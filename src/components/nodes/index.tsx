@@ -4,14 +4,26 @@ import { nanoid } from 'nanoid';
 import { iconMapping } from '@/data/icon-mapping';
 
 import { SampleSelect } from './sounds/sample-select';
+import { DrumSoundsNode } from './sounds/drum-sounds';
 
 // Synths
 import { PadNode } from './synths/pad-node';
-import { DrumNode } from './synths/drum-node';
 import { ArpeggiatorNode } from './synths/arpeggiator-node';
 import { ChordNode } from './synths/chord-node';
+import { CustomNode } from './synths/custom-node';
+import { ProbabilityNode } from './effects/probability-node';
+// Removed SoundPaletteNode
+import { PolyrhythmNode } from './synths/polyrhythm-node';
+// Removed SimplePianoNode
+import { BeatMachineNode } from './synths/beat-machine-node';
+import { ChordPadNode } from './synths/chord-pad-node';
+import { InteractivePianoRollNode } from './synths/interactive-piano-roll-node';
 
 // Effects
+import { MaskNode } from './effects/mask-node';
+import { PlyNode } from './effects/ply-node';
+import { FMNode } from './effects/fm-node';
+import { LateNode } from './effects/late-node';
 import { PalindromeNode } from './effects/palindrome-node';
 import { RoomNode } from './effects/room-node';
 import { LpfNode } from './effects/lpf-node';
@@ -71,21 +83,47 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
   },
   'arpeggiator-node': {
     id: 'arpeggiator-node',
-    title: 'Arpeggiator Node',
+    title: 'Arpeggiator',
     category: 'Sound Sources',
     icon: 'Zap',
   },
-  'drum-node': {
-    id: 'drum-node',
-    title: 'Drum Node',
+  'drum-sounds': {
+    id: 'drum-sounds',
+    title: 'Drum Sounds',
     category: 'Sound Sources',
-    icon: 'Spline',
+    icon: 'Music',
   },
   'chord-node': {
     id: 'chord-node',
     title: 'Chord Node',
     category: 'Sound Sources',
     icon: 'Music2',
+  },
+  'custom-node': {
+    id: 'custom-node',
+    title: 'Strudel Code',
+    category: 'Sound Sources',
+    icon: 'Code',
+  },
+  'probability-node': {
+    id: 'probability-node',
+    title: 'Probability',
+    category: 'Pattern Effects',
+    icon: 'Dice1',
+  },
+  // Removed sound-palette-node
+  'polyrhythm-node': {
+    id: 'polyrhythm-node',
+    title: 'Polyrhythm',
+    category: 'Sound Sources',
+    icon: 'Layers',
+  },
+  // Removed simple-piano-node and bass-generator-node
+  'beat-machine-node': {
+    id: 'beat-machine-node',
+    title: 'Beat Machine',
+    category: 'Sound Sources',
+    icon: 'Grid3x3',
   },
   'sample-select': {
     id: 'sample-select',
@@ -201,6 +239,43 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     category: 'Audio Effects',
     icon: 'Volume2',
   },
+  // Removed lead-synth-node
+  'chord-pad-node': {
+    id: 'chord-pad-node',
+    title: 'Chord Pad',
+    category: 'Sound Sources',
+    icon: 'Piano',
+  },
+  'interactive-piano-roll-node': {
+    id: 'interactive-piano-roll-node',
+    title: 'Interactive Piano Roll',
+    category: 'Sound Sources',
+    icon: 'Music',
+  },
+  'mask-node': {
+    id: 'mask-node',
+    title: 'Mask',
+    category: 'Pattern Effects',
+    icon: 'EyeOff',
+  },
+  'ply-node': {
+    id: 'ply-node',
+    title: 'Ply',
+    category: 'Pattern Effects',
+    icon: 'Copy',
+  },
+  'fm-node': {
+    id: 'fm-node',
+    title: 'FM',
+    category: 'Audio Effects',
+    icon: 'Radio',
+  },
+  'late-node': {
+    id: 'late-node',
+    title: 'Late',
+    category: 'Time Effects',
+    icon: 'Clock',
+  },
 };
 
 export const nodeTypes = {
@@ -214,8 +289,12 @@ export const nodeTypes = {
   'rev-node': RevNode,
   'jux-node': JuxNode,
   'phaser-node': PhaserNode,
-  'drum-node': DrumNode,
+  'drum-sounds': DrumSoundsNode,
   'chord-node': ChordNode,
+  'custom-node': CustomNode,
+  'probability-node': ProbabilityNode,
+  'polyrhythm-node': PolyrhythmNode,
+  'beat-machine-node': BeatMachineNode,
   'palindrome-node': PalindromeNode,
   'room-node': RoomNode,
   'postgain-node': PostGainNode,
@@ -227,6 +306,12 @@ export const nodeTypes = {
   'fast-node': FastNode,
   'slow-node': SlowNode,
   'size-node': SizeNode,
+  'chord-pad-node': ChordPadNode,
+  'interactive-piano-roll-node': InteractivePianoRollNode,
+  'mask-node': MaskNode,
+  'ply-node': PlyNode,
+  'fm-node': FMNode,
+  'late-node': LateNode,
 };
 
 export function createNodeByType({
@@ -283,8 +368,18 @@ export type AppNode =
   | Node<WorkflowNodeData, 'fast-node'>
   | Node<WorkflowNodeData, 'slow-node'>
   | Node<WorkflowNodeData, 'size-node'>
-  | Node<WorkflowNodeData, 'drum-node'>
-  | Node<WorkflowNodeData, 'chord-node'>;
+  | Node<WorkflowNodeData, 'drum-sounds'>
+  | Node<WorkflowNodeData, 'chord-node'>
+  | Node<WorkflowNodeData, 'custom-node'>
+  | Node<WorkflowNodeData, 'probability-node'>
+  | Node<WorkflowNodeData, 'polyrhythm-node'>
+  | Node<WorkflowNodeData, 'beat-machine-node'>
+  | Node<WorkflowNodeData, 'chord-pad-node'>
+  | Node<WorkflowNodeData, 'interactive-piano-roll-node'>
+  | Node<WorkflowNodeData, 'mask-node'>
+  | Node<WorkflowNodeData, 'ply-node'>
+  | Node<WorkflowNodeData, 'fm-node'>
+  | Node<WorkflowNodeData, 'late-node'>;
 
 export type AppNodeType = NonNullable<AppNode['type']>;
 
