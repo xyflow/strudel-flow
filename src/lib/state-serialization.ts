@@ -1,18 +1,25 @@
 import { compressToBase64, decompressFromBase64 } from 'lz-string';
 import { Node, Edge } from '@xyflow/react';
+import { StrudelConfig } from '@/types';
 
 export interface SerializableState {
-  nodes: Node[];
+  nodes: Node[]; // Now includes internal states in node.data.internalState
   edges: Edge[];
+  strudelConfig: Record<string, StrudelConfig>; // Node configurations from Strudel store
 }
 
 /**
- * Serialize nodes and edges to a compressed base64 string
+ * Serialize nodes (with internal states), edges, and strudel config to a compressed base64 string
  */
-export function serializeState(nodes: Node[], edges: Edge[]): string {
+export function serializeState(
+  nodes: Node[],
+  edges: Edge[],
+  strudelConfig: Record<string, StrudelConfig>
+): string {
   const state: SerializableState = {
-    nodes,
+    nodes, // Nodes now contain internal states in their data property
     edges,
+    strudelConfig,
   };
 
   const jsonString = JSON.stringify(state);
@@ -22,7 +29,7 @@ export function serializeState(nodes: Node[], edges: Edge[]): string {
 }
 
 /**
- * Deserialize a compressed base64 string back to nodes and edges
+ * Deserialize a compressed base64 string back to nodes, edges, and config
  */
 export function deserializeState(compressed: string): SerializableState | null {
   try {
@@ -40,8 +47,12 @@ export function deserializeState(compressed: string): SerializableState | null {
 /**
  * Generate a shareable URL with the current state
  */
-export function generateShareableUrl(nodes: Node[], edges: Edge[]): string {
-  const compressed = serializeState(nodes, edges);
+export function generateShareableUrl(
+  nodes: Node[],
+  edges: Edge[],
+  strudelConfig: Record<string, StrudelConfig>
+): string {
+  const compressed = serializeState(nodes, edges, strudelConfig);
   const currentUrl = new URL(window.location.href);
   currentUrl.searchParams.set('state', compressed);
   return currentUrl.toString();

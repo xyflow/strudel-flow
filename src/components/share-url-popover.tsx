@@ -8,17 +8,44 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppStore } from '@/store/app-context';
+import { useStrudelStore } from '@/store/strudel-store';
 import { generateShareableUrl } from '@/lib/state-serialization';
+import { findConnectedComponents } from '@/lib/graph-utils';
 
 export function ShareUrlPopover() {
   const [isCopied, setIsCopied] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { nodes, edges } = useAppStore((state) => state);
-  const shareableUrl = generateShareableUrl(nodes, edges);
+  const strudelStore = useStrudelStore();
 
   const handleCopyUrl = async () => {
     try {
+      // Capture the current Strudel config BEFORE pausing (so we get the full patterns)
+      const currentStrudelConfig = { ...strudelStore.config };
+
+      // Now pause all groups to prepare for sharing
+      const connectedComponents = findConnectedComponents(nodes, edges);
+
+      connectedComponents.forEach((component) => {
+        if (component.length > 0) {
+          const groupId = component.sort().join('-');
+          if (!strudelStore.isGroupPaused(groupId)) {
+            strudelStore.pauseGroup(groupId, component);
+            console.log(
+              `Paused group for sharing: ${groupId} with nodes:`,
+              component
+            );
+          }
+        }
+      });
+
+      // Generate URL with the captured config (before pausing) and current nodes
+      const shareableUrl = generateShareableUrl(
+        nodes,
+        edges,
+        currentStrudelConfig
+      );
       await navigator.clipboard.writeText(shareableUrl);
       setIsCopied(true);
 
@@ -30,6 +57,9 @@ export function ShareUrlPopover() {
       console.error('Failed to copy URL:', error);
     }
   };
+
+  // Generate URL for display (without pausing) - this is just for preview
+  const displayUrl = generateShareableUrl(nodes, edges, strudelStore.config);
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
@@ -47,12 +77,14 @@ export function ShareUrlPopover() {
             <h4 className="font-medium text-sm mb-2">Share Your Workflow</h4>
             <p className="text-xs text-muted-foreground mb-3">
               Copy this URL to share your current workflow state with others.
+              All groups will be paused when copied, and the shared state will
+              include all button states, settings, and patterns.
             </p>
           </div>
 
           <div className="flex gap-2">
             <Input
-              value={shareableUrl}
+              value={displayUrl}
               readOnly
               className="text-xs font-mono"
               onClick={(e) => e.currentTarget.select()}
@@ -79,7 +111,11 @@ export function ShareUrlPopover() {
           </div>
 
           <div className="text-xs text-muted-foreground">
-            <p>The URL contains your nodes, edges, and their positions.</p>
+            <p>
+              The URL contains your nodes, edges, positions, button states,
+              patterns, and all configurations. When opened, the workflow will
+              start in paused mode.
+            </p>
           </div>
         </div>
       </PopoverContent>
