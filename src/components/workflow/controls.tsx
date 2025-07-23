@@ -5,6 +5,7 @@ import { NotebookText, Timer } from 'lucide-react';
 import { PatternPanelWithCopy } from '@/components/pattern-panel';
 import { CPM } from '../cpm';
 import { ShareUrlPopover } from '@/components/share-url-popover';
+import { PresetPopover } from '@/components/preset-popover';
 
 export function WorkflowControls() {
   const [isPatternPanelVisible, setPatternPanelVisible] = useState(false);
@@ -29,6 +30,8 @@ export function WorkflowControls() {
         >
           <Timer className="w-5 h-5" />
         </button>
+
+        <PresetPopover />
 
         <ShareUrlPopover />
 
