@@ -1,11 +1,10 @@
 /**
- * Shared exports for synth node utilities
+ * Pad node utilities for step sequencing and pattern modification
  */
 
 // Utilities
 export * from './cell-state-utils';
 export * from './button-utils';
-export * from './pattern-utils';
 export * from './hooks';
 
 // UI Components

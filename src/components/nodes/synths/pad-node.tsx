@@ -30,7 +30,7 @@ import {
   applyRowModifier,
   ModifierContextMenu,
   CellState,
-} from './shared';
+} from './pad-utils';
 
 const generateNotes = () => [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`];
 

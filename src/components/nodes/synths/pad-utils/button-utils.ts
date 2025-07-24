@@ -10,14 +10,6 @@ export function createButtonKey(stepIdx: number, trackIdx: number): string {
 }
 
 /**
- * Parse button key to get step and track indices
- */
-export function parseButtonKey(buttonKey: string): [number, number] {
-  const [stepIdx, trackIdx] = buttonKey.split('-').map(Number);
-  return [stepIdx, trackIdx];
-}
-
-/**
  * Check if a button is part of a group
  */
 export function getButtonGroupIndex(
@@ -81,23 +73,6 @@ export function clearSelectionForStep(
 }
 
 /**
- * Clean up selected sounds when steps change
- */
-export function cleanupSelectedSoundsForSteps(
-  selectedSounds: Record<string, number>,
-  maxSteps: number
-) {
-  const newSounds = { ...selectedSounds };
-  Object.keys(newSounds).forEach((key) => {
-    const [stepIdx] = parseButtonKey(key);
-    if (stepIdx >= maxSteps) {
-      delete newSounds[key];
-    }
-  });
-  return newSounds;
-}
-
-/**
  * Clean up sound groups when steps change
  */
 export function cleanupSoundGroupsForSteps(
@@ -123,7 +98,7 @@ export function cleanupSelectedButtonsForSteps(
 ): Set<string> {
   const newSelected = new Set<string>();
   selectedButtons.forEach((key) => {
-    const [stepIdx] = parseButtonKey(key);
+    const [stepIdx] = key.split('-').map(Number);
     if (stepIdx < maxSteps) {
       newSelected.add(key);
     }
