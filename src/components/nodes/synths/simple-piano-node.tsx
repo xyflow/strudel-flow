@@ -120,11 +120,6 @@ export function SimplePianoNode({ id, data }: WorkflowNodeProps) {
   // Restore state from saved internal state
   useEffect(() => {
     if (savedInternalState && !hasRestoredState) {
-      console.log(
-        `SimplePianoNode ${id} - Restoring state from saved internal state:`,
-        savedInternalState
-      );
-
       setSelectedPattern(savedInternalState.selectedPattern);
       setSelectedSound(savedInternalState.selectedSound);
       setSelectedKey(savedInternalState.selectedKey);

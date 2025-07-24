@@ -37,11 +37,6 @@ export function DrumSoundsNode({ id, data }: WorkflowNodeProps) {
   // Restore state from saved internal state
   useEffect(() => {
     if (savedInternalState && !hasRestoredState) {
-      console.log(
-        `DrumSoundsNode ${id} - Restoring state from saved internal state:`,
-        savedInternalState
-      );
-
       setSelectedSound(savedInternalState.selectedSound);
       setHasRestoredState(true);
     }

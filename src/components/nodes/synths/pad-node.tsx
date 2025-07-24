@@ -55,8 +55,6 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
   const savedInternalState = (data as { internalState?: PadNodeInternalState })
     ?.internalState;
 
-  console.log(`PadNode ${id} - Saved internal state:`, savedInternalState);
-
   // Initialize state with saved values or defaults
   const { steps, setSteps } = useStepManagement(savedInternalState?.steps || 4);
   const [mode, setMode] = useState<'arp' | 'chord'>(
@@ -85,59 +83,32 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
     Record<string, CellState>
   >({});
 
-  // Track if button modifiers have been restored
-  const [hasRestoredModifiers, setHasRestoredModifiers] = useState(false);
-
   // State restoration flag to ensure we only restore once
   const [hasRestoredState, setHasRestoredState] = useState(false);
 
   // Restore all state from saved internal state - comprehensive restoration
   useEffect(() => {
     if (savedInternalState && !hasRestoredState) {
-      console.log(
-        `PadNode ${id} - Restoring ALL state from saved internal state:`,
-        savedInternalState
-      );
-
       // Use setTimeout to ensure the grid hook is fully initialized first
       setTimeout(() => {
         // Restore grid state
         if (savedInternalState.grid) {
-          console.log(
-            `PadNode ${id} - Restoring grid:`,
-            savedInternalState.grid
-          );
           setGrid(savedInternalState.grid);
         }
 
         // Restore button modifiers for visual display
         if (savedInternalState.buttonModifiers) {
-          console.log(
-            `PadNode ${id} - Restoring button modifiers:`,
-            savedInternalState.buttonModifiers
-          );
           setButtonModifiers(savedInternalState.buttonModifiers);
-          setHasRestoredModifiers(true);
         }
 
         // Restore other state
         if (savedInternalState.selectedButtons) {
-          console.log(
-            `PadNode ${id} - Restoring selected buttons:`,
-            savedInternalState.selectedButtons
-          );
           setSelectedButtons(new Set(savedInternalState.selectedButtons));
         }
 
         if (savedInternalState.noteGroups) {
-          console.log(
-            `PadNode ${id} - Restoring note groups:`,
-            savedInternalState.noteGroups
-          );
           setNoteGroups(savedInternalState.noteGroups);
         }
-
-        console.log(`PadNode ${id} - ✅ State restoration complete`);
       }, 50); // Small delay to ensure hook initialization
 
       setHasRestoredState(true);
@@ -150,28 +121,6 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
     setNoteGroups,
     id,
   ]);
-
-  // Debug: Log current grid state to verify restoration
-  useEffect(() => {
-    if (hasRestoredState) {
-      console.log(`PadNode ${id} - Current grid state:`, grid);
-      console.log(
-        `PadNode ${id} - Grid has pressed buttons:`,
-        grid.some((row) => row.some((cell) => cell))
-      );
-    }
-  }, [grid, id, hasRestoredState]);
-
-  // Debug: Log current button modifiers to verify restoration
-  useEffect(() => {
-    if (hasRestoredModifiers) {
-      console.log(`PadNode ${id} - Current button modifiers:`, buttonModifiers);
-      console.log(
-        `PadNode ${id} - Has modifiers:`,
-        Object.keys(buttonModifiers).length > 0
-      );
-    }
-  }, [buttonModifiers, id, hasRestoredModifiers]);
 
   // Save internal state whenever it changes
   useEffect(() => {
@@ -187,7 +136,6 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
       noteGroups,
     };
 
-    console.log(`PadNode ${id} - Saving internal state:`, internalState);
     updateNodeData(id, { internalState });
   }, [
     steps,
@@ -275,7 +223,6 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
         );
         if (newGroups !== noteGroups) {
           setNoteGroups(newGroups);
-          console.log('Note group created:', { stepIdx, newGroups });
 
           // Clear selection for this step
           return clearSelectionForStep(newSelected, stepIdx);
@@ -289,10 +236,6 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
         const next = prev.map((row) => [...row]);
         const wasOn = next[stepIdx][noteIdx];
         next[stepIdx][noteIdx] = !next[stepIdx][noteIdx];
-
-        console.log(
-          `PadNode ${id} - Button [${stepIdx}][${noteIdx}] toggled: ${wasOn} → ${next[stepIdx][noteIdx]}`
-        );
 
         // If turning off the button, also clear its modifier
         if (wasOn && !next[stepIdx][noteIdx]) {
@@ -398,15 +341,6 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
                   groupIndex,
                   on // Use the grid state directly for pressed/highlighted state
                 );
-
-                // Debug logging for first few buttons to verify visual state
-                if (stepIdx === 0 && noteIdx < 3 && hasRestoredState) {
-                  console.log(
-                    `PadNode ${id} - Button [${stepIdx}][${noteIdx}]: on=${on}, buttonClass includes primary=${buttonClass.includes(
-                      'bg-primary'
-                    )}, modifierText='${modifierText}', hasModifier=${hasModifier}`
-                  );
-                }
 
                 return (
                   <ModifierContextMenu

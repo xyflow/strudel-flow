@@ -62,11 +62,6 @@ export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
   // Restore state from saved internal state
   useEffect(() => {
     if (savedInternalState && !hasRestoredState) {
-      console.log(
-        `PolyrhythmNode ${id} - Restoring state from saved internal state:`,
-        savedInternalState
-      );
-
       setPattern1(savedInternalState.pattern1);
       setPattern2(savedInternalState.pattern2);
       setPattern3(savedInternalState.pattern3);

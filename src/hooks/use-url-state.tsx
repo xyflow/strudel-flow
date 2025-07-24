@@ -36,11 +36,9 @@ export function useUrlStateLoader() {
 
       // Restore theme settings
       if (urlState.theme) {
-        console.log('Restoring theme:', urlState.theme);
         setTheme(urlState.theme);
       }
       if (urlState.colorMode) {
-        console.log('Restoring color mode:', urlState.colorMode);
         setColorMode(urlState.colorMode);
       }
 
@@ -77,19 +75,11 @@ export function useUrlStateLoader() {
 
                 // Now pause the group (this moves the active config to paused state)
                 strudelStore.pauseGroup(groupId, component);
-                console.log(
-                  `Restored paused group: ${groupId} with config:`,
-                  groupConfigs
-                );
               }
             }
           });
-
-          console.log(
-            '✅ URL state restoration complete - all groups are paused'
-          );
-        }, 100); // Small delay to ensure everything is loaded
+        }, 100);
       }
     }
-  }, []); // Only run once on mount
+  }, [setNodes, setEdges, setTheme, setColorMode, strudelStore]);
 }

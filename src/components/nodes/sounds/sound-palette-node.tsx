@@ -152,11 +152,6 @@ export function SoundPaletteNode({ id, data }: WorkflowNodeProps) {
   // Restore state from saved internal state
   useEffect(() => {
     if (savedInternalState && !hasRestoredState) {
-      console.log(
-        `SoundPaletteNode ${id} - Restoring state from saved internal state:`,
-        savedInternalState
-      );
-
       setSelectedSound(savedInternalState.selectedSound);
       setSelectedCategory(savedInternalState.selectedCategory);
       setHasRestoredState(true);

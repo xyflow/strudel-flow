@@ -6,31 +6,22 @@ import { WorkflowNodeProps, AppNode } from '..';
 import { StrudelConfig } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 
-// Define the internal state interface for URL persistence
 interface ProbabilityNodeInternalState {
   selectedFunction: string;
   probability: number;
   maskPattern: string;
-  customValue: string;
 }
 
 const PROBABILITY_FUNCTIONS = [
-  { id: 'rarely', label: 'Rarely', color: 'bg-red-500 hover:bg-red-600' },
+  { id: 'rarely', label: 'Rarely' },
   {
     id: 'sometimes',
     label: 'Sometimes',
-    color: 'bg-yellow-500 hover:bg-yellow-600',
   },
-  { id: 'often', label: 'Often', color: 'bg-green-500 hover:bg-green-600' },
-  { id: 'always', label: 'Always', color: 'bg-blue-500 hover:bg-blue-600' },
-  { id: 'mask', label: 'Mask', color: 'bg-purple-500 hover:bg-purple-600' },
+  { id: 'often', label: 'Often' },
+  { id: 'always', label: 'Always' },
+  { id: 'mask', label: 'Mask' },
 ];
 
 const MASK_PRESETS = [
@@ -61,9 +52,6 @@ export function ProbabilityNode({ id, data }: WorkflowNodeProps) {
   const [maskPattern, setMaskPattern] = useState(
     savedInternalState?.maskPattern || '<0 1>/2'
   );
-  const [customValue, setCustomValue] = useState(
-    savedInternalState?.customValue || ''
-  );
 
   // State restoration flag to ensure we only restore once
   const [hasRestoredState, setHasRestoredState] = useState(false);
@@ -71,15 +59,9 @@ export function ProbabilityNode({ id, data }: WorkflowNodeProps) {
   // Restore state from saved internal state
   useEffect(() => {
     if (savedInternalState && !hasRestoredState) {
-      console.log(
-        `ProbabilityNode ${id} - Restoring state from saved internal state:`,
-        savedInternalState
-      );
-
       setSelectedFunction(savedInternalState.selectedFunction);
       setProbability(savedInternalState.probability);
       setMaskPattern(savedInternalState.maskPattern);
-      setCustomValue(savedInternalState.customValue);
       setHasRestoredState(true);
     }
   }, [savedInternalState, hasRestoredState, id]);
@@ -90,18 +72,10 @@ export function ProbabilityNode({ id, data }: WorkflowNodeProps) {
       selectedFunction,
       probability,
       maskPattern,
-      customValue,
     };
 
     updateNodeData(id, { internalState });
-  }, [
-    selectedFunction,
-    probability,
-    maskPattern,
-    customValue,
-    id,
-    updateNodeData,
-  ]);
+  }, [selectedFunction, probability, maskPattern, id, updateNodeData]);
 
   // Update strudel whenever settings change
   useEffect(() => {
@@ -115,12 +89,8 @@ export function ProbabilityNode({ id, data }: WorkflowNodeProps) {
       config.probability = probability;
     }
 
-    if (customValue.trim()) {
-      config.customValue = customValue;
-    }
-
     updateNode(id, config);
-  }, [selectedFunction, probability, maskPattern, customValue, id, updateNode]);
+  }, [selectedFunction, probability, maskPattern, id, updateNode]);
 
   const handleFunctionClick = (functionId: string) => {
     setSelectedFunction(functionId);
@@ -142,11 +112,6 @@ export function ProbabilityNode({ id, data }: WorkflowNodeProps) {
             {PROBABILITY_FUNCTIONS.map((func) => (
               <Button
                 key={func.id}
-                className={`h-12 text-white font-bold ${
-                  selectedFunction === func.id
-                    ? func.color + ' ring-2 ring-white'
-                    : func.color + ' opacity-70'
-                }`}
                 onClick={() => handleFunctionClick(func.id)}
               >
                 {func.label}
@@ -201,41 +166,13 @@ export function ProbabilityNode({ id, data }: WorkflowNodeProps) {
           </div>
         )}
 
-        {/* Advanced Controls */}
-        <Accordion type="single" collapsible>
-          <AccordionItem value="advanced">
-            <AccordionTrigger className="text-xs font-mono py-2">
-              Advanced
-            </AccordionTrigger>
-            <AccordionContent className="overflow-hidden">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-mono font-medium">
-                  Custom Function
-                </label>
-                <input
-                  type="text"
-                  value={customValue}
-                  onChange={(e) => setCustomValue(e.target.value)}
-                  placeholder="e.g., ply(2), chunk(4, fast(2))"
-                  className="font-mono text-sm px-3 py-2 border rounded-md bg-transparent border-input"
-                />
-                <div className="text-xs text-muted-foreground">
-                  Add custom probability functions
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-
         {/* Current Function Display */}
         <div className="text-xs font-mono bg-muted px-2 py-1 rounded">
           {selectedFunction === 'mask'
             ? `mask("${maskPattern}")`
             : selectedFunction === 'always'
             ? 'No probability filtering'
-            : `${selectedFunction}(${probability}${
-                customValue ? `, ${customValue}` : ''
-              })`}
+            : `${selectedFunction}(${probability})`}
         </div>
       </div>
     </WorkflowNode>
@@ -246,7 +183,6 @@ ProbabilityNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const probFunction = useStrudelStore.getState().config[node.id]?.probFunction;
   const probability = useStrudelStore.getState().config[node.id]?.probability;
   const maskPattern = useStrudelStore.getState().config[node.id]?.maskPattern;
-  const customValue = useStrudelStore.getState().config[node.id]?.customValue;
 
   if (!probFunction || probFunction === 'always') return strudelString;
   if (!strudelString) return strudelString;
@@ -256,8 +192,7 @@ ProbabilityNode.strudelOutput = (node: AppNode, strudelString: string) => {
   if (probFunction === 'mask') {
     result = `${strudelString}.mask("${maskPattern}")`;
   } else {
-    const args = customValue ? `${probability}, ${customValue}` : probability;
-    result = `${strudelString}.${probFunction}(${args})`;
+    result = `${strudelString}.${probFunction}(${probability})`;
   }
 
   return result;

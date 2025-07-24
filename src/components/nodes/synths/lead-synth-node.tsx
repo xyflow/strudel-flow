@@ -78,11 +78,6 @@ export function LeadSynthNode({ id, data }: WorkflowNodeProps) {
   // Restore state from saved internal state
   useEffect(() => {
     if (savedInternalState && !hasRestoredState) {
-      console.log(
-        `LeadSynthNode ${id} - Restoring state from saved internal state:`,
-        savedInternalState
-      );
-
       setSelectedScale(savedInternalState.selectedScale);
       setSelectedMovement(savedInternalState.selectedMovement);
       setSelectedKey(savedInternalState.selectedKey);

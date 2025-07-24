@@ -24,13 +24,6 @@ export function ShareUrlPopover() {
       // Capture the current Strudel config BEFORE pausing (so we get the full patterns)
       const currentStrudelConfig = { ...strudelStore.config };
 
-      console.log('💾 Saving URL state:', {
-        theme,
-        colorMode,
-        nodeCount: nodes.length,
-        edgeCount: edges.length,
-      });
-
       // Now pause all groups to prepare for sharing
       const connectedComponents = findConnectedComponents(nodes, edges);
 
@@ -39,10 +32,6 @@ export function ShareUrlPopover() {
           const groupId = component.sort().join('-');
           if (!strudelStore.isGroupPaused(groupId)) {
             strudelStore.pauseGroup(groupId, component);
-            console.log(
-              `Paused group for sharing: ${groupId} with nodes:`,
-              component
-            );
           }
         }
       });

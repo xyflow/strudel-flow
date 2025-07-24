@@ -157,26 +157,6 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
     updateNode,
   ]);
 
-  const getCurrentPattern = () =>
-    ARP_PATTERNS.find((p) => p.id === selectedPattern);
-  const getCurrentChordType = () =>
-    CHORD_TYPES.find((c) => c.id === selectedChordType);
-
-  // Generate preview pattern for display
-  const getPreviewPattern = () => {
-    const patternData = getCurrentPattern();
-    if (!patternData) return '';
-
-    if (selectedPattern === 'random') {
-      return patternData.pattern as string;
-    } else {
-      return expandPatternAcrossOctaves(
-        patternData.pattern as number[],
-        selectedOctaves
-      );
-    }
-  };
-
   return (
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md min-w-80">
