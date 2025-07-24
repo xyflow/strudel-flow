@@ -10,48 +10,58 @@ import { StrudelConfig } from '@/types';
 interface ArpeggiatorNodeInternalState {
   selectedPattern: string;
   selectedOctaves: number;
-  selectedSpeed: string;
   selectedChordType: string;
   selectedKey: string;
 }
 
 const ARP_PATTERNS = [
-  { id: 'up', label: 'Up', pattern: '0 2 4' },
-  { id: 'down', label: 'Down', pattern: '4 2 0' },
-  { id: 'up-down', label: 'Up-Down', pattern: '0 2 4 2' },
-  { id: 'down-up', label: 'Down-Up', pattern: '4 2 0 2' },
-  { id: 'inside-out', label: 'Inside-Out', pattern: '2 0 4' },
-  { id: 'outside-in', label: 'Outside-In', pattern: '0 4 2' },
-  { id: 'random', label: 'Random', pattern: '[0 2 4]' },
-  { id: 'octave', label: 'Octave', pattern: '0 2 4 7' },
+  { id: 'up', label: 'Up', pattern: [0, 2, 4] },
+  { id: 'down', label: 'Down', pattern: [4, 2, 0] },
+  { id: 'up-down', label: 'Up-Down', pattern: [0, 2, 4, 2] },
+  { id: 'down-up', label: 'Down-Up', pattern: [4, 2, 0, 2] },
+  { id: 'inside-out', label: 'Inside-Out', pattern: [2, 0, 4] },
+  { id: 'outside-in', label: 'Outside-In', pattern: [0, 4, 2] },
+  { id: 'octave', label: 'Octave', pattern: [0, 2, 4, 7] },
 ];
 
 const OCTAVE_RANGES = [
-  { octaves: 1, label: '1 Octave' },
-  { octaves: 2, label: '2 Octaves' },
-  { octaves: 3, label: '3 Octaves' },
-  { octaves: 4, label: '4 Octaves' },
-];
-
-const SPEED_OPTIONS = [
-  { id: 'slow', label: 'Slow', speed: 0.5 },
-  { id: 'normal', label: 'Normal', speed: 1 },
-  { id: 'fast', label: 'Fast', speed: 2 },
-  { id: 'veryfast', label: 'Very Fast', speed: 4 },
-  { id: 'triplets', label: 'Triplets', speed: 1.5 },
-  { id: 'dotted', label: 'Dotted', speed: 0.75 },
+  { octaves: 1, label: '1' },
+  { octaves: 2, label: '2' },
+  { octaves: 3, label: '3' },
+  { octaves: 4, label: '4' },
 ];
 
 const CHORD_TYPES = [
-  { id: 'triad', label: 'Triad', notes: '0 2 4' },
-  { id: 'seventh', label: '7th', notes: '0 2 4 6' },
-  { id: 'ninth', label: '9th', notes: '0 2 4 6 8' },
-  { id: 'sus4', label: 'Sus4', notes: '0 3 4' },
-  { id: 'add9', label: 'Add9', notes: '0 2 4 8' },
-  { id: 'minor', label: 'Minor', notes: '0 2 4' },
+  { id: 'major', label: 'Major', scale: 'major' },
+  { id: 'minor', label: 'Minor', scale: 'minor' },
+  { id: 'dorian', label: 'Dorian', scale: 'dorian' },
+  { id: 'mixolydian', label: 'Mixolydian', scale: 'mixolydian' },
+  { id: 'pentatonic', label: 'Pentatonic', scale: 'pentatonic' },
+  { id: 'blues', label: 'Blues', scale: 'blues' },
 ];
 
 const KEYS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+// Function to expand pattern across multiple octaves
+const expandPatternAcrossOctaves = (
+  basePattern: number[],
+  octaves: number
+): string => {
+  if (octaves === 1) {
+    return basePattern.join(' ');
+  }
+
+  const expandedPattern: number[] = [];
+
+  for (let octave = 0; octave < octaves; octave++) {
+    const octaveOffset = octave * 7; // 7 scale degrees per octave
+    basePattern.forEach((note) => {
+      expandedPattern.push(note + octaveOffset);
+    });
+  }
+
+  return expandedPattern.join(' ');
+};
 
 export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
@@ -69,11 +79,8 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
   const [selectedOctaves, setSelectedOctaves] = useState(
     savedInternalState?.selectedOctaves || 1
   );
-  const [selectedSpeed, setSelectedSpeed] = useState(
-    savedInternalState?.selectedSpeed || 'normal'
-  );
   const [selectedChordType, setSelectedChordType] = useState(
-    savedInternalState?.selectedChordType || 'triad'
+    savedInternalState?.selectedChordType || 'major'
   );
   const [selectedKey, setSelectedKey] = useState(
     savedInternalState?.selectedKey || 'C'
@@ -87,7 +94,6 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
     if (savedInternalState && !hasRestoredState) {
       setSelectedPattern(savedInternalState.selectedPattern);
       setSelectedOctaves(savedInternalState.selectedOctaves);
-      setSelectedSpeed(savedInternalState.selectedSpeed);
       setSelectedChordType(savedInternalState.selectedChordType);
       setSelectedKey(savedInternalState.selectedKey);
       setHasRestoredState(true);
@@ -99,7 +105,6 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
     const internalState: ArpeggiatorNodeInternalState = {
       selectedPattern,
       selectedOctaves,
-      selectedSpeed,
       selectedChordType,
       selectedKey,
     };
@@ -108,7 +113,6 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
   }, [
     selectedPattern,
     selectedOctaves,
-    selectedSpeed,
     selectedChordType,
     selectedKey,
     id,
@@ -118,15 +122,27 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
   // Update strudel whenever settings change
   useEffect(() => {
     const patternData = ARP_PATTERNS.find((p) => p.id === selectedPattern);
-    const speedData = SPEED_OPTIONS.find((s) => s.id === selectedSpeed);
     const chordData = CHORD_TYPES.find((c) => c.id === selectedChordType);
 
-    if (patternData && speedData && chordData) {
+    if (patternData && chordData) {
+      // Generate the expanded pattern
+      let finalPattern: string;
+
+      if (selectedPattern === 'random') {
+        // For random pattern, keep it as is - it's already a string
+        finalPattern = patternData.pattern as string;
+      } else {
+        // For other patterns, expand across octaves
+        finalPattern = expandPatternAcrossOctaves(
+          patternData.pattern as number[],
+          selectedOctaves
+        );
+      }
+
       const config: Partial<StrudelConfig> = {
-        arpPattern: patternData.pattern,
+        arpPattern: finalPattern,
         arpOctaves: selectedOctaves,
-        arpSpeed: speedData.speed.toString(),
-        arpChordType: chordData.notes,
+        arpChordType: chordData.scale,
         arpKey: selectedKey,
       };
 
@@ -135,7 +151,6 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
   }, [
     selectedPattern,
     selectedOctaves,
-    selectedSpeed,
     selectedChordType,
     selectedKey,
     id,
@@ -144,10 +159,23 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
 
   const getCurrentPattern = () =>
     ARP_PATTERNS.find((p) => p.id === selectedPattern);
-  const getCurrentSpeed = () =>
-    SPEED_OPTIONS.find((s) => s.id === selectedSpeed);
   const getCurrentChordType = () =>
     CHORD_TYPES.find((c) => c.id === selectedChordType);
+
+  // Generate preview pattern for display
+  const getPreviewPattern = () => {
+    const patternData = getCurrentPattern();
+    if (!patternData) return '';
+
+    if (selectedPattern === 'random') {
+      return patternData.pattern as string;
+    } else {
+      return expandPatternAcrossOctaves(
+        patternData.pattern as number[],
+        selectedOctaves
+      );
+    }
+  };
 
   return (
     <WorkflowNode id={id} data={data}>
@@ -188,26 +216,9 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
           </div>
         </div>
 
-        {/* Speed */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-mono font-medium">Speed</label>
-          <div className="grid grid-cols-3 gap-1">
-            {SPEED_OPTIONS.map((speed) => (
-              <Button
-                key={speed.id}
-                variant={selectedSpeed === speed.id ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedSpeed(speed.id)}
-              >
-                {speed.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-
         {/* Chord Type */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-mono font-medium">Chord Type</label>
+          <label className="text-xs font-mono font-medium">Scale Type</label>
           <div className="grid grid-cols-3 gap-1">
             {CHORD_TYPES.map((chord) => (
               <Button
@@ -238,22 +249,6 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
             ))}
           </div>
         </div>
-
-        {/* Current Selection Display */}
-        <div className="text-xs font-mono bg-muted px-2 py-1 rounded">
-          <div className="font-bold">
-            {getCurrentPattern()?.label} • {getCurrentChordType()?.label} •{' '}
-            {getCurrentSpeed()?.label}
-          </div>
-          <div className="opacity-70">
-            Key: {selectedKey} • {selectedOctaves} octave
-            {selectedOctaves > 1 ? 's' : ''}
-          </div>
-          <div className="mt-1">
-            n("{getCurrentPattern()?.pattern}").scale("{selectedKey}
-            4:major").fast({getCurrentSpeed()?.speed})
-          </div>
-        </div>
       </div>
     </WorkflowNode>
   );
@@ -262,20 +257,12 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
 ArpeggiatorNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const config = useStrudelStore.getState().config[node.id];
   const pattern = config?.arpPattern;
-  const octaves = config?.arpOctaves;
-  const speed = config?.arpSpeed;
   const chordType = config?.arpChordType;
   const key = config?.arpKey;
 
-  if (!pattern || !octaves || !speed || !chordType || !key)
-    return strudelString;
+  if (!pattern || !chordType || !key) return strudelString;
 
-  // Build the arpeggiator call
-  let arpCall = `n("${pattern}").scale("${key}4:major")`;
-
-  if (parseFloat(speed) !== 1) {
-    arpCall += `.fast(${speed})`;
-  }
+  const arpCall = `n("${pattern}").scale("${key}4:${chordType}")`;
 
   return strudelString ? `${strudelString}.stack(${arpCall})` : arpCall;
 };
