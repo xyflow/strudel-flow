@@ -92,7 +92,7 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
   },
   'beat-machine-node': {
     id: 'beat-machine-node',
-    title: 'Beat Machine',
+    title: 'Beats',
     category: 'Synths',
     icon: 'Grid3x3',
   },

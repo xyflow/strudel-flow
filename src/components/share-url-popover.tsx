@@ -81,8 +81,6 @@ export function ShareUrlPopover() {
             <h4 className="font-medium text-sm mb-2">Share Your Workflow</h4>
             <p className="text-xs text-muted-foreground mb-3">
               Copy this URL to share your current workflow state with others.
-              All groups will be paused when copied, and the shared state will
-              include all button states, settings, patterns, and visual themes.
             </p>
           </div>
 
@@ -112,15 +110,6 @@ export function ShareUrlPopover() {
                 </>
               )}
             </Button>
-          </div>
-
-          <div className="text-xs text-muted-foreground">
-            <p>
-              The URL contains your nodes, edges, positions, button states,
-              patterns, theme settings, dark/light mode, and all configurations.
-              When opened, the workflow will start in paused mode with the exact
-              same visual appearance.
-            </p>
           </div>
         </div>
       </PopoverContent>

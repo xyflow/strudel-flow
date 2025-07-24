@@ -17,8 +17,6 @@ export function WorkflowControls() {
       <ZoomSlider position="bottom-left" className="bg-card" />
 
       <Panel position="top-right" className="flex flex-col items-end gap-4">
-        <AppInfoPopover />
-
         <button
           className="p-2 rounded bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition"
           onClick={() => setPatternPanelVisible((prev) => !prev)}
@@ -38,6 +36,7 @@ export function WorkflowControls() {
 
         <ShareUrlPopover />
 
+        <AppInfoPopover />
         <PatternPanelWithCopy isVisible={isPatternPanelVisible} />
       </Panel>
       <Panel

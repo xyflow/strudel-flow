@@ -60,12 +60,10 @@ export function PresetPopover() {
       <PopoverContent className="w-80" align="end">
         <div className="space-y-3">
           <div>
-            <h4 className="font-medium text-sm mb-1">
-              🎵 Try It Out! - Presets
-            </h4>
+            <h4 className="font-medium text-sm mb-1">🎵 Presets</h4>
             <p className="text-xs text-muted-foreground mb-3">
-              Load example patterns to get started or spark inspiration! Each
-              preset includes patterns, settings, and visual themes.
+              Here are some example patterns to get started or spark
+              inspiration!
             </p>
           </div>
 
@@ -100,17 +98,6 @@ export function PresetPopover() {
               {loadedPreset}
             </div>
           )}
-
-          <div className="text-xs text-muted-foreground pt-2 border-t">
-            <p className="font-mono">
-              💡 <strong>Tip:</strong> Right-click buttons to add modifiers like
-              repeat (x2) or slow!
-            </p>
-            <p className="font-mono mt-1">
-              🎯 <strong>Pro Tip:</strong> Create your own patterns and share
-              the URL with others!
-            </p>
-          </div>
         </div>
       </PopoverContent>
     </Popover>

@@ -19,117 +19,85 @@ export function AppInfoPopover() {
       <PopoverContent className="w-96 max-h-96 overflow-y-auto" align="end">
         <div className="space-y-4">
           <div>
-            <h3 className="font-semibold text-lg mb-2">🎵 Flow Machine</h3>
-            <p className="text-sm text-muted-foreground">
-              A visual music creation tool that generates Strudel live coding
-              patterns through an intuitive node-based interface.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="font-medium mb-2">🚀 Getting Started</h4>
-            <ul className="text-sm space-y-1 text-muted-foreground">
-              <li>
-                • <strong>Add Nodes:</strong> Right-click on canvas or drag from
-                sidebar
-              </li>
-              <li>
-                • <strong>Connect Nodes:</strong> Drag from output (bottom) to
-                input (top)
-              </li>
-              <li>
-                • <strong>Edit Patterns:</strong> Click buttons in nodes to
-                create sequences
-              </li>
-              <li>
-                • <strong>Control Playback:</strong> Use node headers to
-                play/pause/mute
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-medium mb-2">🎛️ Node Types</h4>
-            <div className="text-sm space-y-2 text-muted-foreground">
+            <h4 className="font-medium mb-3 flex items-center gap-2">
+              🎛️ Getting Started
+            </h4>
+            <div className="space-y-2 text-sm">
               <div>
-                <strong>Sound Sources:</strong>
-                <ul className="ml-4 mt-1 space-y-1">
-                  <li>• Beat Machine - Drum step sequencer</li>
-                  <li>• Arpeggiator - Melodic arpeggios</li>
-                  <li>• Chord Pad - Harmonic progressions</li>
-                  <li>• Piano Roll - Click & drag notes</li>
-                  <li>• Pad Node - Scale-based patterns</li>
-                </ul>
+                <strong>Add Nodes:</strong> Drag nodes from the sidebar into
+                your workspace.
               </div>
               <div>
-                <strong>Audio Effects:</strong>
-                <ul className="ml-4 mt-1 space-y-1">
-                  <li>• Gain, Distortion, LPF, Pan</li>
-                  <li>• Fast, Slow, Attack, Release</li>
-                  <li>• Room, Compressor, Phaser</li>
-                </ul>
+                <strong>Connect Nodes:</strong> Drag from bottom handles to top
+                handles.
+              </div>
+              <div>
+                <strong>Create Patterns:</strong> Click buttons in nodes to
+                build sequences.
+              </div>
+              <div>
+                <strong>Control Playback:</strong> Use play/pause/mute in
+                headers.
               </div>
             </div>
           </div>
 
           <div>
-            <h4 className="font-medium mb-2">⚡ Quick Tips</h4>
-            <ul className="text-sm space-y-1 text-muted-foreground">
-              <li>
-                • <strong>Multiple Selection:</strong> Shift+click to select
-                multiple steps
-              </li>
-              <li>
-                • <strong>Pattern Preview:</strong> Click notebook icon in node
-                header
-              </li>
-              <li>
-                • <strong>Tempo:</strong> Use BPM control (timer icon) to adjust
-                speed
-              </li>
-              <li>
-                • <strong>Sharing:</strong> Use share button to save/load
-                patterns via URL
-              </li>
-              <li>
-                • <strong>Groups:</strong> Connected nodes play together
-              </li>
-            </ul>
+            <h4 className="font-medium mb-3 flex items-center gap-2">
+              🚀 Advanced Features
+            </h4>
+            <div className="space-y-2 text-sm">
+              <div>
+                <strong>Multi-select:</strong>{' '}
+                <kbd className="bg-background border px-1 rounded text-xs">
+                  Shift + click
+                </kbd>{' '}
+                to select multiple steps.
+              </div>
+              <div>
+                <strong>Pattern Preview:</strong> Click notebook icon in
+                headers.
+              </div>
+              <div>
+                <strong>Chain Effects:</strong> Connect multiple nodes for
+                complex processing.
+              </div>
+              <div>
+                <strong>Add Modifiers:</strong> Right-click buttons for repeats
+                & speed changes.
+              </div>
+              <div>
+                <strong>Tempo Control:</strong> Use timer icon in top controls.
+              </div>
+            </div>
           </div>
 
-          <div>
-            <h4 className="font-medium mb-2">🎹 Piano Roll Instructions</h4>
-            <ul className="text-sm space-y-1 text-muted-foreground">
-              <li>
-                • <strong>Place Notes:</strong> Click on grid cells
-              </li>
-              <li>
-                • <strong>Move Notes:</strong> Click and drag existing notes
-              </li>
-              <li>
-                • <strong>Remove Notes:</strong> Click on existing notes
-              </li>
-              <li>
-                • <strong>Chords:</strong> Place multiple notes on same step
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-medium mb-2">🔗 Pattern Chaining</h4>
-            <ul className="text-sm space-y-1 text-muted-foreground">
-              <li>• Connect sound sources to effects for processing</li>
-              <li>• Chain multiple effects for complex sounds</li>
-              <li>• Each connection creates a new audio path</li>
-              <li>• Disconnected nodes play independently</li>
-            </ul>
-          </div>
-
-          <div className="pt-2 border-t">
+          <div className="pt-2 border-t text-left">
             <p className="text-xs text-muted-foreground">
-              Built with <strong>Strudel</strong> live coding engine.
-              <br />
-              Generated patterns use JavaScript-based audio synthesis.
+              Powered by{' '}
+              <strong>
+                <a href="https://strudel.cc" className="hover:underline">
+                  Strudel
+                </a>
+              </strong>{' '}
+              •{' '}
+              <strong>
+                <a href="https://reactflow.dev/" className="hover:underline">
+                  React Flow
+                </a>
+              </strong>{' '}
+              •{' '}
+              <strong>
+                <a href="https://ui.shadcn.com/" className="hover:underline">
+                  shadcn
+                </a>
+              </strong>
+              •{' '}
+              <strong>
+                <a href="https://tweakcn.com" className="hover:underline">
+                  tweakcn
+                </a>
+              </strong>
             </p>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { Settings2 } from 'lucide-react';
+import { Settings2, Moon, Sun, Palette, Check } from 'lucide-react';
 
 import {
   Dialog,
@@ -8,34 +8,121 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from '@/components/ui/select';
 import { useAppStore } from '@/store/app-context';
 import { useThemeCss } from '@/hooks/use-theme-css';
-import { ReactNode } from 'react';
 
-function SettingsItem({
-  title,
-  description,
-  control,
+// Theme configurations with colors and descriptions
+const themes = [
+  {
+    value: 'supabase',
+    label: 'Supabase',
+    description: 'Clean & modern',
+    color: 'oklch(0.8348 0.1302 160.9080)',
+  },
+  {
+    value: 'amber-minimal',
+    label: 'Amber Minimal',
+    description: 'Warm & focused',
+    color: 'oklch(0.7686 0.1647 70.0804)',
+  },
+  {
+    value: 'bold-tech',
+    label: 'Bold Tech',
+    description: 'High contrast',
+    color: 'oklch(0.6489 0.237 200)',
+  },
+  {
+    value: 'catppuccin',
+    label: 'Catppuccin',
+    description: 'Soothing pastels',
+    color: 'oklch(0.7647 0.1596 267.8947)',
+  },
+  {
+    value: 'claymorphism',
+    label: 'Claymorphism',
+    description: 'Soft & tactile',
+    color: 'oklch(0.8 0.15 25)',
+  },
+  {
+    value: 'cosmic-night',
+    label: 'Cosmic Night',
+    description: 'Deep space vibes',
+    color: 'oklch(0.5417 0.179 288.0332)',
+  },
+  {
+    value: 'doom-64',
+    label: 'Doom 64',
+    description: 'Retro gaming',
+    color: 'oklch(0.4 0.2 0)',
+  },
+  {
+    value: 'mono',
+    label: 'Mono',
+    description: 'Minimal grayscale',
+    color: 'oklch(0.5 0 0)',
+  },
+  {
+    value: 'neo-brutalism',
+    label: 'Neo Brutalism',
+    description: 'Bold & geometric',
+    color: 'oklch(0.6489 0.237 26.9728)',
+  },
+  {
+    value: 'pastel-dreams',
+    label: 'Pastel Dreams',
+    description: 'Soft & dreamy',
+    color: 'oklch(0.8 0.1 330)',
+  },
+  {
+    value: 'quantum-rose',
+    label: 'Quantum Rose',
+    description: 'Elegant pink tones',
+    color: 'oklch(0.6002 0.2414 0.1348)',
+  },
+  {
+    value: 'soft-pop',
+    label: 'Soft Pop',
+    description: 'Playful colors',
+    color: 'oklch(0.7 0.15 280)',
+  },
+];
+
+function ThemeCard({
+  theme,
+  isSelected,
+  onClick,
 }: {
-  title: string;
-  description: string;
-  control: ReactNode;
+  theme: (typeof themes)[0];
+  isSelected: boolean;
+  onClick: () => void;
 }) {
   return (
-    <div className="flex flex-row items-center justify-between rounded-lg border p-4 mb-2">
-      <div className="space-y-0.5">
-        <span className="text-base font-bold">{title}</span>
-        <p>{description}.</p>
+    <button
+      onClick={onClick}
+      className={`
+        relative p-3 rounded-lg border-2 transition-all duration-200 text-left
+        hover:shadow-md hover:scale-[1.02] group
+        ${
+          isSelected
+            ? 'border-primary bg-primary/5 shadow-sm'
+            : 'border-border hover:border-primary/50'
+        }
+      `}
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className="w-8 h-8 rounded-full border-2 border-white shadow-sm flex-shrink-0"
+          style={{ backgroundColor: theme.color }}
+        />
+        <div className="flex-1 min-w-0">
+          <div className="font-medium text-sm">{theme.label}</div>
+          <div className="text-xs text-muted-foreground truncate">
+            {theme.description}
+          </div>
+        </div>
+        {isSelected && <Check className="w-4 h-4 text-primary flex-shrink-0" />}
       </div>
-      {control}
-    </div>
+    </button>
   );
 }
 
@@ -51,45 +138,76 @@ export function SettingsDialog() {
           <span>Settings</span>
         </button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="mb-2">Settings</DialogTitle>
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <Settings2 className="w-5 h-5" />
+            Settings
+          </DialogTitle>
         </DialogHeader>
-        <SettingsItem
-          title="Dark Mode"
-          description="Toggle to switch to dark mode"
-          control={
-            <Switch
-              checked={state.colorMode === 'dark'}
-              onCheckedChange={state.toggleDarkMode}
-            />
-          }
-        />
-        <SettingsItem
-          title="Theme"
-          description="Choose your UI theme"
-          control={
-            <Select value={state.theme} onValueChange={state.setTheme}>
-              <SelectTrigger className="ml-2 w-[180px]">
-                <SelectValue placeholder="Select theme" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="supabase">Supabase</SelectItem>
-                <SelectItem value="amber-minimal">Amber Minimal</SelectItem>
-                <SelectItem value="bold-tech">Bold Tech</SelectItem>
-                <SelectItem value="catppuccin">Catppuccin</SelectItem>
-                <SelectItem value="claymorphism">Claymorphism</SelectItem>
-                <SelectItem value="cosmic-night">Cosmic Night</SelectItem>
-                <SelectItem value="doom-64">Doom 64</SelectItem>
-                <SelectItem value="mono">Mono</SelectItem>
-                <SelectItem value="neo-brutalism">Neo Brutalism</SelectItem>
-                <SelectItem value="pastel-dreams">Pastel Dreams</SelectItem>
-                <SelectItem value="quantum-rose">Quantum Rose</SelectItem>
-                <SelectItem value="soft-pop">Soft Pop</SelectItem>
-              </SelectContent>
-            </Select>
-          }
-        />
+
+        <div className="space-y-6">
+          {/* Dark Mode Section */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-primary/10">
+                {state.colorMode === 'dark' ? (
+                  <Moon className="w-4 h-4 text-primary" />
+                ) : (
+                  <Sun className="w-4 h-4 text-primary" />
+                )}
+              </div>
+              <div>
+                <h3 className="font-semibold">Appearance</h3>
+                <p className="text-sm text-muted-foreground">
+                  Switch between light and dark modes
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <Sun className="w-4 h-4" />
+                  <span className="text-sm">Light</span>
+                </div>
+                <Switch
+                  checked={state.colorMode === 'dark'}
+                  onCheckedChange={state.toggleDarkMode}
+                />
+                <div className="flex items-center gap-2">
+                  <Moon className="w-4 h-4" />
+                  <span className="text-sm">Dark</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Theme Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Palette className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Theme</h3>
+                <p className="text-sm text-muted-foreground">
+                  Choose your preferred color scheme
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {themes.map((theme) => (
+                <ThemeCard
+                  key={theme.value}
+                  theme={theme}
+                  isSelected={state.theme === theme.value}
+                  onClick={() => state.setTheme(theme.value)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
