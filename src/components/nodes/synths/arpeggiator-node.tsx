@@ -125,19 +125,11 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
     const chordData = CHORD_TYPES.find((c) => c.id === selectedChordType);
 
     if (patternData && chordData) {
-      // Generate the expanded pattern
-      let finalPattern: string;
-
-      if (selectedPattern === 'random') {
-        // For random pattern, keep it as is - it's already a string
-        finalPattern = patternData.pattern as string;
-      } else {
-        // For other patterns, expand across octaves
-        finalPattern = expandPatternAcrossOctaves(
-          patternData.pattern as number[],
-          selectedOctaves
-        );
-      }
+      // Generate the expanded pattern across octaves
+      const finalPattern = expandPatternAcrossOctaves(
+        patternData.pattern,
+        selectedOctaves
+      );
 
       const config: Partial<StrudelConfig> = {
         arpPattern: finalPattern,
