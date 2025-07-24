@@ -1,4 +1,4 @@
-import { Background, ReactFlow, ConnectionLineType } from '@xyflow/react';
+import { Background, ReactFlow } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { nodeTypes } from '@/components/nodes';
@@ -6,8 +6,6 @@ import { useAppStore } from '@/store/app-context';
 import { WorkflowControls } from './controls';
 import { useDragAndDrop } from './useDragAndDrop';
 import { useUrlStateLoader } from '@/hooks/use-url-state';
-
-const defaultEdgeOptions = { type: 'smootstep' };
 
 export default function Workflow() {
   useUrlStateLoader();
@@ -43,7 +41,6 @@ export default function Workflow() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        connectionLineType={ConnectionLineType.SmoothStep}
         nodeTypes={nodeTypes}
         onDragOver={onDragOver}
         onDrop={onDrop}
@@ -51,7 +48,6 @@ export default function Workflow() {
         onNodeDragStart={onNodeDragStart}
         onNodeDragStop={onNodeDragStop}
         colorMode={colorMode}
-        defaultEdgeOptions={defaultEdgeOptions}
       >
         <Background />
         <WorkflowControls />

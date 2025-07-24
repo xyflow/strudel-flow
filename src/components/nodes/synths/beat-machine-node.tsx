@@ -117,7 +117,7 @@ export function BeatMachineNode({ id, data }: WorkflowNodeProps) {
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md min-w-96">
         {/* 16-Step Sequencer Grid */}
-        <div className="flex flex-col gap-2 bg-gray-50 p-3 rounded border">
+        <div className="flex flex-col gap-2 p-3 rounded border">
           {/* Step Numbers Header */}
           <div className="flex items-center gap-1">
             <div className="w-12 text-xs font-mono font-medium">Step</div>

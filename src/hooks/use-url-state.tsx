@@ -81,5 +81,5 @@ export function useUrlStateLoader() {
         }, 100);
       }
     }
-  }, [setNodes, setEdges, setTheme, setColorMode, strudelStore]);
+  }, [setNodes, setEdges, setTheme, setColorMode]);
 }

@@ -136,12 +136,12 @@ export function ChordNode({ id, data }: WorkflowNodeProps) {
                 <button
                   key={index}
                   className={`
-                    w-8 h-16 border border-gray-300 rounded-b-md transition-all duration-150
+                    w-8 h-16 border border-border rounded-b-md transition-all duration-150
                     text-xs font-mono font-bold flex flex-col items-center justify-end pb-2
                     ${
                       isPressed
                         ? 'bg-blue-500 text-white border-blue-600 shadow-inner'
-                        : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm hover:shadow-md'
+                        : 'bg-primary text-gray-700 hover:bg-gray-50 shadow-sm hover:shadow-md'
                     }
                     ${
                       scaleDegree.quality === 'major'

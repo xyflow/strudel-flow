@@ -128,7 +128,7 @@ function DraggableItem(props: NodeConfig) {
     <SidebarMenuItem
       className={cn(
         'relative border-2 active:scale-[.99] rounded-md',
-        isDragging ? 'border-green-500' : 'border-gray-100'
+        isDragging ? 'border-green-500' : 'border'
       )}
       onDragStart={onDragStart}
       onDrag={onDrag}

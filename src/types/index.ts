@@ -1,13 +1,18 @@
 export interface StrudelConfig {
+  // Core properties
   notes?: string;
   sound?: string;
+  scale?: string;
+  cpm?: string;
+  customPattern?: string;
+
+  // Effect nodes
   palindrome?: boolean;
   room?: string;
   roomsize?: string;
   roomfade?: string;
   roomlp?: string;
   roomdim?: string;
-  cpm?: string;
   lpf?: string;
   distort?: string;
   gain?: string;
@@ -23,15 +28,29 @@ export interface StrudelConfig {
   sustain?: string;
   release?: string;
   attack?: string;
-  scale?: string;
   fast?: string;
   slow?: string;
-  customPattern?: string;
+
+  // Probability and masking
   probFunction?: string;
   probability?: number;
   maskPattern?: string;
-  customValue?: string;
-  selectedSound?: string;
+  maskProbability?: string;
+
+  // Ply node
+  plyMultiplier?: string;
+  plyProbability?: string;
+
+  // FM node
+  fmFrequency?: string;
+  fmDepth?: string;
+  fmModulator?: string;
+
+  // Late node
+  lateOffset?: string;
+  latePattern?: string;
+
+  // Polyrhythm node
   polyPattern1?: string;
   polyPattern2?: string;
   polyPattern3?: string;
@@ -39,59 +58,15 @@ export interface StrudelConfig {
   polySound2?: string;
   polySound3?: string;
   activePolyPatterns?: string;
-  pianoPattern?: string;
-  pianoSound?: string;
-  pianoKey?: string;
+
+  // Arpeggiator node
   arpPattern?: string;
   arpOctaves?: number;
-  arpSpeed?: string;
-  arpChordNotes?: string;
   arpKey?: string;
   arpChordType?: string;
-  bassPattern?: string;
-  bassSound?: string;
-  bassOctave?: string;
-  bassGroove?: string;
-  bassKey?: string;
+
+  // Beat machine node
   beatKickPattern?: string;
   beatSnarePattern?: string;
   beatHihatPattern?: string;
-  leadScale?: string;
-  leadMovement?: string;
-  leadKey?: string;
-  chordProgression?: string;
-  chordVoicing?: string;
-  chordStrum?: string;
-  chordRhythm?: string;
-  chordKey?: string;
-  chordSound?: string;
-  pianoRollPattern?: string;
-  pianoRollKey?: string;
-  pianoRollSound?: string;
-  pianoRollOctave?: number;
-
-  // Interactive Piano Roll Node
-  interactivePianoNotes?: {
-    id: string;
-    pitch: number;
-    octave: number;
-    step: number;
-    velocity: number;
-  }[];
-  interactivePianoSound?: string;
-
-  // New Effect Nodes (added to existing maskPattern)
-  maskProbability?: string;
-  plyMultiplier?: string;
-  plyProbability?: string;
-  fmFrequency?: string;
-  fmDepth?: string;
-  fmModulator?: string;
-  lateOffset?: string;
-  latePattern?: string;
-
-  percussionInstruments?: string;
-  percussionPattern?: string;
-  percussionDensity?: string;
-  percussionCulture?: string;
 }

@@ -19,6 +19,6 @@ export const initialEdges: Edge[] = [
     id: 'edge_1',
     source: 'padNode_1',
     target: 'workflowNode_2',
-    type: 'default',
+    type: 'bezier',
   },
 ];

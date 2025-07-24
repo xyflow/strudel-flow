@@ -28,7 +28,7 @@ function ZoomSlider({ className, ...props }: ZoomSliderProps) {
   return (
     <Panel
       className={cn(
-        'flex bg-primary-foreground text-foreground rounded-md gap-1 p-1',
+        'flex bg-primary-foreground text-foreground border rounded-md gap-1 p-1',
         className
       )}
       {...props}
