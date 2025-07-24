@@ -108,7 +108,6 @@ export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
   ]);
 
   const handlePresetClick = (
-    presetId: string,
     preset: (typeof RHYTHM_PRESETS)[0],
     patternNumber: 1 | 2 | 3
   ) => {
@@ -152,7 +151,7 @@ export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
                     : 'outline'
                 }
                 className="h-8 text-xs font-bold"
-                onClick={() => handlePresetClick(preset.id, preset, 1)}
+                onClick={() => handlePresetClick(preset, 1)}
               >
                 {preset.label}
               </Button>
@@ -185,7 +184,7 @@ export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
                     : 'outline'
                 }
                 className="h-8 text-xs font-bold"
-                onClick={() => handlePresetClick(preset.id, preset, 2)}
+                onClick={() => handlePresetClick(preset, 2)}
               >
                 {preset.label}
               </Button>
@@ -218,7 +217,7 @@ export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
                     : 'outline'
                 }
                 className="h-8 text-xs font-bold"
-                onClick={() => handlePresetClick(preset.id, preset, 3)}
+                onClick={() => handlePresetClick(preset, 3)}
               >
                 {preset.label}
               </Button>
