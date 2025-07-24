@@ -4,7 +4,6 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { AppStoreProvider } from '@/store';
 import { defaultState } from '@/store/app-store';
 import SidebarLayout from '@/components/layouts/sidebar-layout';
-import AppContextMenu from '@/components/app-context-menu';
 import Workflow from '@/components/workflow';
 
 import './index.css';
@@ -14,9 +13,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <ReactFlowProvider>
       <AppStoreProvider initialState={{ ...defaultState }}>
         <SidebarLayout>
-          <AppContextMenu>
-            <Workflow />
-          </AppContextMenu>
+          <Workflow />
         </SidebarLayout>
       </AppStoreProvider>
     </ReactFlowProvider>
