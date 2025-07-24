@@ -5,11 +5,11 @@ import { Slider } from '@/components/ui/slider';
 
 export function PhaserNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const config = useStrudelStore((state) => state.config[id] || {});
+  const config = useStrudelStore((state) => state.config[id]);
 
   // Extract values or set defaults
-  const speed = config.phaser ? parseFloat(config.phaser) : 1;
-  const depth = config.phaserdepth ? parseFloat(config.phaserdepth) : 0.5;
+  const speed = config?.phaser ? parseFloat(config.phaser) : 1;
+  const depth = config?.phaserdepth ? parseFloat(config.phaserdepth) : 0.5;
 
   // Handler for speed changes
   const handleSpeedChange = (value: number[]) => {

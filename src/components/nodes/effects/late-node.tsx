@@ -137,24 +137,6 @@ export function LateNode({ id, data }: WorkflowNodeProps) {
             ))}
           </div>
         </div>
-
-        <div className="text-xs font-mono bg-muted px-2 py-1 rounded">
-          <div className="font-bold">
-            {getCurrentOffset()?.label} • {getCurrentPattern()?.label}
-          </div>
-          <div className="opacity-70">
-            {getCurrentOffset()?.description} -{' '}
-            {getCurrentPattern()?.description}
-          </div>
-          <div className="mt-1">
-            {getCurrentPattern()?.pattern
-              ? `.late("${getCurrentPattern()?.pattern?.replace(
-                  /{offset}/g,
-                  getCurrentOffset()?.offset || '0'
-                )}")`
-              : `.late(${getCurrentOffset()?.offset})`}
-          </div>
-        </div>
       </div>
     </WorkflowNode>
   );

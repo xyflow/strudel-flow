@@ -147,20 +147,6 @@ export function PlyNode({ id, data }: WorkflowNodeProps) {
             ))}
           </div>
         </div>
-
-        <div className="text-xs font-mono bg-muted px-2 py-1 rounded">
-          <div className="font-bold">
-            {getCurrentMultiplier()?.label} • {getCurrentProbability()?.label}
-          </div>
-          <div className="opacity-70">
-            {getCurrentMultiplier()?.description}
-          </div>
-          <div className="mt-1">
-            .ply({getCurrentMultiplier()?.multiplier})
-            {getCurrentProbability()?.probability !== '1' &&
-              `.sometimes(${getCurrentProbability()?.probability})`}
-          </div>
-        </div>
       </div>
     </WorkflowNode>
   );

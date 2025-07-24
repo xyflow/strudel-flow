@@ -158,18 +158,6 @@ export function MaskNode({ id, data }: WorkflowNodeProps) {
             ))}
           </div>
         </div>
-
-        <div className="text-xs font-mono bg-muted px-2 py-1 rounded">
-          <div className="font-bold">
-            {getCurrentPattern()?.label} • {getCurrentProbability()?.label}
-          </div>
-          <div className="opacity-70">{getCurrentPattern()?.description}</div>
-          <div className="mt-1">
-            .mask("{getCurrentPattern()?.pattern}")
-            {getCurrentProbability()?.probability !== '1' &&
-              `.sometimes(${getCurrentProbability()?.probability})`}
-          </div>
-        </div>
       </div>
     </WorkflowNode>
   );

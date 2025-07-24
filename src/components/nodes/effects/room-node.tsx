@@ -5,14 +5,14 @@ import { Slider } from '@/components/ui/slider';
 
 export function RoomNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const config = useStrudelStore((state) => state.config[id] || {});
+  const config = useStrudelStore((state) => state.config[id]);
 
   // Extract values or set defaults
-  const room = config.room ? parseFloat(config.room) : 0;
-  const roomsize = config.roomsize ? parseFloat(config.roomsize) : 1;
-  const roomfade = config.roomfade ? parseFloat(config.roomfade) : 0.5;
-  const roomlp = config.roomlp ? parseFloat(config.roomlp) : 10000;
-  const roomdim = config.roomdim ? parseFloat(config.roomdim) : 8000;
+  const room = config?.room ? parseFloat(config.room) : 0;
+  const roomsize = config?.roomsize ? parseFloat(config.roomsize) : 1;
+  const roomfade = config?.roomfade ? parseFloat(config.roomfade) : 0.5;
+  const roomlp = config?.roomlp ? parseFloat(config.roomlp) : 10000;
+  const roomdim = config?.roomdim ? parseFloat(config.roomdim) : 8000;
 
   // Handlers for each property
   const handleSliderChange = (key: string, value: number[]) => {
@@ -92,12 +92,12 @@ export function RoomNode({ id, data }: WorkflowNodeProps) {
 }
 
 RoomNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const config = useStrudelStore.getState().config[node.id] || {};
-  const room = config.room;
-  const roomsize = config.roomsize;
-  const roomfade = config.roomfade;
-  const roomlp = config.roomlp;
-  const roomdim = config.roomdim;
+  const config = useStrudelStore.getState().config[node.id];
+  const room = config?.room;
+  const roomsize = config?.roomsize;
+  const roomfade = config?.roomfade;
+  const roomlp = config?.roomlp;
+  const roomdim = config?.roomdim;
 
   const calls = [];
 

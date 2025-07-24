@@ -202,18 +202,6 @@ export function FMNode({ id, data }: WorkflowNodeProps) {
             ))}
           </div>
         </div>
-
-        <div className="text-xs font-mono bg-muted px-2 py-1 rounded">
-          <div className="font-bold">
-            {getCurrentFrequency()?.label} • {getCurrentDepth()?.label} •{' '}
-            {getCurrentModulator()?.label}
-          </div>
-          <div className="opacity-70">{getCurrentFrequency()?.description}</div>
-          <div className="mt-1">
-            .fm({getCurrentModulator()?.modulator}.range(
-            {getCurrentFrequency()?.frequency}).mul({getCurrentDepth()?.depth}))
-          </div>
-        </div>
       </div>
     </WorkflowNode>
   );

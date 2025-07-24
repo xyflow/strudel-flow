@@ -165,15 +165,6 @@ export function ProbabilityNode({ id, data }: WorkflowNodeProps) {
             </div>
           </div>
         )}
-
-        {/* Current Function Display */}
-        <div className="text-xs font-mono bg-muted px-2 py-1 rounded">
-          {selectedFunction === 'mask'
-            ? `mask("${maskPattern}")`
-            : selectedFunction === 'always'
-            ? 'No probability filtering'
-            : `${selectedFunction}(${probability})`}
-        </div>
       </div>
     </WorkflowNode>
   );
