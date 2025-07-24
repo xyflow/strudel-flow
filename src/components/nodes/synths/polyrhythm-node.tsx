@@ -16,34 +16,14 @@ interface PolyrhythmNodeInternalState {
 }
 
 const RHYTHM_PRESETS = [
-  { id: '3:2', label: '3:2', pattern: 'euclidean(3,8)', color: 'bg-red-500' },
-  { id: '4:3', label: '4:3', pattern: 'euclidean(4,12)', color: 'bg-blue-500' },
-  {
-    id: '5:4',
-    label: '5:4',
-    pattern: 'euclidean(5,16)',
-    color: 'bg-green-500',
-  },
-  {
-    id: '7:5',
-    label: '7:5',
-    pattern: 'euclidean(7,20)',
-    color: 'bg-yellow-500',
-  },
-  {
-    id: '3:4',
-    label: '3:4',
-    pattern: 'euclidean(3,16)',
-    color: 'bg-purple-500',
-  },
-  { id: '5:3', label: '5:3', pattern: 'euclidean(5,12)', color: 'bg-pink-500' },
-  {
-    id: '2:3',
-    label: '2:3',
-    pattern: 'euclidean(2,12)',
-    color: 'bg-orange-500',
-  },
-  { id: '4:5', label: '4:5', pattern: 'euclidean(4,20)', color: 'bg-teal-500' },
+  { id: '3:2', label: '3:2', pattern: 'euclidean(3,8)' },
+  { id: '4:3', label: '4:3', pattern: 'euclidean(4,12)' },
+  { id: '5:4', label: '5:4', pattern: 'euclidean(5,16)' },
+  { id: '7:5', label: '7:5', pattern: 'euclidean(7,20)' },
+  { id: '3:4', label: '3:4', pattern: 'euclidean(3,16)' },
+  { id: '5:3', label: '5:3', pattern: 'euclidean(5,12)' },
+  { id: '2:3', label: '2:3', pattern: 'euclidean(2,12)' },
+  { id: '4:5', label: '4:5', pattern: 'euclidean(4,20)' },
 ];
 
 const SOUND_PRESETS = ['bd', 'sd', 'hh', 'oh', 'cp', 'rim', 'kick', 'snare'];
@@ -68,7 +48,7 @@ export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
     savedInternalState?.pattern3 || 'euclidean(5,16)'
   );
   const [activePatterns, setActivePatterns] = useState<string[]>(
-    savedInternalState?.activePatterns || ['pattern1']
+    savedInternalState?.activePatterns || []
   );
 
   // Sounds for each pattern
@@ -137,21 +117,17 @@ export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
     preset: (typeof RHYTHM_PRESETS)[0],
     patternNumber: 1 | 2 | 3
   ) => {
+    // Set the pattern
     if (patternNumber === 1) setPattern1(preset.pattern);
     if (patternNumber === 2) setPattern2(preset.pattern);
     if (patternNumber === 3) setPattern3(preset.pattern);
-  };
 
-  const togglePattern = (patternId: string) => {
-    setActivePatterns((prev) =>
-      prev.includes(patternId)
-        ? prev.filter((p) => p !== patternId)
-        : [...prev, patternId]
-    );
+    // Activate the layer when a pattern is selected
+    const patternId = `pattern${patternNumber}`;
+    if (!activePatterns.includes(patternId)) {
+      setActivePatterns((prev) => [...prev, patternId]);
+    }
   };
-
-  const isPatternActive = (patternId: string) =>
-    activePatterns.includes(patternId);
 
   return (
     <WorkflowNode id={id} data={data}>
@@ -159,14 +135,6 @@ export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
         {/* Pattern 1 */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <Button
-              variant={isPatternActive('pattern1') ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => togglePattern('pattern1')}
-              className="w-16"
-            >
-              Layer 1
-            </Button>
             <select
               value={sound1}
               onChange={(e) => setSound1(e.target.value)}
@@ -183,11 +151,12 @@ export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
             {RHYTHM_PRESETS.map((preset) => (
               <Button
                 key={`1-${preset.id}`}
-                className={`h-8 text-white text-xs font-bold ${preset.color} ${
+                variant={
                   pattern1.includes(preset.pattern.split('(')[1].split(')')[0])
-                    ? 'ring-2 ring-white'
-                    : 'opacity-70'
-                }`}
+                    ? 'default'
+                    : 'outline'
+                }
+                className="h-8 text-xs font-bold"
                 onClick={() => handlePresetClick(preset.id, preset, 1)}
               >
                 {preset.label}
@@ -199,14 +168,6 @@ export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
         {/* Pattern 2 */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <Button
-              variant={isPatternActive('pattern2') ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => togglePattern('pattern2')}
-              className="w-16"
-            >
-              Layer 2
-            </Button>
             <select
               value={sound2}
               onChange={(e) => setSound2(e.target.value)}
@@ -223,11 +184,12 @@ export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
             {RHYTHM_PRESETS.map((preset) => (
               <Button
                 key={`2-${preset.id}`}
-                className={`h-8 text-white text-xs font-bold ${preset.color} ${
+                variant={
                   pattern2.includes(preset.pattern.split('(')[1].split(')')[0])
-                    ? 'ring-2 ring-white'
-                    : 'opacity-70'
-                }`}
+                    ? 'default'
+                    : 'outline'
+                }
+                className="h-8 text-xs font-bold"
                 onClick={() => handlePresetClick(preset.id, preset, 2)}
               >
                 {preset.label}
@@ -239,14 +201,6 @@ export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
         {/* Pattern 3 */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <Button
-              variant={isPatternActive('pattern3') ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => togglePattern('pattern3')}
-              className="w-16"
-            >
-              Layer 3
-            </Button>
             <select
               value={sound3}
               onChange={(e) => setSound3(e.target.value)}
@@ -263,37 +217,18 @@ export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
             {RHYTHM_PRESETS.map((preset) => (
               <Button
                 key={`3-${preset.id}`}
-                className={`h-8 text-white text-xs font-bold ${preset.color} ${
+                variant={
                   pattern3.includes(preset.pattern.split('(')[1].split(')')[0])
-                    ? 'ring-2 ring-white'
-                    : 'opacity-70'
-                }`}
+                    ? 'default'
+                    : 'outline'
+                }
+                className="h-8 text-xs font-bold"
                 onClick={() => handlePresetClick(preset.id, preset, 3)}
               >
                 {preset.label}
               </Button>
             ))}
           </div>
-        </div>
-
-        {/* Pattern Display */}
-        <div className="text-xs font-mono bg-muted px-2 py-1 rounded max-h-20 overflow-y-auto">
-          <div>Active layers: {activePatterns.length}</div>
-          {activePatterns.includes('pattern1') && (
-            <div>
-              • Layer 1: sound("{sound1}").struct("{pattern1}")
-            </div>
-          )}
-          {activePatterns.includes('pattern2') && (
-            <div>
-              • Layer 2: sound("{sound2}").struct("{pattern2}")
-            </div>
-          )}
-          {activePatterns.includes('pattern3') && (
-            <div>
-              • Layer 3: sound("{sound3}").struct("{pattern3}")
-            </div>
-          )}
         </div>
       </div>
     </WorkflowNode>

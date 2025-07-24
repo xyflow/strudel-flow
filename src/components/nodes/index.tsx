@@ -12,9 +12,7 @@ import { ArpeggiatorNode } from './synths/arpeggiator-node';
 import { ChordNode } from './synths/chord-node';
 import { CustomNode } from './synths/custom-node';
 import { ProbabilityNode } from './effects/probability-node';
-// Removed SoundPaletteNode
 import { PolyrhythmNode } from './synths/polyrhythm-node';
-// Removed SimplePianoNode
 import { BeatMachineNode } from './synths/beat-machine-node';
 
 // Effects
