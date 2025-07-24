@@ -74,13 +74,18 @@ export function SettingsDialog() {
                 <SelectValue placeholder="Select theme" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="amber-minimal">Amber</SelectItem>
-                <SelectItem value="brutal">Brutal</SelectItem>
-                <SelectItem value="cosmic-night">Cosmic Night</SelectItem>
-                <SelectItem value="neo-brutalism">Neo Brutalism</SelectItem>
-                <SelectItem value="quantum-rose">Quantum Rose</SelectItem>
                 <SelectItem value="supabase">Supabase</SelectItem>
-                {/* Add more themes here */}
+                <SelectItem value="amber-minimal">Amber Minimal</SelectItem>
+                <SelectItem value="bold-tech">Bold Tech</SelectItem>
+                <SelectItem value="catppuccin">Catppuccin</SelectItem>
+                <SelectItem value="claymorphism">Claymorphism</SelectItem>
+                <SelectItem value="cosmic-night">Cosmic Night</SelectItem>
+                <SelectItem value="doom-64">Doom 64</SelectItem>
+                <SelectItem value="mono">Mono</SelectItem>
+                <SelectItem value="neo-brutalism">Neo Brutalism</SelectItem>
+                <SelectItem value="pastel-dreams">Pastel Dreams</SelectItem>
+                <SelectItem value="quantum-rose">Quantum Rose</SelectItem>
+                <SelectItem value="soft-pop">Soft Pop</SelectItem>
               </SelectContent>
             </Select>
           }
