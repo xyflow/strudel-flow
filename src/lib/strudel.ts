@@ -1,5 +1,5 @@
 /**
- * Strudel pattern generation utilities
+ * Simplified Strudel pattern generation
  */
 
 import { Edge } from '@xyflow/react';
@@ -10,164 +10,11 @@ import { getNodeStrudelOutput } from './node-registry';
 import { findConnectedComponents } from './graph-utils';
 
 /**
- * Extract node patterns and types from nodes
+ * Check if a node generates sound (vs processes it)
  */
-function extractNodeData(nodes: AppNode[]): {
-  nodePatterns: Map<string, string>;
-  nodeTypes: Map<string, string>;
-} {
-  const nodePatterns = new Map<string, string>();
-  const nodeTypes = new Map<string, string>();
-
-  nodes.forEach((node) => {
-    nodeTypes.set(node.id, node.type);
-    const strudelOutput = getNodeStrudelOutput(node.type);
-    if (strudelOutput) {
-      const pattern = strudelOutput(node, '');
-      if (pattern) {
-        nodePatterns.set(node.id, pattern);
-      }
-    }
-  });
-
-  return { nodePatterns, nodeTypes };
-}
-
-/**
- * Handle the case where there are no edges (all nodes are isolated)
- */
-function handleIsolatedNodes(
-  nodePatterns: Map<string, string>,
-  cpm: number | string | null
-): string {
-  const patterns = Array.from(nodePatterns.values());
-  if (patterns.length === 0) return '';
-  const result = patterns.map((pattern) => `$: ${pattern}`).join('\n');
-  return cpm ? `setcpm(${cpm})\n${result}` : result;
-}
-
-/**
- * Determine if a node is an effect node based on its category
- */
-function isEffectNode(node: AppNode): boolean {
-  const nodeConfig = nodesConfig[node.type];
-  const category = nodeConfig?.category;
-  return category === 'Audio Effects' || category === 'Time Effects';
-}
-
-/**
- * Separate nodes into source and effect categories
- */
-function categorizeNodes(
-  component: string[],
-  nodes: AppNode[]
-): {
-  sourceNodes: string[];
-  effectNodes: string[];
-} {
-  const sourceNodes: string[] = [];
-  const effectNodes: string[] = [];
-
-  component.forEach((nodeId) => {
-    const node = nodes.find((n) => n.id === nodeId);
-    if (node && isEffectNode(node)) {
-      effectNodes.push(nodeId);
-    } else {
-      // Source nodes are pads, drums, arpeggiators - they generate patterns
-      sourceNodes.push(nodeId);
-    }
-  });
-
-  return { sourceNodes, effectNodes };
-}
-
-/**
- * Build base pattern from source nodes
- */
-function buildBasePattern(
-  sourceNodes: string[],
-  nodePatterns: Map<string, string>
-): string {
-  const sourcePatterns = sourceNodes
-    .map((nodeId) => nodePatterns.get(nodeId))
-    .filter(Boolean) as string[];
-
-  if (sourcePatterns.length === 0) return '';
-  if (sourcePatterns.length === 1) return sourcePatterns[0];
-  return `stack(${sourcePatterns.join(', ')})`;
-}
-
-/**
- * Apply effect nodes to a base pattern
- */
-function applyEffectNodes(
-  basePattern: string,
-  effectNodes: string[],
-  nodeTypes: Map<string, string>,
-  nodes: AppNode[]
-): string {
-  let finalPattern = basePattern;
-
-  effectNodes.forEach((nodeId) => {
-    const nodeType = nodeTypes.get(nodeId);
-    if (nodeType) {
-      const strudelOutput = getNodeStrudelOutput(nodeType);
-      if (strudelOutput) {
-        const node = nodes.find((n) => n.id === nodeId);
-        if (node) {
-          finalPattern = strudelOutput(node, finalPattern);
-        }
-      }
-    }
-  });
-
-  return finalPattern;
-}
-
-/**
- * Process a single connected component
- */
-function processComponent(
-  component: string[],
-  nodePatterns: Map<string, string>,
-  nodeTypes: Map<string, string>,
-  nodes: AppNode[]
-): string {
-  const { sourceNodes, effectNodes } = categorizeNodes(component, nodes);
-
-  // Build base pattern from source nodes
-  let basePattern = '';
-  if (sourceNodes.length === 0) {
-    // Only effect nodes - treat as regular pattern
-    const patterns = component
-      .map((nodeId) => nodePatterns.get(nodeId))
-      .filter(Boolean) as string[];
-
-    if (patterns.length === 1) {
-      basePattern = patterns[0];
-    } else if (patterns.length > 1) {
-      basePattern = `stack(${patterns.join(', ')})`;
-    }
-  } else {
-    // Source nodes exist
-    basePattern = buildBasePattern(sourceNodes, nodePatterns);
-  }
-
-  // Apply effect nodes to the base pattern
-  return applyEffectNodes(basePattern, effectNodes, nodeTypes, nodes);
-}
-
-/**
- * Format final result with CPM if needed
- */
-function formatFinalResult(
-  finalPatterns: string[],
-  cpm: number | string | null
-): string {
-  if (finalPatterns.length === 0) return '';
-
-  const result = finalPatterns.map((pattern) => `$: ${pattern}`).join('\n');
-  return cpm ? `setcpm(${cpm})\n${result}` : result;
+function isSoundSource(node: AppNode): boolean {
+  const category = nodesConfig[node.type]?.category;
+  return category === 'Synths' || category === 'Sounds';
 }
 
 /**
@@ -176,30 +23,68 @@ function formatFinalResult(
 export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
   const cpm = useStrudelStore.getState().cpm;
 
-  // Extract node patterns and types
-  const { nodePatterns, nodeTypes } = extractNodeData(nodes);
+  // Generate patterns for all nodes
+  const nodePatterns: Record<string, string> = {};
+  nodes.forEach((node) => {
+    const strudelOutput = getNodeStrudelOutput(node.type);
+    if (strudelOutput) {
+      const pattern = strudelOutput(node, '');
+      if (pattern) {
+        nodePatterns[node.id] = pattern;
+      }
+    }
+  });
 
-  // If there are no edges, just return all patterns separately
+  // If no edges, all nodes are isolated
   if (edges.length === 0) {
-    return handleIsolatedNodes(nodePatterns, cpm);
+    const patterns = Object.values(nodePatterns);
+    if (patterns.length === 0) return '';
+    const result = patterns.map((pattern) => `$: ${pattern}`).join('\n');
+    return cpm ? `setcpm(${cpm})\n${result}` : result;
   }
 
-  // Find connected components
+  // Find connected components and build patterns
   const components = findConnectedComponents(nodes, edges);
   const finalPatterns: string[] = [];
 
-  // Process each component
-  components.forEach((component) => {
-    const finalPattern = processComponent(
-      component,
-      nodePatterns,
-      nodeTypes,
-      nodes
-    );
+  components.forEach((componentNodeIds) => {
+    // Get nodes in this component
+    const componentNodes = componentNodeIds
+      .map((id) => nodes.find((n) => n.id === id))
+      .filter(Boolean) as AppNode[];
+
+    // Separate sources from effects
+    const sources = componentNodes.filter(isSoundSource);
+    const effects = componentNodes.filter((node) => !isSoundSource(node));
+
+    // Build base pattern from sources
+    const sourcePatterns = sources
+      .map((node) => nodePatterns[node.id])
+      .filter(Boolean);
+
+    let basePattern = '';
+    if (sourcePatterns.length === 1) {
+      basePattern = sourcePatterns[0];
+    } else if (sourcePatterns.length > 1) {
+      basePattern = `stack(${sourcePatterns.join(', ')})`;
+    }
+
+    // Apply effects in sequence
+    let finalPattern = basePattern;
+    effects.forEach((effect) => {
+      const strudelOutput = getNodeStrudelOutput(effect.type);
+      if (strudelOutput && finalPattern) {
+        finalPattern = strudelOutput(effect, finalPattern);
+      }
+    });
+
     if (finalPattern) {
       finalPatterns.push(finalPattern);
     }
   });
 
-  return formatFinalResult(finalPatterns, cpm);
+  // Format result
+  if (finalPatterns.length === 0) return '';
+  const result = finalPatterns.map((pattern) => `$: ${pattern}`).join('\n');
+  return cpm ? `setcpm(${cpm})\n${result}` : result;
 }

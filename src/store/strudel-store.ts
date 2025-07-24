@@ -28,6 +28,21 @@ export const useStrudelStore = create<StrudelStore>((set, get) => ({
   cpm: '60',
 
   updateNode: (nodeId: string, value: Partial<StrudelConfig>) => {
+    const state = get();
+
+    // Don't update if node is muted
+    if (state.mutedNodes[nodeId]) {
+      return;
+    }
+
+    // Don't update if node is in a paused group
+    const isInPausedGroup = Object.values(state.pausedGroups).some(
+      (group) => group[nodeId] !== undefined
+    );
+    if (isInPausedGroup) {
+      return;
+    }
+
     set((state) => ({
       config: {
         ...state.config,
