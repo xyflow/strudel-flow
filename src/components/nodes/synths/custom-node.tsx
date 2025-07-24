@@ -3,15 +3,14 @@ import { useStrudelStore } from '@/store/strudel-store';
 import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
-// Note: Using regular HTML textarea since no Textarea component exists
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Textarea } from '@/components/ui/textarea';
 
-// Define the internal state interface for URL persistence
 interface CustomNodeInternalState {
   pattern: string;
 }
@@ -20,33 +19,23 @@ export function CustomNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Get internal state from node data if it exists (for URL restoration)
   const savedInternalState = (
     data as { internalState?: CustomNodeInternalState }
   )?.internalState;
 
-  // Initialize state with saved values or defaults
   const [pattern, setPattern] = useState(
     savedInternalState?.pattern || 'sound("bd sd hh sd")'
   );
 
-  // State restoration flag to ensure we only restore once
   const [hasRestoredState, setHasRestoredState] = useState(false);
 
-  // Restore state from saved internal state
   useEffect(() => {
     if (savedInternalState && !hasRestoredState) {
-      console.log(
-        `CustomNode ${id} - Restoring state from saved internal state:`,
-        savedInternalState
-      );
-
       setPattern(savedInternalState.pattern);
       setHasRestoredState(true);
     }
   }, [savedInternalState, hasRestoredState, id]);
 
-  // Save internal state whenever it changes
   useEffect(() => {
     const internalState: CustomNodeInternalState = {
       pattern,
@@ -74,44 +63,13 @@ export function CustomNode({ id, data }: WorkflowNodeProps) {
           <label className="text-xs font-mono font-medium">
             Raw Strudel Code
           </label>
-          <textarea
+          <Textarea
             value={pattern}
             onChange={handlePatternChange}
             placeholder='Enter raw Strudel code...&#10;Example: sound("bd sd").gain(0.8).lpf(1000)'
             className="font-mono text-sm min-h-24 resize-none border rounded-md px-3 py-2 bg-transparent border-input focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
             spellCheck={false}
           />
-        </div>
-
-        {/* Quick Presets */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-mono font-medium">Quick Presets</label>
-          <div className="grid grid-cols-2 gap-1">
-            <button
-              className="text-left text-xs p-2 border rounded hover:bg-muted"
-              onClick={() => setPattern('sound("bd sd hh sd")')}
-            >
-              🥁 Basic Drums
-            </button>
-            <button
-              className="text-left text-xs p-2 border rounded hover:bg-muted"
-              onClick={() => setPattern('n("0 2 4 7").scale("C4:major")')}
-            >
-              🎵 Simple Melody
-            </button>
-            <button
-              className="text-left text-xs p-2 border rounded hover:bg-muted"
-              onClick={() => setPattern('sound("bd").fast(2).gain(0.8)')}
-            >
-              ⚡ Fast Kick
-            </button>
-            <button
-              className="text-left text-xs p-2 border rounded hover:bg-muted"
-              onClick={() => setPattern('note("c3 eb3 g3").slow(2)')}
-            >
-              🎹 Slow Chords
-            </button>
-          </div>
         </div>
 
         {/* Help & Examples */}
