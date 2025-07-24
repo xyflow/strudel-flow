@@ -4,6 +4,7 @@
 
 import { Edge } from '@xyflow/react';
 import { AppNode } from '@/components/nodes';
+import nodesConfig from '@/components/nodes';
 import { useStrudelStore } from '@/store/strudel-store';
 import { getNodeStrudelOutput } from './node-registry';
 import { findConnectedComponents } from './graph-utils';
@@ -46,23 +47,12 @@ function handleIsolatedNodes(
 }
 
 /**
- * Determine if a node type is an effect node
+ * Determine if a node is an effect node based on its category
  */
-function isEffectNode(nodeType: string): boolean {
-  return (
-    nodeType === 'sample-select' ||
-    nodeType === 'drum-sounds' ||
-    nodeType === 'probability-node' ||
-    (nodeType?.includes('-node') &&
-      !nodeType?.includes('pad') &&
-      !nodeType?.includes('drum') &&
-      !nodeType?.includes('chord') &&
-      !nodeType?.includes('arpeggiator') &&
-      !nodeType?.includes('custom') &&
-      !nodeType?.includes('sound-palette') &&
-      !nodeType?.includes('polyrhythm') &&
-      !nodeType?.includes('piano'))
-  );
+function isEffectNode(node: AppNode): boolean {
+  const nodeConfig = nodesConfig[node.type];
+  const category = nodeConfig?.category;
+  return category === 'Audio Effects' || category === 'Time Effects';
 }
 
 /**
@@ -70,7 +60,7 @@ function isEffectNode(nodeType: string): boolean {
  */
 function categorizeNodes(
   component: string[],
-  nodeTypes: Map<string, string>
+  nodes: AppNode[]
 ): {
   sourceNodes: string[];
   effectNodes: string[];
@@ -79,8 +69,8 @@ function categorizeNodes(
   const effectNodes: string[] = [];
 
   component.forEach((nodeId) => {
-    const nodeType = nodeTypes.get(nodeId);
-    if (nodeType && isEffectNode(nodeType)) {
+    const node = nodes.find((n) => n.id === nodeId);
+    if (node && isEffectNode(node)) {
       effectNodes.push(nodeId);
     } else {
       // Source nodes are pads, drums, arpeggiators - they generate patterns
@@ -143,7 +133,7 @@ function processComponent(
   nodeTypes: Map<string, string>,
   nodes: AppNode[]
 ): string {
-  const { sourceNodes, effectNodes } = categorizeNodes(component, nodeTypes);
+  const { sourceNodes, effectNodes } = categorizeNodes(component, nodes);
 
   // Build base pattern from source nodes
   let basePattern = '';

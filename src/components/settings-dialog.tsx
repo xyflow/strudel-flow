@@ -16,73 +16,61 @@ const themes = [
   {
     value: 'supabase',
     label: 'Supabase',
-    description: 'Clean & modern',
     color: 'oklch(0.8348 0.1302 160.9080)',
   },
   {
     value: 'amber-minimal',
     label: 'Amber Minimal',
-    description: 'Warm & focused',
     color: 'oklch(0.7686 0.1647 70.0804)',
   },
   {
     value: 'bold-tech',
     label: 'Bold Tech',
-    description: 'High contrast',
     color: 'oklch(0.6489 0.237 200)',
   },
   {
     value: 'catppuccin',
     label: 'Catppuccin',
-    description: 'Soothing pastels',
     color: 'oklch(0.7647 0.1596 267.8947)',
   },
   {
     value: 'claymorphism',
     label: 'Claymorphism',
-    description: 'Soft & tactile',
     color: 'oklch(0.8 0.15 25)',
   },
   {
     value: 'cosmic-night',
     label: 'Cosmic Night',
-    description: 'Deep space vibes',
     color: 'oklch(0.5417 0.179 288.0332)',
   },
   {
     value: 'doom-64',
     label: 'Doom 64',
-    description: 'Retro gaming',
     color: 'oklch(0.4 0.2 0)',
   },
   {
     value: 'mono',
     label: 'Mono',
-    description: 'Minimal grayscale',
     color: 'oklch(0.5 0 0)',
   },
   {
     value: 'neo-brutalism',
     label: 'Neo Brutalism',
-    description: 'Bold & geometric',
     color: 'oklch(0.6489 0.237 26.9728)',
   },
   {
     value: 'pastel-dreams',
     label: 'Pastel Dreams',
-    description: 'Soft & dreamy',
     color: 'oklch(0.8 0.1 330)',
   },
   {
     value: 'quantum-rose',
     label: 'Quantum Rose',
-    description: 'Elegant pink tones',
     color: 'oklch(0.6002 0.2414 0.1348)',
   },
   {
     value: 'soft-pop',
     label: 'Soft Pop',
-    description: 'Playful colors',
     color: 'oklch(0.7 0.15 280)',
   },
 ];
@@ -116,9 +104,6 @@ function ThemeCard({
         />
         <div className="flex-1 min-w-0">
           <div className="font-medium text-sm">{theme.label}</div>
-          <div className="text-xs text-muted-foreground truncate">
-            {theme.description}
-          </div>
         </div>
         {isSelected && <Check className="w-4 h-4 text-primary flex-shrink-0" />}
       </div>
