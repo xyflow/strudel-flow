@@ -58,12 +58,7 @@ export type WorkflowNodeProps = NodeProps<Node<WorkflowNodeData>> & {
 export type NodeConfig = {
   id: AppNodeType;
   title: string;
-  category:
-    | 'Sound Sources'
-    | 'Audio Effects'
-    | 'Time Effects'
-    | 'Pattern Effects'
-    | 'Room Simulation';
+  category: 'Synths' | 'Sounds' | 'Audio Effects' | 'Time Effects';
   status?: 'loading' | 'success' | 'error' | 'initial';
   sound?: string;
   notes?: string;
@@ -73,57 +68,57 @@ export type NodeConfig = {
 const nodesConfig: Record<AppNodeType, NodeConfig> = {
   'pad-node': {
     id: 'pad-node',
-    title: 'Pad Node',
-    category: 'Sound Sources',
+    title: 'Pad',
+    category: 'Synths',
     icon: 'Spline',
   },
   'arpeggiator-node': {
     id: 'arpeggiator-node',
     title: 'Arpeggiator',
-    category: 'Sound Sources',
+    category: 'Synths',
     icon: 'Zap',
-  },
-  'drum-sounds': {
-    id: 'drum-sounds',
-    title: 'Drum Sounds',
-    category: 'Sound Sources',
-    icon: 'Music',
   },
   'chord-node': {
     id: 'chord-node',
-    title: 'Chord Node',
-    category: 'Sound Sources',
+    title: 'Chords',
+    category: 'Synths',
     icon: 'Music2',
-  },
-  'custom-node': {
-    id: 'custom-node',
-    title: 'Strudel Code',
-    category: 'Sound Sources',
-    icon: 'Code',
-  },
-  'probability-node': {
-    id: 'probability-node',
-    title: 'Probability',
-    category: 'Pattern Effects',
-    icon: 'Dice1',
   },
   'polyrhythm-node': {
     id: 'polyrhythm-node',
     title: 'Polyrhythm',
-    category: 'Sound Sources',
+    category: 'Synths',
     icon: 'Layers',
   },
   'beat-machine-node': {
     id: 'beat-machine-node',
     title: 'Beat Machine',
-    category: 'Sound Sources',
+    category: 'Synths',
     icon: 'Grid3x3',
+  },
+  'custom-node': {
+    id: 'custom-node',
+    title: 'Custom Code',
+    category: 'Synths',
+    icon: 'Code',
+  },
+  'drum-sounds': {
+    id: 'drum-sounds',
+    title: 'Drums',
+    category: 'Sounds',
+    icon: 'Music',
   },
   'sample-select': {
     id: 'sample-select',
-    title: 'Sounds Node',
-    category: 'Sound Sources',
+    title: 'Sounds',
+    category: 'Sounds',
     icon: 'CheckCheck',
+  },
+  'probability-node': {
+    id: 'probability-node',
+    title: 'Probability',
+    category: 'Time Effects',
+    icon: 'Dice1',
   },
   'lpf-node': {
     id: 'lpf-node',
@@ -161,6 +156,12 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     icon: 'Zap',
     category: 'Audio Effects',
   },
+  'room-node': {
+    id: 'room-node',
+    title: 'Room',
+    category: 'Audio Effects',
+    icon: 'CheckCheck',
+  },
   'fast-node': {
     id: 'fast-node',
     title: 'Fast',
@@ -191,41 +192,35 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     icon: 'Volume2',
     category: 'Time Effects',
   },
-  'jux-node': {
-    id: 'jux-node',
-    title: 'Jux',
-    category: 'Pattern Effects',
-    icon: 'Split',
+  'rev-node': {
+    id: 'rev-node',
+    title: 'Rev',
+    category: 'Time Effects',
+    icon: 'Radio',
   },
   'palindrome-node': {
     id: 'palindrome-node',
     title: 'Palindrome',
-    category: 'Pattern Effects',
+    category: 'Time Effects',
     icon: 'CheckCheck',
+  },
+  'jux-node': {
+    id: 'jux-node',
+    title: 'Jux',
+    category: 'Time Effects',
+    icon: 'Split',
   },
   'crush-node': {
     id: 'crush-node',
     title: 'Crush',
     icon: 'Hash',
-    category: 'Pattern Effects',
-  },
-  'rev-node': {
-    id: 'rev-node',
-    title: 'Rev',
-    category: 'Pattern Effects',
-    icon: 'Radio',
+    category: 'Time Effects',
   },
   'size-node': {
     id: 'size-node',
     title: 'Size',
-    category: 'Pattern Effects',
+    category: 'Time Effects',
     icon: 'Maximize',
-  },
-  'room-node': {
-    id: 'room-node',
-    title: 'Room',
-    category: 'Room Simulation',
-    icon: 'CheckCheck',
   },
   'postgain-node': {
     id: 'postgain-node',
@@ -236,13 +231,13 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
   'mask-node': {
     id: 'mask-node',
     title: 'Mask',
-    category: 'Pattern Effects',
+    category: 'Time Effects',
     icon: 'EyeOff',
   },
   'ply-node': {
     id: 'ply-node',
     title: 'Ply',
-    category: 'Pattern Effects',
+    category: 'Time Effects',
     icon: 'Copy',
   },
   'fm-node': {
