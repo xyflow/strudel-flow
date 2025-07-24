@@ -306,7 +306,7 @@ export function createNodeByType({
 }): AppNode {
   const node = nodesConfig[type];
 
-  const newNode: AppNode = {
+  const newNode = {
     id: id ?? nanoid(),
     data: data ?? {
       title: node.title,
@@ -320,7 +320,7 @@ export function createNodeByType({
       y: position?.y || 0,
     },
     type,
-  };
+  } as AppNode;
 
   return newNode;
 }

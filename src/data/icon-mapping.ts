@@ -22,6 +22,13 @@ import {
   Hash,
   FastForward,
   Rewind,
+  Code,
+  Dice1,
+  Layers,
+  Maximize,
+  EyeOff,
+  Copy,
+  Clock,
   // Import other icons as needed
 } from 'lucide-react';
 
@@ -52,5 +59,12 @@ export const iconMapping: Record<
   Hash: Hash,
   FastForward: FastForward,
   Rewind: Rewind,
+  Code: Code,
+  Dice1: Dice1,
+  Layers: Layers,
+  Maximize: Maximize,
+  EyeOff: EyeOff,
+  Copy: Copy,
+  Clock: Clock,
   // Add other mappings here
 };
