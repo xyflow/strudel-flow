@@ -1,6 +1,6 @@
 import { useAppStore } from '@/store/app-context';
 import { useStrudelStore } from '@/store/strudel-store';
-import { findAllGroups } from '@/lib/graph-utils';
+import { findConnectedComponents } from '@/lib/graph-utils';
 import { Button } from '@/components/ui/button';
 import { Pause, Play } from 'lucide-react';
 
@@ -11,7 +11,13 @@ export function GroupPauseControls() {
   const unpauseGroup = useStrudelStore((state) => state.unpauseGroup);
   const isGroupPaused = useStrudelStore((state) => state.isGroupPaused);
 
-  const groups = findAllGroups(nodes, edges);
+  // Use simplified connected components instead of complex group logic
+  const components = findConnectedComponents(nodes, edges);
+  const groups = components.map((componentNodeIds, index) => ({
+    groupId: componentNodeIds.sort().join('-'),
+    nodeIds: componentNodeIds,
+    index,
+  }));
 
   const handleGroupToggle = (groupId: string, nodeIds: string[]) => {
     if (isGroupPaused(groupId)) {
@@ -31,7 +37,7 @@ export function GroupPauseControls() {
         Group Controls
       </label>
       <div className="flex flex-col gap-1">
-        {groups.map((group, index) => {
+        {groups.map((group) => {
           const isPaused = isGroupPaused(group.groupId);
           return (
             <Button
@@ -46,7 +52,7 @@ export function GroupPauseControls() {
               ) : (
                 <Pause className="w-3 h-3" />
               )}
-              Group {index + 1} ({group.nodeIds.length} nodes)
+              Group {group.index + 1} ({group.nodeIds.length} nodes)
             </Button>
           );
         })}

@@ -10,11 +10,12 @@ import { getNodeStrudelOutput } from './node-registry';
 import { findConnectedComponents } from './graph-utils';
 
 /**
- * Check if a node generates sound (vs processes it)
+ * Check if a node generates patterns (vs processes/modifies them)
  */
 function isSoundSource(node: AppNode): boolean {
   const category = nodesConfig[node.type]?.category;
-  return category === 'Synths' || category === 'Sounds';
+  // Only Synths generate patterns, Sounds are effects that modify patterns
+  return category === 'Synths';
 }
 
 /**
