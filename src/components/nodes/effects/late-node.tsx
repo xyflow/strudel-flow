@@ -95,12 +95,6 @@ export function LateNode({ id, data }: WorkflowNodeProps) {
       });
     }
   }, [selectedOffset, selectedPattern, id, updateNode]);
-
-  const getCurrentOffset = () =>
-    LATE_OFFSETS.find((o) => o.id === selectedOffset);
-  const getCurrentPattern = () =>
-    LATE_PATTERNS.find((p) => p.id === selectedPattern);
-
   return (
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md min-w-80">

@@ -139,12 +139,6 @@ export function FMNode({ id, data }: WorkflowNodeProps) {
     }
   }, [selectedFrequency, selectedDepth, selectedModulator, id, updateNode]);
 
-  const getCurrentFrequency = () =>
-    FM_FREQUENCIES.find((f) => f.id === selectedFrequency);
-  const getCurrentDepth = () => FM_DEPTHS.find((d) => d.id === selectedDepth);
-  const getCurrentModulator = () =>
-    FM_MODULATORS.find((m) => m.id === selectedModulator);
-
   return (
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md min-w-80">

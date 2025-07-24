@@ -116,20 +116,6 @@ export function BeatMachineNode({ id, data }: WorkflowNodeProps) {
   return (
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md min-w-96">
-        {/* Controls Row */}
-        <div className="flex flex-wrap gap-2 items-center justify-between">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearAll}
-              className="text-xs"
-            >
-              Clear All
-            </Button>
-          </div>
-        </div>
-
         {/* 16-Step Sequencer Grid */}
         <div className="flex flex-col gap-2 bg-gray-50 p-3 rounded border">
           {/* Step Numbers Header */}
@@ -178,6 +164,19 @@ export function BeatMachineNode({ id, data }: WorkflowNodeProps) {
                 getStepButton('hihat', step, isActive)
               )}
             </div>
+          </div>
+        </div>
+        {/* Controls Row */}
+        <div className="flex flex-wrap gap-2 items-center justify-between">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearAll}
+              className="text-xs"
+            >
+              Clear All
+            </Button>
           </div>
         </div>
       </div>

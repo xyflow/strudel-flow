@@ -22,7 +22,9 @@ export function PatternPanelWithCopy({ isVisible }: { isVisible: boolean }) {
 
   return (
     <div className="flex flex-row  bg-card p-4 shadow mt-2 rounded-md border">
-      <pre className="text-xs m-2">{pattern || 'No pattern.'}</pre>
+      <pre className="text-xs m-2 w-96 overflow-y-auto">
+        {pattern || 'No pattern.'}
+      </pre>
       <div className="flex flex-row justify-between items-center">
         <Popover>
           <PopoverTrigger asChild>

@@ -102,11 +102,6 @@ export function PlyNode({ id, data }: WorkflowNodeProps) {
     }
   }, [selectedMultiplier, selectedProbability, id, updateNode]);
 
-  const getCurrentMultiplier = () =>
-    PLY_MULTIPLIERS.find((m) => m.id === selectedMultiplier);
-  const getCurrentProbability = () =>
-    PROBABILITY_OPTIONS.find((p) => p.id === selectedProbability);
-
   return (
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md min-w-80">

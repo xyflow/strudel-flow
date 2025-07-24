@@ -115,11 +115,6 @@ export function MaskNode({ id, data }: WorkflowNodeProps) {
     }
   }, [selectedPattern, selectedProbability, id, updateNode]);
 
-  const getCurrentPattern = () =>
-    MASK_PATTERNS.find((p) => p.id === selectedPattern);
-  const getCurrentProbability = () =>
-    PROBABILITY_OPTIONS.find((p) => p.id === selectedProbability);
-
   return (
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md min-w-80">
