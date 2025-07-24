@@ -16,8 +16,6 @@ import { ProbabilityNode } from './effects/probability-node';
 import { PolyrhythmNode } from './synths/polyrhythm-node';
 // Removed SimplePianoNode
 import { BeatMachineNode } from './synths/beat-machine-node';
-import { ChordPadNode } from './synths/chord-pad-node';
-import { InteractivePianoRollNode } from './synths/interactive-piano-roll-node';
 
 // Effects
 import { MaskNode } from './effects/mask-node';
@@ -111,14 +109,12 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     category: 'Pattern Effects',
     icon: 'Dice1',
   },
-  // Removed sound-palette-node
   'polyrhythm-node': {
     id: 'polyrhythm-node',
     title: 'Polyrhythm',
     category: 'Sound Sources',
     icon: 'Layers',
   },
-  // Removed simple-piano-node and bass-generator-node
   'beat-machine-node': {
     id: 'beat-machine-node',
     title: 'Beat Machine',
@@ -239,19 +235,6 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     category: 'Audio Effects',
     icon: 'Volume2',
   },
-  // Removed lead-synth-node
-  'chord-pad-node': {
-    id: 'chord-pad-node',
-    title: 'Chord Pad',
-    category: 'Sound Sources',
-    icon: 'Piano',
-  },
-  'interactive-piano-roll-node': {
-    id: 'interactive-piano-roll-node',
-    title: 'Interactive Piano Roll',
-    category: 'Sound Sources',
-    icon: 'Music',
-  },
   'mask-node': {
     id: 'mask-node',
     title: 'Mask',
@@ -306,8 +289,6 @@ export const nodeTypes = {
   'fast-node': FastNode,
   'slow-node': SlowNode,
   'size-node': SizeNode,
-  'chord-pad-node': ChordPadNode,
-  'interactive-piano-roll-node': InteractivePianoRollNode,
   'mask-node': MaskNode,
   'ply-node': PlyNode,
   'fm-node': FMNode,
@@ -374,8 +355,6 @@ export type AppNode =
   | Node<WorkflowNodeData, 'probability-node'>
   | Node<WorkflowNodeData, 'polyrhythm-node'>
   | Node<WorkflowNodeData, 'beat-machine-node'>
-  | Node<WorkflowNodeData, 'chord-pad-node'>
-  | Node<WorkflowNodeData, 'interactive-piano-roll-node'>
   | Node<WorkflowNodeData, 'mask-node'>
   | Node<WorkflowNodeData, 'ply-node'>
   | Node<WorkflowNodeData, 'fm-node'>
