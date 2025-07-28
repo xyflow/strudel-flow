@@ -10,6 +10,18 @@ import { getNodeStrudelOutput } from './node-registry';
 import { findConnectedComponents } from './graph-utils';
 
 /**
+ * Optimize consecutive .sound() calls by combining them
+ */
+function optimizeSoundCalls(strudelString: string): string {
+  // Replace consecutive .sound() calls with combined ones
+  // This regex matches: .sound("something").sound("something else")
+  return strudelString.replace(
+    /\.sound\("([^"]+)"\)\.sound\("([^"]+)"\)/g,
+    '.sound("$1 $2")'
+  );
+}
+
+/**
  * Check if a node generates patterns (vs processes/modifies them)
  */
 function isSoundSource(node: AppNode): boolean {
@@ -40,7 +52,9 @@ export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
   if (edges.length === 0) {
     const patterns = Object.values(nodePatterns);
     if (patterns.length === 0) return '';
-    const result = patterns.map((pattern) => `$: ${pattern}`).join('\n');
+    const result = patterns
+      .map((pattern) => `$: ${optimizeSoundCalls(pattern)}`)
+      .join('\n');
     return cpm ? `setcpm(${cpm})\n${result}` : result;
   }
 
@@ -80,7 +94,8 @@ export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
     });
 
     if (finalPattern) {
-      finalPatterns.push(finalPattern);
+      // Apply optimization to the final pattern
+      finalPatterns.push(optimizeSoundCalls(finalPattern));
     }
   });
 
