@@ -9,11 +9,9 @@ export function JuxNode({ id, data }: WorkflowNodeProps) {
 
   // Available jux effects
   const effects = [
-    { name: 'Rev', value: 'rev', description: 'Reverse right channel' },
+    { name: 'Reverse', value: 'rev', description: 'Reverse right channel' },
     { name: 'Press', value: 'press', description: 'Compress right channel' },
     { name: 'Crush', value: 'crush', description: 'Bitcrush right channel' },
-    { name: 'Slow', value: 'slow', description: 'Slow right channel' },
-    { name: 'Fast', value: 'fast', description: 'Speed up right channel' },
     { name: 'Delay', value: 'delay', description: 'Delay right channel' },
   ];
 

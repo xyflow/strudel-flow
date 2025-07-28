@@ -25,14 +25,6 @@ export function DistortNode({ id, data }: WorkflowNodeProps) {
     updateNode(id, { distort: distortValue });
   };
 
-  // Handler for postgain changes
-  const handlePostgainChange = (value: number[]) => {
-    const newPostgain = value[0];
-    const distortValue =
-      newPostgain !== 1 ? `${amount}:${newPostgain}` : `${amount}`;
-    updateNode(id, { distort: distortValue });
-  };
-
   return (
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-3 p-4 bg-card text-card-foreground rounded-md min-w-80">
@@ -49,24 +41,6 @@ export function DistortNode({ id, data }: WorkflowNodeProps) {
             onValueChange={handleAmountChange}
             min={0}
             max={3}
-            step={0.1}
-            className="w-full"
-          />
-        </div>
-
-        {/* Postgain control */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-medium">Postgain</label>
-            <span className="text-xs text-muted-foreground">
-              {postgain.toFixed(1)}
-            </span>
-          </div>
-          <Slider
-            value={[postgain]}
-            onValueChange={handlePostgainChange}
-            min={0.1}
-            max={2}
             step={0.1}
             className="w-full"
           />

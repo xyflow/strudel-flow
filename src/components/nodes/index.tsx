@@ -11,7 +11,6 @@ import { PadNode } from './synths/pad-node';
 import { ArpeggiatorNode } from './synths/arpeggiator-node';
 import { ChordNode } from './synths/chord-node';
 import { CustomNode } from './synths/custom-node';
-import { ProbabilityNode } from './effects/probability-node';
 import { PolyrhythmNode } from './synths/polyrhythm-node';
 import { BeatMachineNode } from './synths/beat-machine-node';
 
@@ -30,14 +29,12 @@ import { RevNode } from './effects/rev-node';
 import { JuxNode } from './effects/jux-node';
 import { PhaserNode } from './effects/phaser-node';
 import { PostGainNode } from './effects/postgain-node';
-import { CompressorNode } from './effects/compressor-node';
 import { CrushNode } from './effects/crush-node';
 import { SustainNode } from './effects/sustain-node';
 import { ReleaseNode } from './effects/release-node';
 import { AttackNode } from './effects/attack-node';
 import { FastNode } from './effects/fast-node';
 import { SlowNode } from './effects/slow-node';
-import { SizeNode } from './effects/size-node';
 
 /* WORKFLOW NODE DATA PROPS ------------------------------------------------------ */
 
@@ -114,12 +111,6 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     category: 'Sounds',
     icon: 'CheckCheck',
   },
-  'probability-node': {
-    id: 'probability-node',
-    title: 'Probability',
-    category: 'Time Effects',
-    icon: 'Dice1',
-  },
   'lpf-node': {
     id: 'lpf-node',
     title: 'LPF',
@@ -149,12 +140,6 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     title: 'Phaser',
     category: 'Audio Effects',
     icon: 'Waves',
-  },
-  'compressor-node': {
-    id: 'compressor-node',
-    title: 'Compressor',
-    icon: 'Zap',
-    category: 'Audio Effects',
   },
   'room-node': {
     id: 'room-node',
@@ -194,7 +179,7 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
   },
   'rev-node': {
     id: 'rev-node',
-    title: 'Rev',
+    title: 'Reverse',
     category: 'Time Effects',
     icon: 'Radio',
   },
@@ -215,12 +200,6 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     title: 'Crush',
     icon: 'Hash',
     category: 'Time Effects',
-  },
-  'size-node': {
-    id: 'size-node',
-    title: 'Size',
-    category: 'Time Effects',
-    icon: 'Maximize',
   },
   'postgain-node': {
     id: 'postgain-node',
@@ -268,20 +247,17 @@ export const nodeTypes = {
   'drum-sounds': DrumSoundsNode,
   'chord-node': ChordNode,
   'custom-node': CustomNode,
-  'probability-node': ProbabilityNode,
   'polyrhythm-node': PolyrhythmNode,
   'beat-machine-node': BeatMachineNode,
   'palindrome-node': PalindromeNode,
   'room-node': RoomNode,
   'postgain-node': PostGainNode,
-  'compressor-node': CompressorNode,
   'crush-node': CrushNode,
   'sustain-node': SustainNode,
   'release-node': ReleaseNode,
   'attack-node': AttackNode,
   'fast-node': FastNode,
   'slow-node': SlowNode,
-  'size-node': SizeNode,
   'mask-node': MaskNode,
   'ply-node': PlyNode,
   'fm-node': FMNode,
@@ -334,18 +310,15 @@ export type AppNode =
   | Node<WorkflowNodeData, 'palindrome-node'>
   | Node<WorkflowNodeData, 'room-node'>
   | Node<WorkflowNodeData, 'postgain-node'>
-  | Node<WorkflowNodeData, 'compressor-node'>
   | Node<WorkflowNodeData, 'crush-node'>
   | Node<WorkflowNodeData, 'sustain-node'>
   | Node<WorkflowNodeData, 'release-node'>
   | Node<WorkflowNodeData, 'attack-node'>
   | Node<WorkflowNodeData, 'fast-node'>
   | Node<WorkflowNodeData, 'slow-node'>
-  | Node<WorkflowNodeData, 'size-node'>
   | Node<WorkflowNodeData, 'drum-sounds'>
   | Node<WorkflowNodeData, 'chord-node'>
   | Node<WorkflowNodeData, 'custom-node'>
-  | Node<WorkflowNodeData, 'probability-node'>
   | Node<WorkflowNodeData, 'polyrhythm-node'>
   | Node<WorkflowNodeData, 'beat-machine-node'>
   | Node<WorkflowNodeData, 'mask-node'>
