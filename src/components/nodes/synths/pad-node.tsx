@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
+import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { Button } from '@/components/ui/button';
@@ -33,16 +34,40 @@ import {
 
 const generateNotes = () => [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`];
 
+// Define the internal state interface for URL persistence
+interface PadNodeInternalState {
+  steps: number;
+  mode: 'arp' | 'chord';
+  octave: number;
+  selectedKey: string;
+  selectedScaleType: string;
+  grid: boolean[][]; // Which buttons are pressed
+  buttonModifiers: Record<string, CellState>;
+  selectedButtons: string[]; // For grouping selection
+  noteGroups: Record<number, number[][]>;
+}
+
 export function PadNode({ id, data }: WorkflowNodeProps) {
   const [notes] = useState(generateNotes());
-  const updateNode = useStrudelStore((state) => state.updateNode);
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Initialize state with defaults
-  const { steps, setSteps } = useStepManagement(4);
-  const [mode, setMode] = useState<'arp' | 'chord'>('arp');
-  const [octave, setOctave] = useState(4);
-  const [selectedKey, setSelectedKey] = useState('C');
-  const [selectedScaleType, setSelectedScaleType] = useState('major');
+  // Get internal state from node data if it exists (for URL restoration)
+  const savedInternalState = (data as { internalState?: PadNodeInternalState })
+    ?.internalState;
+
+  // Initialize state with saved values or defaults
+  const { steps, setSteps } = useStepManagement(savedInternalState?.steps || 4);
+  const [mode, setMode] = useState<'arp' | 'chord'>(
+    savedInternalState?.mode || 'arp'
+  );
+  const [octave, setOctave] = useState(savedInternalState?.octave || 4);
+  const [selectedKey, setSelectedKey] = useState(
+    savedInternalState?.selectedKey || 'C'
+  );
+  const [selectedScaleType, setSelectedScaleType] = useState(
+    savedInternalState?.selectedScaleType || 'major'
+  );
+  const updateNode = useStrudelStore((state) => state.updateNode);
 
   const {
     grid,
@@ -53,10 +78,78 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
     setSoundGroups: setNoteGroups,
   } = useGridAsStepSequencer(steps, notes.length);
 
-  // Individual button modifiers
+  // Individual button modifiers - restored from saved state
   const [buttonModifiers, setButtonModifiers] = useState<
     Record<string, CellState>
   >({});
+
+  // State restoration flag to ensure we only restore once
+  const [hasRestoredState, setHasRestoredState] = useState(false);
+
+  // Restore all state from saved internal state - comprehensive restoration
+  useEffect(() => {
+    if (savedInternalState && !hasRestoredState) {
+      // Use setTimeout to ensure the grid hook is fully initialized first
+      setTimeout(() => {
+        // Restore grid state
+        if (savedInternalState.grid) {
+          setGrid(savedInternalState.grid);
+        }
+
+        // Restore button modifiers for visual display
+        if (savedInternalState.buttonModifiers) {
+          setButtonModifiers(savedInternalState.buttonModifiers);
+        }
+
+        // Restore other state
+        if (savedInternalState.selectedButtons) {
+          setSelectedButtons(new Set(savedInternalState.selectedButtons));
+        }
+
+        if (savedInternalState.noteGroups) {
+          setNoteGroups(savedInternalState.noteGroups);
+        }
+      }, 50); // Small delay to ensure hook initialization
+
+      setHasRestoredState(true);
+    }
+  }, [
+    savedInternalState,
+    hasRestoredState,
+    setGrid,
+    setSelectedButtons,
+    setNoteGroups,
+    id,
+  ]);
+
+  // Save internal state whenever it changes
+  useEffect(() => {
+    const internalState: PadNodeInternalState = {
+      steps,
+      mode,
+      octave,
+      selectedKey,
+      selectedScaleType,
+      grid: grid.map((row) => [...row]), // Deep copy
+      buttonModifiers,
+      selectedButtons: Array.from(selectedButtons),
+      noteGroups,
+    };
+
+    updateNodeData(id, { internalState });
+  }, [
+    steps,
+    mode,
+    octave,
+    selectedKey,
+    selectedScaleType,
+    grid,
+    buttonModifiers,
+    selectedButtons,
+    noteGroups,
+    id,
+    updateNodeData,
+  ]);
 
   // Get modifier state for a specific button
   const getButtonModifier = (stepIdx: number, noteIdx: number): CellState => {
@@ -130,6 +223,7 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
         );
         if (newGroups !== noteGroups) {
           setNoteGroups(newGroups);
+
           // Clear selection for this step
           return clearSelectionForStep(newSelected, stepIdx);
         }
@@ -245,7 +339,7 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
                   isSelected,
                   isInGroup,
                   groupIndex,
-                  on
+                  on // Use the grid state directly for pressed/highlighted state
                 );
 
                 return (
