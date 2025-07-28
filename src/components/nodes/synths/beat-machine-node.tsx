@@ -1,93 +1,73 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
-import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { Button } from '@/components/ui/button';
-import { StrudelConfig } from '@/types';
-
-// Define the internal state interface for URL persistence
-interface BeatMachineNodeInternalState {
-  kickPattern: boolean[];
-  snarePattern: boolean[];
-  hihatPattern: boolean[];
-}
 
 export function BeatMachineNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Get internal state from node data if it exists (for URL restoration)
-  const savedInternalState = (
-    data as { internalState?: BeatMachineNodeInternalState }
-  )?.internalState;
-
-  // Initialize patterns with saved values or defaults
-  const [kickPattern, setKickPattern] = useState<boolean[]>(
-    savedInternalState?.kickPattern || Array(16).fill(false)
+  // Get current patterns from strudel store with optimized selectors
+  const kickPatternString = useStrudelStore(
+    (state) => state.config[id]?.beatKickPattern || ''
   );
-  const [snarePattern, setSnarePattern] = useState<boolean[]>(
-    savedInternalState?.snarePattern || Array(16).fill(false)
+  const snarePatternString = useStrudelStore(
+    (state) => state.config[id]?.beatSnarePattern || ''
   );
-  const [hihatPattern, setHihatPattern] = useState<boolean[]>(
-    savedInternalState?.hihatPattern || Array(16).fill(false)
+  const hihatPatternString = useStrudelStore(
+    (state) => state.config[id]?.beatHihatPattern || ''
   );
 
-  // State restoration flag to ensure we only restore once
-  const [hasRestoredState, setHasRestoredState] = useState(false);
-
-  // Restore state from saved internal state
-  useEffect(() => {
-    if (savedInternalState && !hasRestoredState) {
-      setKickPattern(savedInternalState.kickPattern);
-      setSnarePattern(savedInternalState.snarePattern);
-      setHihatPattern(savedInternalState.hihatPattern);
-      setHasRestoredState(true);
-    }
-  }, [savedInternalState, hasRestoredState, id]);
-
-  // Save internal state whenever it changes
-  useEffect(() => {
-    const internalState: BeatMachineNodeInternalState = {
-      kickPattern,
-      snarePattern,
-      hihatPattern,
-    };
-
-    updateNodeData(id, { internalState });
-  }, [kickPattern, snarePattern, hihatPattern, id, updateNodeData]);
-
-  // Update Strudel whenever patterns change
-  useEffect(() => {
-    const config: Partial<StrudelConfig> = {
-      beatKickPattern: patternToString(kickPattern),
-      beatSnarePattern: patternToString(snarePattern),
-      beatHihatPattern: patternToString(hihatPattern),
-    };
-
-    updateNode(id, config);
-  }, [kickPattern, snarePattern, hihatPattern, id, updateNode]);
+  const stringToPattern = (patternString: string): boolean[] => {
+    if (!patternString) return Array(16).fill(false);
+    return patternString.split(' ').map((char) => char === '1');
+  };
 
   const patternToString = (pattern: boolean[]) => {
     return pattern.map((active) => (active ? '1' : '~')).join(' ');
   };
 
+  // Memoize pattern conversions to prevent unnecessary recalculations
+  const kickPattern = useMemo(
+    () => stringToPattern(kickPatternString),
+    [kickPatternString]
+  );
+  const snarePattern = useMemo(
+    () => stringToPattern(snarePatternString),
+    [snarePatternString]
+  );
+  const hihatPattern = useMemo(
+    () => stringToPattern(hihatPatternString),
+    [hihatPatternString]
+  );
+
   const toggleStep = (type: 'kick' | 'snare' | 'hihat', step: number) => {
-    const setter =
+    const currentPattern =
       type === 'kick'
-        ? setKickPattern
+        ? kickPattern
         : type === 'snare'
-        ? setSnarePattern
-        : setHihatPattern;
-    setter((prev) =>
-      prev.map((active, idx) => (idx === step ? !active : active))
+        ? snarePattern
+        : hihatPattern;
+    const newPattern = currentPattern.map((active, idx) =>
+      idx === step ? !active : active
     );
+    const patternKey =
+      type === 'kick'
+        ? 'beatKickPattern'
+        : type === 'snare'
+        ? 'beatSnarePattern'
+        : 'beatHihatPattern';
+
+    updateNode(id, { [patternKey]: patternToString(newPattern) });
   };
 
   const clearAll = () => {
-    setKickPattern(Array(16).fill(false));
-    setSnarePattern(Array(16).fill(false));
-    setHihatPattern(Array(16).fill(false));
+    const emptyPattern = patternToString(Array(16).fill(false));
+    updateNode(id, {
+      beatKickPattern: emptyPattern,
+      beatSnarePattern: emptyPattern,
+      beatHihatPattern: emptyPattern,
+    });
   };
 
   const getStepButton = (

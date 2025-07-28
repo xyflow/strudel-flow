@@ -1,18 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
-import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { Button } from '@/components/ui/button';
-import { StrudelConfig } from '@/types';
-
-// Define the internal state interface for URL persistence
-interface ArpeggiatorNodeInternalState {
-  selectedPattern: string;
-  selectedOctaves: number;
-  selectedChordType: string;
-  selectedKey: string;
-}
 
 const ARP_PATTERNS = [
   { id: 'up', label: 'Up', pattern: [0, 2, 4] },
@@ -65,89 +55,64 @@ const expandPatternAcrossOctaves = (
 
 export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Get internal state from node data if it exists (for URL restoration)
-  const savedInternalState = (
-    data as { internalState?: ArpeggiatorNodeInternalState }
-  )?.internalState;
+  // Local state for UI controls
+  const [selectedPattern, setSelectedPattern] = useState('up');
+  const [selectedOctaves, setSelectedOctaves] = useState(1);
+  const [selectedChordType, setSelectedChordType] = useState('major');
+  const [selectedKey, setSelectedKey] = useState('C');
 
-  // Initialize state with saved values or defaults
-  const [selectedPattern, setSelectedPattern] = useState(
-    savedInternalState?.selectedPattern || 'up'
-  );
-  const [selectedOctaves, setSelectedOctaves] = useState(
-    savedInternalState?.selectedOctaves || 1
-  );
-  const [selectedChordType, setSelectedChordType] = useState(
-    savedInternalState?.selectedChordType || 'major'
-  );
-  const [selectedKey, setSelectedKey] = useState(
-    savedInternalState?.selectedKey || 'C'
-  );
+  // Helper function to update arpeggiator settings
+  const updateArpeggiator = useMemo(() => {
+    return (
+      patternId: string,
+      octaves: number,
+      chordType: string,
+      key: string
+    ) => {
+      const patternData = ARP_PATTERNS.find((p) => p.id === patternId);
+      const chordData = CHORD_TYPES.find((c) => c.id === chordType);
 
-  // State restoration flag to ensure we only restore once
-  const [hasRestoredState, setHasRestoredState] = useState(false);
+      if (patternData && chordData) {
+        const finalPattern = expandPatternAcrossOctaves(
+          patternData.pattern,
+          octaves
+        );
 
-  // Restore state from saved internal state
-  useEffect(() => {
-    if (savedInternalState && !hasRestoredState) {
-      setSelectedPattern(savedInternalState.selectedPattern);
-      setSelectedOctaves(savedInternalState.selectedOctaves);
-      setSelectedChordType(savedInternalState.selectedChordType);
-      setSelectedKey(savedInternalState.selectedKey);
-      setHasRestoredState(true);
-    }
-  }, [savedInternalState, hasRestoredState, id]);
+        updateNode(id, {
+          arpPattern: finalPattern,
+          arpOctaves: octaves,
+          arpChordType: chordData.scale,
+          arpKey: key,
+        });
+      }
+    };
+  }, [updateNode, id]);
 
-  // Save internal state whenever it changes
-  useEffect(() => {
-    const internalState: ArpeggiatorNodeInternalState = {
-      selectedPattern,
+  const handlePatternChange = (patternId: string) => {
+    setSelectedPattern(patternId);
+    updateArpeggiator(
+      patternId,
       selectedOctaves,
       selectedChordType,
-      selectedKey,
-    };
+      selectedKey
+    );
+  };
 
-    updateNodeData(id, { internalState });
-  }, [
-    selectedPattern,
-    selectedOctaves,
-    selectedChordType,
-    selectedKey,
-    id,
-    updateNodeData,
-  ]);
+  const handleOctaveChange = (octaves: number) => {
+    setSelectedOctaves(octaves);
+    updateArpeggiator(selectedPattern, octaves, selectedChordType, selectedKey);
+  };
 
-  // Update strudel whenever settings change
-  useEffect(() => {
-    const patternData = ARP_PATTERNS.find((p) => p.id === selectedPattern);
-    const chordData = CHORD_TYPES.find((c) => c.id === selectedChordType);
+  const handleChordTypeChange = (chordType: string) => {
+    setSelectedChordType(chordType);
+    updateArpeggiator(selectedPattern, selectedOctaves, chordType, selectedKey);
+  };
 
-    if (patternData && chordData) {
-      // Generate the expanded pattern across octaves
-      const finalPattern = expandPatternAcrossOctaves(
-        patternData.pattern,
-        selectedOctaves
-      );
-
-      const config: Partial<StrudelConfig> = {
-        arpPattern: finalPattern,
-        arpOctaves: selectedOctaves,
-        arpChordType: chordData.scale,
-        arpKey: selectedKey,
-      };
-
-      updateNode(id, config);
-    }
-  }, [
-    selectedPattern,
-    selectedOctaves,
-    selectedChordType,
-    selectedKey,
-    id,
-    updateNode,
-  ]);
+  const handleKeyChange = (key: string) => {
+    setSelectedKey(key);
+    updateArpeggiator(selectedPattern, selectedOctaves, selectedChordType, key);
+  };
 
   return (
     <WorkflowNode id={id} data={data}>
@@ -161,7 +126,7 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
                 key={pattern.id}
                 variant={selectedPattern === pattern.id ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedPattern(pattern.id)}
+                onClick={() => handlePatternChange(pattern.id)}
               >
                 {pattern.label}
               </Button>
@@ -180,7 +145,7 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
                   selectedOctaves === range.octaves ? 'default' : 'outline'
                 }
                 size="sm"
-                onClick={() => setSelectedOctaves(range.octaves)}
+                onClick={() => handleOctaveChange(range.octaves)}
               >
                 {range.label}
               </Button>
@@ -197,7 +162,7 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
                 key={chord.id}
                 variant={selectedChordType === chord.id ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedChordType(chord.id)}
+                onClick={() => handleChordTypeChange(chord.id)}
               >
                 {chord.label}
               </Button>
@@ -214,7 +179,7 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
                 key={key}
                 variant={selectedKey === key ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedKey(key)}
+                onClick={() => handleKeyChange(key)}
               >
                 {key}
               </Button>
