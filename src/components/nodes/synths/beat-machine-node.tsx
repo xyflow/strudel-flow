@@ -19,7 +19,7 @@ export function BeatMachineNode({ id, data }: WorkflowNodeProps) {
   );
 
   const stringToPattern = (patternString: string): boolean[] => {
-    if (!patternString) return Array(16).fill(false);
+    if (!patternString) return Array(8).fill(false);
     return patternString.split(' ').map((char) => char === '1');
   };
 
@@ -62,7 +62,7 @@ export function BeatMachineNode({ id, data }: WorkflowNodeProps) {
   };
 
   const clearAll = () => {
-    const emptyPattern = patternToString(Array(16).fill(false));
+    const emptyPattern = patternToString(Array(8).fill(false));
     updateNode(id, {
       beatKickPattern: emptyPattern,
       beatSnarePattern: emptyPattern,
@@ -96,12 +96,12 @@ export function BeatMachineNode({ id, data }: WorkflowNodeProps) {
   return (
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md min-w-96">
-        {/* 16-Step Sequencer Grid */}
+        {/* 8-Step Sequencer Grid */}
         <div className="flex flex-col gap-2 p-3 rounded border">
           {/* Step Numbers Header */}
           <div className="flex items-center gap-1">
             <div className="w-12 text-xs font-mono font-medium">Step</div>
-            {Array(16)
+            {Array(8)
               .fill(0)
               .map((_, step) => (
                 <div key={step} className="w-8 text-xs text-center font-mono">
@@ -174,15 +174,15 @@ BeatMachineNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const calls: string[] = [];
 
-  if (kickPattern && kickPattern !== Array(16).fill('~').join(' ')) {
+  if (kickPattern && kickPattern !== Array(8).fill('~').join(' ')) {
     calls.push(`sound("bd").struct("${kickPattern}")`);
   }
 
-  if (snarePattern && snarePattern !== Array(16).fill('~').join(' ')) {
+  if (snarePattern && snarePattern !== Array(8).fill('~').join(' ')) {
     calls.push(`sound("sd").struct("${snarePattern}")`);
   }
 
-  if (hihatPattern && hihatPattern !== Array(16).fill('~').join(' ')) {
+  if (hihatPattern && hihatPattern !== Array(8).fill('~').join(' ')) {
     calls.push(`sound("hh").struct("${hihatPattern}")`);
   }
 
