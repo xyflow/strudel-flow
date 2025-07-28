@@ -48,6 +48,7 @@ export default function Workflow() {
         onNodeDragStart={onNodeDragStart}
         onNodeDragStop={onNodeDragStop}
         colorMode={colorMode}
+        fitView
       >
         <Background />
         <WorkflowControls />

@@ -5,12 +5,12 @@ export const initialNodes: AppNode[] = [
   createNodeByType({
     type: 'pad-node',
     id: 'padNode_1',
-    position: { x: 600, y: 300 },
+    position: { x: 0, y: 0 },
   }),
   createNodeByType({
     type: 'sample-select',
     id: 'workflowNode_2',
-    position: { x: 700, y: 700 },
+    position: { x: 0, y: 600 },
   }),
 ];
 
