@@ -192,14 +192,14 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
   'jux-node': {
     id: 'jux-node',
     title: 'Jux',
-    category: 'Time Effects',
+    category: 'Audio Effects',
     icon: 'Split',
   },
   'crush-node': {
     id: 'crush-node',
     title: 'Crush',
     icon: 'Hash',
-    category: 'Time Effects',
+    category: 'Audio Effects',
   },
   'postgain-node': {
     id: 'postgain-node',
