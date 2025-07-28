@@ -10,17 +10,25 @@ import { getNodeStrudelOutput } from './node-registry';
 import { findConnectedComponents } from './graph-utils';
 
 /**
- * Optimize consecutive .sound() calls by combining them
+ * Optimize consecutive .sound() calls by combining them recursively
  */
 function optimizeSoundCalls(strudelString: string): string {
-  // Replace consecutive .sound() calls with combined ones
-  // This regex matches: .sound("something").sound("something else")
-  return strudelString.replace(
-    /\.sound\("([^"]+)"\)\.sound\("([^"]+)"\)/g,
-    '.sound("$1 $2")'
-  );
-}
+  let optimized = strudelString;
+  let previousLength = 0;
 
+  // Keep applying optimization until no more changes are made
+  while (optimized.length !== previousLength) {
+    previousLength = optimized.length;
+    // Replace consecutive .sound() calls with combined ones
+    // This regex matches: .sound("something").sound("something else")
+    optimized = optimized.replace(
+      /\.sound\("([^"]+)"\)\.sound\("([^"]+)"\)/g,
+      '.sound("$1 $2")'
+    );
+  }
+
+  return optimized;
+}
 /**
  * Check if a node generates patterns (vs processes/modifies them)
  */
