@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
-import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import {
@@ -11,48 +9,18 @@ import {
 } from '@/components/ui/accordion';
 import { Textarea } from '@/components/ui/textarea';
 
-interface CustomNodeInternalState {
-  pattern: string;
-}
-
 export function CustomNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  const savedInternalState = (
-    data as { internalState?: CustomNodeInternalState }
-  )?.internalState;
-
-  const [pattern, setPattern] = useState(
-    savedInternalState?.pattern || 'sound("bd sd hh sd")'
+  // Get current pattern from strudel store
+  const currentPattern = useStrudelStore(
+    (state) => state.config[id]?.customPattern || 'sound("bd sd hh sd")'
   );
-
-  const [hasRestoredState, setHasRestoredState] = useState(false);
-
-  useEffect(() => {
-    if (savedInternalState && !hasRestoredState) {
-      setPattern(savedInternalState.pattern);
-      setHasRestoredState(true);
-    }
-  }, [savedInternalState, hasRestoredState, id]);
-
-  useEffect(() => {
-    const internalState: CustomNodeInternalState = {
-      pattern,
-    };
-
-    updateNodeData(id, { internalState });
-  }, [pattern, id, updateNodeData]);
-
-  // Update strudel whenever pattern changes
-  useEffect(() => {
-    updateNode(id, { customPattern: pattern });
-  }, [pattern, id, updateNode]);
 
   const handlePatternChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
-    setPattern(event.target.value);
+    updateNode(id, { customPattern: event.target.value });
   };
 
   return (
@@ -64,7 +32,7 @@ export function CustomNode({ id, data }: WorkflowNodeProps) {
             Raw Strudel Code
           </label>
           <Textarea
-            value={pattern}
+            value={currentPattern}
             onChange={handlePatternChange}
             placeholder='Enter raw Strudel code...&#10;Example: sound("bd sd").gain(0.8).lpf(1000)'
             className="font-mono text-sm min-h-24 resize-none border rounded-md px-3 py-2 bg-transparent border-input focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
@@ -149,7 +117,6 @@ CustomNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   if (!customPattern || !customPattern.trim()) return strudelString;
 
-  // Return the raw pattern - no additional processing needed
   const pattern = customPattern.trim();
   return strudelString ? `${strudelString}.stack(${pattern})` : pattern;
 };
