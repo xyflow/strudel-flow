@@ -5,8 +5,8 @@ import { Slider } from '@/components/ui/slider';
 
 export function FMNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const attack = useStrudelStore((state) =>
-    parseFloat(state.config[id]?.attack || '0.01')
+  const fm = useStrudelStore((state) =>
+    parseFloat(state.config[id]?.fm || '0.01')
   );
 
   return (
@@ -14,12 +14,12 @@ export function FMNode({ id, data }: WorkflowNodeProps) {
       <div className="space-y-3 p-3">
         <div>
           <label className="text-xs text-muted-foreground mb-2 block">
-            Attack Time: {attack.toFixed(3)}s
+            FM: {fm.toFixed(3)}s
           </label>
           <Slider
-            value={[attack]}
+            value={[fm]}
             onValueChange={(value) =>
-              updateNode(id, { attack: value[0].toString() })
+              updateNode(id, { fm: value[0].toString() })
             }
             min={0.001}
             max={2.0}
@@ -33,9 +33,9 @@ export function FMNode({ id, data }: WorkflowNodeProps) {
 }
 
 FMNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const attack = useStrudelStore.getState().config[node.id]?.attack;
-  if (!attack) return strudelString;
+  const fm = useStrudelStore.getState().config[node.id]?.fm;
+  if (!fm) return strudelString;
 
-  const attackCall = `fm("${attack}")`;
-  return strudelString ? `${strudelString}.${attackCall}` : attackCall;
+  const fmCall = `fm("${fm}")`;
+  return strudelString ? `${strudelString}.${fmCall}` : fmCall;
 };

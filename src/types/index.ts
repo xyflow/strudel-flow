@@ -30,6 +30,7 @@ export interface StrudelConfig {
   attack?: string;
   fast?: string;
   slow?: string;
+  fm?: string;
 
   // Probability and masking
   probFunction?: string;
