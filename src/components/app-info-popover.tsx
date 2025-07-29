@@ -17,29 +17,62 @@ export function AppInfoPopover() {
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-96 max-h-96 overflow-y-auto" align="end">
-        <div className="space-y-4">
-          <div>
-            <h4 className="font-medium mb-3 flex items-center gap-2">
-              🎛️ Getting Started
+        <div className="space-y-6">
+          {/* Header Section */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold text-foreground">
+              Flow Machine
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              The Flow Machine is built with{' '}
+              <a
+                href="https://reactflow.dev/"
+                className="text-primary hover:underline font-medium"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                React Flow
+              </a>{' '}
+              and powered by{' '}
+              <a
+                href="https://strudel.cc"
+                className="text-primary hover:underline font-medium"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Strudel
+              </a>
+              .
+            </p>
+          </div>
+
+          {/* Getting Started */}
+          <div className="space-y-3">
+            <h4 className="font-semibold text-foreground flex items-center gap-2">
+              🎵 Getting Started
             </h4>
-            <div className="space-y-2 text-sm">
-              <div>
-                <strong>Add Nodes:</strong> Drag nodes from the sidebar into
-                your workspace.
-              </div>
-              <div>
-                <strong>Connect Nodes:</strong> Drag from bottom handles to top
-                handles.
-              </div>
-              <div>
-                <strong>Create Patterns:</strong> Click buttons in nodes to
-                build sequences.
-              </div>
-              <div>
-                <strong>Control Playback:</strong> Use play/pause/mute in
-                headers.
-              </div>
-            </div>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start gap-2">
+                <span className="text-primary font-mono text-xs mt-0.5">
+                  1.
+                </span>
+                <span>Drag nodes from the sidebar to your workspace.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary font-mono text-xs mt-0.5">
+                  2.
+                </span>
+                <span>
+                  Connect nodes using the handles to create complex patterns.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary font-mono text-xs mt-0.5">
+                  3.
+                </span>
+                <span>Share your patterns with the world.</span>
+              </li>
+            </ul>
           </div>
 
           <div>
@@ -58,10 +91,7 @@ export function AppInfoPopover() {
                 <strong>Pattern Preview:</strong> Click notebook icon in
                 headers.
               </div>
-              <div>
-                <strong>Chain Effects:</strong> Connect multiple nodes for
-                complex processing.
-              </div>
+
               <div>
                 <strong>Add Modifiers:</strong> Right-click buttons for repeats
                 & speed changes.
