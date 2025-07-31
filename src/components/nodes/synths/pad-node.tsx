@@ -320,9 +320,11 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-2 p-3 bg-card text-card-foreground rounded-md">
         <div className="flex flex-col gap-1">
-          {grid.map((row, stepIdx) => (
-            <div key={stepIdx} className="flex gap-1 items-center">
-              {row.map((on, noteIdx) => {
+          {/* Grid rows - each row is a note, each column is a step */}
+          {notes.map((note, noteIdx) => (
+            <div key={noteIdx} className="flex gap-1 items-center">
+              {Array.from({ length: steps }, (_, stepIdx) => {
+                const on = grid[stepIdx]?.[noteIdx] || false;
                 const isSelected = isButtonSelected(stepIdx, noteIdx);
                 const groupIndex = getButtonGroupIndex(
                   stepIdx,
@@ -335,12 +337,12 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
                   modifier.type !== 'off' && modifier.type !== 'normal';
                 const modifierText = getButtonDisplayText(stepIdx, noteIdx);
 
-                const buttonClass = getButtonClasses(
+                const buttonClass = `${getButtonClasses(
                   isSelected,
                   isInGroup,
                   groupIndex,
                   on // Use the grid state directly for pressed/highlighted state
-                );
+                )} w-12`;
 
                 return (
                   <ModifierContextMenu
@@ -463,7 +465,6 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
                       +
                     </Button>
                   </div>
-
                   {/* Mode toggle */}
                   <div className="flex items-center gap-1">
                     <span className="text-xs">Mode:</span>

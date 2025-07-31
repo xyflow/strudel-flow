@@ -126,7 +126,7 @@ export function getButtonClasses(
   groupIndex: number,
   hasSound: boolean
 ): string {
-  let buttonClass = `w-12 h-11 rounded-md border transition-all duration-200 shadow-sm text-xs font-mono `;
+  let buttonClass = `w-20 h-10 rounded-md border transition-all duration-200 shadow-sm text-xs font-mono `;
 
   if (isSelected) {
     // Selected for grouping - bright yellow
