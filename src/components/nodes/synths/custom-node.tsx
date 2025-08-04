@@ -8,39 +8,42 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Textarea } from '@/components/ui/textarea';
+import { useNodeState } from '@/hooks/use-node-state';
+
+interface CustomNodeInternalState {
+  customPattern: string;
+}
 
 export function CustomNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-
-  // Get current pattern from strudel store
-  const currentPattern = useStrudelStore(
-    (state) => state.config[id]?.customPattern || 'sound("bd sd hh sd")'
+  const [{ customPattern }, setState] = useNodeState(
+    id,
+    data as { internalState?: CustomNodeInternalState },
+    {
+      customPattern: 'sound("bd sd hh sd")',
+    }
   );
 
   const handlePatternChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
-    updateNode(id, { customPattern: event.target.value });
+    setState({ customPattern: event.target.value });
   };
 
   return (
     <WorkflowNode id={id} data={data}>
-      <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md min-w-80">
-        {/* Pattern Input */}
+      <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md w-80">
         <div className="flex flex-col gap-2">
           <label className="text-xs font-mono font-medium">
             Raw Strudel Code
           </label>
           <Textarea
-            value={currentPattern}
+            value={customPattern}
             onChange={handlePatternChange}
             placeholder='Enter raw Strudel code...&#10;Example: sound("bd sd").gain(0.8).lpf(1000)'
             className="font-mono text-sm min-h-24 resize-none border rounded-md px-3 py-2 bg-transparent border-input focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
             spellCheck={false}
           />
         </div>
-
-        {/* Help & Examples */}
         <Accordion type="single" collapsible>
           <AccordionItem value="help">
             <AccordionTrigger className="text-xs font-mono py-2">
@@ -48,7 +51,6 @@ export function CustomNode({ id, data }: WorkflowNodeProps) {
             </AccordionTrigger>
             <AccordionContent className="overflow-hidden">
               <div className="flex flex-col gap-3 text-xs font-mono">
-                {/* Examples */}
                 <div>
                   <div className="font-semibold mb-2">Examples:</div>
                   <div className="space-y-1 text-muted-foreground">
@@ -66,8 +68,6 @@ export function CustomNode({ id, data }: WorkflowNodeProps) {
                     </div>
                   </div>
                 </div>
-
-                {/* Tips */}
                 <div>
                   <div className="font-semibold mb-2">Tips:</div>
                   <div className="space-y-1 text-muted-foreground">
@@ -85,8 +85,6 @@ export function CustomNode({ id, data }: WorkflowNodeProps) {
                     </div>
                   </div>
                 </div>
-
-                {/* Links */}
                 <div>
                   <div className="font-semibold mb-2">Learn More:</div>
                   <div className="text-muted-foreground">

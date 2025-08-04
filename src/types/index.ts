@@ -67,6 +67,7 @@ export interface StrudelConfig {
   arpChordType?: string;
 
   // Beat machine node
+  beatPatterns?: string[];
   beatKickPattern?: string;
   beatSnarePattern?: string;
   beatHihatPattern?: string;

@@ -1,4 +1,8 @@
 export const DRUM_OPTIONS = [
+  'bd',
+  'sd',
+  'hh',
+  'cp',
   'kicklinn',
   'clubkick',
   'hardkick',
