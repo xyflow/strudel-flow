@@ -122,6 +122,10 @@ export const createAppStore = (initialState: AppState = defaultState) => {
       },
 
       onConnect: (connection) => {
+        // Prevent self-connecting nodes
+        if (connection.source === connection.target) {
+          return;
+        }
         // Only include handles if they are not null/undefined
         const { source, target, sourceHandle, targetHandle } = connection;
         const newEdge: Edge = {
@@ -129,7 +133,6 @@ export const createAppStore = (initialState: AppState = defaultState) => {
           source,
           target,
           type: 'default',
-          animated: true,
           ...(sourceHandle ? { sourceHandle } : {}),
           ...(targetHandle ? { targetHandle } : {}),
         };

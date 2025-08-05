@@ -54,7 +54,9 @@ function WorkflowNode({
   // Find all connected nodes for this group using findConnectedComponents
   const { connectedNodeIds, groupId } = useMemo(() => {
     const allComponents = findConnectedComponents(nodes, edges);
-    const connectedComponent = allComponents.find(component => component.includes(id)) || [id];
+    const connectedComponent = allComponents.find((component) =>
+      component.includes(id)
+    ) || [id];
     const nodeIds = new Set(connectedComponent);
     const gId = Array.from(nodeIds).sort().join('-');
     return { connectedNodeIds: nodeIds, groupId: gId };

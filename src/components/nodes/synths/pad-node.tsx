@@ -146,7 +146,7 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
 
   return (
     <WorkflowNode id={id} data={data}>
-      <div className="flex flex-col gap-2 p-3 bg-card text-card-foreground rounded-md w-80">
+      <div className="flex flex-col gap-2 p-3 bg-card text-card-foreground rounded-md">
         <div className="flex flex-col gap-1">
           {notes.map((_, noteIdx) => (
             <div key={noteIdx} className="flex gap-1 items-center">
