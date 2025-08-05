@@ -5,7 +5,7 @@ type StrudelStore = {
   config: Record<string, StrudelConfig>;
   pattern: string;
   mutedNodes: Record<string, StrudelConfig>;
-  pausedGroups: Record<string, Record<string, StrudelConfig>>;
+  pausedGroups: Record<string, string[]>;
   cpm: string;
 
   updateNode: (nodeId: string, value: Partial<StrudelConfig>) => void;
@@ -65,12 +65,11 @@ export const useStrudelStore = create<StrudelStore>((set, get) => ({
 
       // Remove node from any paused groups
       Object.keys(newPausedGroups).forEach((groupId) => {
-        if (newPausedGroups[groupId][nodeId]) {
-          delete newPausedGroups[groupId][nodeId];
-          // If group is now empty, remove it
-          if (Object.keys(newPausedGroups[groupId]).length === 0) {
-            delete newPausedGroups[groupId];
-          }
+        newPausedGroups[groupId] = newPausedGroups[groupId].filter(
+          (id) => id !== nodeId
+        );
+        if (newPausedGroups[groupId].length === 0) {
+          delete newPausedGroups[groupId];
         }
       });
 
@@ -129,49 +128,20 @@ export const useStrudelStore = create<StrudelStore>((set, get) => ({
   },
 
   pauseGroup: (groupId: string, nodeIds: string[]) => {
-    const state = get();
-    const groupConfigs: Record<string, StrudelConfig> = {};
-
-    // Store all node configs for this group
-    nodeIds.forEach((nodeId) => {
-      const nodeConfig = state.config[nodeId];
-      if (nodeConfig && Object.keys(nodeConfig).length > 0) {
-        groupConfigs[nodeId] = nodeConfig;
-      }
-    });
-
-    if (Object.keys(groupConfigs).length > 0) {
-      set((state) => ({
-        pausedGroups: {
-          ...state.pausedGroups,
-          [groupId]: groupConfigs,
-        },
-        config: {
-          ...state.config,
-        },
-      }));
-    }
+    set((state) => ({
+      pausedGroups: {
+        ...state.pausedGroups,
+        [groupId]: nodeIds,
+      },
+    }));
   },
 
   unpauseGroup: (groupId: string) => {
-    const state = get();
-    const groupConfigs = state.pausedGroups[groupId];
-
-    if (groupConfigs) {
-      set((state) => {
-        const newPausedGroups = { ...state.pausedGroups };
-        delete newPausedGroups[groupId];
-
-        return {
-          pausedGroups: newPausedGroups,
-          config: {
-            ...state.config,
-            // Restore configs for all nodes in the group
-            // ...groupConfigs,
-          },
-        };
-      });
-    }
+    set((state) => {
+      const newPausedGroups = { ...state.pausedGroups };
+      delete newPausedGroups[groupId];
+      return { pausedGroups: newPausedGroups };
+    });
   },
 
   isGroupPaused: (groupId: string) => {

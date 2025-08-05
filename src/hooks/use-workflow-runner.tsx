@@ -19,10 +19,9 @@ export function useWorkflowRunner() {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
   useEffect(() => {
+    const allPausedNodes = new Set(Object.values(pausedGroups).flat());
     nodes.forEach((node) => {
-      const isPaused = Object.values(pausedGroups).some(
-        (group) => group[node.id]
-      );
+      const isPaused = allPausedNodes.has(node.id);
       const targetState = isPaused ? 'paused' : 'running';
       if (node.data.state !== targetState) {
         updateNodeData(node.id, { state: targetState });
