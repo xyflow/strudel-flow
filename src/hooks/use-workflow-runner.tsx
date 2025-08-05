@@ -11,28 +11,18 @@ export function useWorkflowRunner() {
   const setPattern = useStrudelStore((s) => s.setPattern);
   const config = useStrudelStore((s) => s.config);
   const cpm = useStrudelStore((s) => s.cpm);
-  const pausedGroups = useStrudelStore((s) => s.pausedGroups);
 
   // Watch for changes in nodes/edges and regenerate pattern
   const nodes = useAppStore((state) => state.nodes);
   const edges = useAppStore((state) => state.edges);
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
-
-  useEffect(() => {
-    const allPausedNodes = new Set(Object.values(pausedGroups).flat());
-    nodes.forEach((node) => {
-      const isPaused = allPausedNodes.has(node.id);
-      const targetState = isPaused ? 'paused' : 'running';
-      if (node.data.state !== targetState) {
-        updateNodeData(node.id, { state: targetState });
-      }
-    });
-  }, [pausedGroups, nodes, updateNodeData]);
 
   // Generate pattern when nodes/edges/config change
   useEffect(() => {
     const newPattern = generateOutput(nodes, edges);
-    setPattern(newPattern);
+
+    if (newPattern.trim() || nodes.length === 0) {
+      setPattern(newPattern);
+    }
 
     // If pattern is empty or becomes empty, hush immediately
     if (!newPattern.trim() && isRunning.current) {

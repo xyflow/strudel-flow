@@ -75,7 +75,13 @@ export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
       sources.every((node) => node.data.state === 'paused');
 
     // Build base pattern from sources
-    const sourcePatterns = sources
+    // If all sources are paused, we'll generate the full stack and comment it out
+    // Otherwise, only stack active nodes
+    const patternsToStack = allSourcesPaused
+      ? sources
+      : sources.filter((node) => node.data.state !== 'paused');
+
+    const sourcePatterns = patternsToStack
       .map((node) => nodePatterns[node.id])
       .filter(Boolean);
 

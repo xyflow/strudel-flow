@@ -44,38 +44,38 @@ function WorkflowNode({
   const muteNode = useStrudelStore((state) => state.muteNode);
   const unmuteNode = useStrudelStore((state) => state.unmuteNode);
   const isNodeMuted = useStrudelStore((state) => state.isNodeMuted);
-  const pauseGroup = useStrudelStore((state) => state.pauseGroup);
-  const unpauseGroup = useStrudelStore((state) => state.unpauseGroup);
-  const isGroupPaused = useStrudelStore((state) => state.isGroupPaused);
-  const { removeNode, edges, nodes } = useAppStore((state) => state);
+  const { removeNode, edges, nodes, updateNodeData } = useAppStore(
+    (state) => state
+  );
+  const nodeState = useAppStore((state) => state.nodes.find((n) => n.id === id))
+    ?.data?.state;
 
   const isMuted = isNodeMuted(id);
+  const isPaused = nodeState === 'paused';
 
   // Find all connected nodes for this group using findConnectedComponents
-  const { connectedNodeIds, groupId } = useMemo(() => {
+  const { connectedNodeIds } = useMemo(() => {
     const allComponents = findConnectedComponents(nodes, edges);
     const connectedComponent = allComponents.find((component) =>
       component.includes(id)
     ) || [id];
     const nodeIds = new Set(connectedComponent);
-    const gId = Array.from(nodeIds).sort().join('-');
-    return { connectedNodeIds: nodeIds, groupId: gId };
+    return { connectedNodeIds: nodeIds };
   }, [nodes, edges, id]);
 
-  const isGroupCurrentlyPaused = isGroupPaused(groupId);
-
   const onPlay = useCallback(() => {
-    if (isGroupCurrentlyPaused) {
-      // Unpause the group first, then run workflow
-      unpauseGroup(groupId);
-    }
+    connectedNodeIds.forEach((nodeId) => {
+      updateNodeData(nodeId, { state: 'running' });
+    });
     runWorkflow();
-  }, [runWorkflow, isGroupCurrentlyPaused, unpauseGroup, groupId]);
+  }, [runWorkflow, connectedNodeIds, updateNodeData]);
 
   const onPause = useCallback(() => {
     // Pause this specific group
-    pauseGroup(groupId, Array.from(connectedNodeIds));
-  }, [pauseGroup, groupId, connectedNodeIds]);
+    connectedNodeIds.forEach((nodeId) => {
+      updateNodeData(nodeId, { state: 'paused' });
+    });
+  }, [connectedNodeIds, updateNodeData]);
 
   const onMute = useCallback(() => {
     if (isMuted) {
@@ -104,11 +104,11 @@ function WorkflowNode({
           <NodeHeaderTitle>{data?.title}</NodeHeaderTitle>
           <NodeHeaderActions>
             <NodeHeaderAction
-              onClick={isGroupCurrentlyPaused ? onPlay : onPause}
-              label={isGroupCurrentlyPaused ? 'Resume group' : 'Pause group'}
-              variant={isGroupCurrentlyPaused ? 'default' : 'ghost'}
+              onClick={isPaused ? onPlay : onPause}
+              label={isPaused ? 'Resume group' : 'Pause group'}
+              variant={isPaused ? 'default' : 'ghost'}
             >
-              {isGroupCurrentlyPaused ? <Play /> : <Pause />}
+              {isPaused ? <Play /> : <Pause />}
             </NodeHeaderAction>
             <NodeHeaderAction
               onClick={onMute}

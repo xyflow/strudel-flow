@@ -5,7 +5,6 @@ type StrudelStore = {
   config: Record<string, StrudelConfig>;
   pattern: string;
   mutedNodes: Record<string, StrudelConfig>;
-  pausedGroups: Record<string, string[]>;
   cpm: string;
 
   updateNode: (nodeId: string, value: Partial<StrudelConfig>) => void;
@@ -14,9 +13,6 @@ type StrudelStore = {
   muteNode: (nodeId: string) => void;
   unmuteNode: (nodeId: string) => void;
   isNodeMuted: (nodeId: string) => boolean;
-  pauseGroup: (groupId: string, nodeIds: string[]) => void;
-  unpauseGroup: (groupId: string) => void;
-  isGroupPaused: (groupId: string) => boolean;
   setCpm: (cpm: string) => void;
 };
 
@@ -24,7 +20,6 @@ export const useStrudelStore = create<StrudelStore>((set, get) => ({
   config: {},
   pattern: '',
   mutedNodes: {},
-  pausedGroups: {},
   cpm: '60',
 
   updateNode: (nodeId: string, value: Partial<StrudelConfig>) => {
@@ -58,25 +53,13 @@ export const useStrudelStore = create<StrudelStore>((set, get) => ({
     set((state) => {
       const newConfig = { ...state.config };
       const newMutedNodes = { ...state.mutedNodes };
-      const newPausedGroups = { ...state.pausedGroups };
 
       delete newConfig[nodeId];
       delete newMutedNodes[nodeId];
 
-      // Remove node from any paused groups
-      Object.keys(newPausedGroups).forEach((groupId) => {
-        newPausedGroups[groupId] = newPausedGroups[groupId].filter(
-          (id) => id !== nodeId
-        );
-        if (newPausedGroups[groupId].length === 0) {
-          delete newPausedGroups[groupId];
-        }
-      });
-
       return {
         config: newConfig,
         mutedNodes: newMutedNodes,
-        pausedGroups: newPausedGroups,
       };
     });
   },
@@ -125,26 +108,5 @@ export const useStrudelStore = create<StrudelStore>((set, get) => ({
 
   isNodeMuted: (nodeId: string) => {
     return !!get().mutedNodes[nodeId];
-  },
-
-  pauseGroup: (groupId: string, nodeIds: string[]) => {
-    set((state) => ({
-      pausedGroups: {
-        ...state.pausedGroups,
-        [groupId]: nodeIds,
-      },
-    }));
-  },
-
-  unpauseGroup: (groupId: string) => {
-    set((state) => {
-      const newPausedGroups = { ...state.pausedGroups };
-      delete newPausedGroups[groupId];
-      return { pausedGroups: newPausedGroups };
-    });
-  },
-
-  isGroupPaused: (groupId: string) => {
-    return !!get().pausedGroups[groupId];
   },
 }));
