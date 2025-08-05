@@ -5,7 +5,7 @@ import {
   CellState,
   getButtonClasses,
   getCellStateDisplay,
-} from './';
+} from '.';
 
 interface PadButtonProps {
   stepIdx: number;

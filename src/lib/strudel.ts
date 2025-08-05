@@ -34,8 +34,8 @@ function optimizeSoundCalls(strudelString: string): string {
  */
 function isSoundSource(node: AppNode): boolean {
   const category = nodesConfig[node.type]?.category;
-  // Only Synths generate patterns, Sounds are effects that modify patterns
-  return category === 'Synths';
+  // Only Instruments generate patterns, Sounds are effects that modify patterns
+  return category === 'Instruments';
 }
 
 /**
@@ -56,19 +56,9 @@ export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
     }
   });
 
-  // If no edges, all nodes are isolated
-  if (edges.length === 0) {
-    const patterns = Object.values(nodePatterns);
-    if (patterns.length === 0) return '';
-    const result = patterns
-      .map((pattern) => `$: ${optimizeSoundCalls(pattern)}`)
-      .join('\n');
-    return cpm ? `setcpm(${cpm})\n${result}` : result;
-  }
-
   // Find connected components and build patterns
   const components = findConnectedComponents(nodes, edges);
-  const finalPatterns: string[] = [];
+  const finalPatterns: { pattern: string; paused: boolean }[] = [];
 
   components.forEach((componentNodeIds) => {
     // Get nodes in this component
@@ -79,6 +69,10 @@ export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
     // Separate sources from effects
     const sources = componentNodes.filter(isSoundSource);
     const effects = componentNodes.filter((node) => !isSoundSource(node));
+
+    const allSourcesPaused =
+      sources.length > 0 &&
+      sources.every((node) => node.data.state === 'paused');
 
     // Build base pattern from sources
     const sourcePatterns = sources
@@ -103,12 +97,20 @@ export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
 
     if (finalPattern) {
       // Apply optimization to the final pattern
-      finalPatterns.push(optimizeSoundCalls(finalPattern));
+      finalPatterns.push({
+        pattern: optimizeSoundCalls(finalPattern),
+        paused: allSourcesPaused,
+      });
     }
   });
 
   // Format result
   if (finalPatterns.length === 0) return '';
-  const result = finalPatterns.map((pattern) => `$: ${pattern}`).join('\n');
+  const result = finalPatterns
+    .map(({ pattern, paused }) => {
+      const line = `$: ${pattern}`;
+      return paused ? `// ${line}` : line;
+    })
+    .join('\n');
   return cpm ? `setcpm(${cpm})\n${result}` : result;
 }

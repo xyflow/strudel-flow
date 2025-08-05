@@ -36,12 +36,12 @@ export const useStrudelStore = create<StrudelStore>((set, get) => ({
     }
 
     // Don't update if node is in a paused group
-    const isInPausedGroup = Object.values(state.pausedGroups).some(
-      (group) => group[nodeId] !== undefined
-    );
-    if (isInPausedGroup) {
-      return;
-    }
+    // const isInPausedGroup = Object.values(state.pausedGroups).some((group) => {
+    //   return group[nodeId] !== undefined;
+    // });
+    // if (isInPausedGroup) {
+    //   return;
+    // }
 
     set((state) => ({
       config: {
@@ -148,11 +148,6 @@ export const useStrudelStore = create<StrudelStore>((set, get) => ({
         },
         config: {
           ...state.config,
-          // Clear configs for all nodes in the group
-          ...nodeIds.reduce((acc, nodeId) => {
-            acc[nodeId] = {};
-            return acc;
-          }, {} as Record<string, StrudelConfig>),
         },
       }));
     }
@@ -172,7 +167,7 @@ export const useStrudelStore = create<StrudelStore>((set, get) => ({
           config: {
             ...state.config,
             // Restore configs for all nodes in the group
-            ...groupConfigs,
+            // ...groupConfigs,
           },
         };
       });

@@ -9,22 +9,20 @@ import {
 import { Button } from '@/components/ui/button';
 
 export function PatternPanelWithCopy({ isVisible }: { isVisible: boolean }) {
-  const pattern = useStrudelStore((s) => s.pattern);
+  const pattern = useStrudelStore((s) => s.pattern) || 'No pattern.';
   const [isCopied, setIsCopied] = useState(false);
 
   if (!isVisible) return null;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(pattern || 'No pattern.');
+    navigator.clipboard.writeText(pattern);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
 
   return (
     <div className="flex flex-row  bg-card p-4 shadow mt-2 rounded-md border">
-      <pre className="text-xs m-2 w-96 overflow-y-auto">
-        {pattern || 'No pattern.'}
-      </pre>
+      <pre className="text-xs m-2 w-96 overflow-y-auto">{pattern}</pre>
       <div className="flex flex-row justify-between items-center">
         <Popover>
           <PopoverTrigger asChild>

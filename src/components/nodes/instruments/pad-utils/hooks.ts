@@ -3,7 +3,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { createGroupsFromSelection, CellState } from './';
+import { createGroupsFromSelection, CellState } from '.';
 
 /**
  * Hook for managing step count

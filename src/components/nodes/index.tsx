@@ -3,16 +3,16 @@ import { nanoid } from 'nanoid';
 
 import { iconMapping } from '@/data/icon-mapping';
 
-import { SampleSelect } from './sounds/sample-select';
-import { DrumSoundsNode } from './sounds/drum-sounds';
+import { SampleSelect } from './synths/sample-select';
+import { DrumSoundsNode } from './synths/drum-sounds';
 
-// Synths
-import { PadNode } from './synths/pad-node';
-import { ArpeggiatorNode } from './synths/arpeggiator-node';
-import { ChordNode } from './synths/chord-node';
-import { CustomNode } from './synths/custom-node';
-import { PolyrhythmNode } from './synths/polyrhythm-node';
-import { BeatMachineNode } from './synths/beat-machine-node';
+// Instruments
+import { PadNode } from './instruments/pad-node';
+import { ArpeggiatorNode } from './instruments/arpeggiator-node';
+import { ChordNode } from './instruments/chord-node';
+import { CustomNode } from './instruments/custom-node';
+import { PolyrhythmNode } from './instruments/polyrhythm-node';
+import { BeatMachineNode } from './instruments/beat-machine-node';
 
 // Effects
 import { MaskNode } from './effects/mask-node';
@@ -45,6 +45,7 @@ export type WorkflowNodeData = {
   sound?: string;
   notes?: string;
   status?: 'loading' | 'success' | 'error' | 'initial';
+  state?: 'running' | 'paused' | 'stopped';
 };
 
 export type WorkflowNodeProps = NodeProps<Node<WorkflowNodeData>> & {
@@ -55,7 +56,7 @@ export type WorkflowNodeProps = NodeProps<Node<WorkflowNodeData>> & {
 export type NodeConfig = {
   id: AppNodeType;
   title: string;
-  category: 'Synths' | 'Sounds' | 'Audio Effects' | 'Time Effects';
+  category: 'Instruments' | 'Synths' | 'Audio Effects' | 'Time Effects';
   status?: 'loading' | 'success' | 'error' | 'initial';
   sound?: string;
   notes?: string;
@@ -66,49 +67,49 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
   'pad-node': {
     id: 'pad-node',
     title: 'Pad',
-    category: 'Synths',
+    category: 'Instruments',
     icon: 'Spline',
   },
   'arpeggiator-node': {
     id: 'arpeggiator-node',
     title: 'Arpeggiator',
-    category: 'Synths',
+    category: 'Instruments',
     icon: 'Zap',
   },
   'chord-node': {
     id: 'chord-node',
     title: 'Chords',
-    category: 'Synths',
+    category: 'Instruments',
     icon: 'Music2',
   },
   'polyrhythm-node': {
     id: 'polyrhythm-node',
     title: 'Polyrhythm',
-    category: 'Synths',
+    category: 'Instruments',
     icon: 'Layers',
   },
   'beat-machine-node': {
     id: 'beat-machine-node',
     title: 'Beats',
-    category: 'Synths',
+    category: 'Instruments',
     icon: 'Grid3x3',
   },
   'custom-node': {
     id: 'custom-node',
     title: 'Custom Code',
-    category: 'Synths',
+    category: 'Instruments',
     icon: 'Code',
   },
   'drum-sounds': {
     id: 'drum-sounds',
     title: 'Drums',
-    category: 'Sounds',
+    category: 'Synths',
     icon: 'Music',
   },
   'sample-select': {
     id: 'sample-select',
-    title: 'Sounds',
-    category: 'Sounds',
+    title: 'Synths',
+    category: 'Synths',
     icon: 'CheckCheck',
   },
   'lpf-node': {
@@ -285,6 +286,7 @@ export function createNodeByType({
       sound: node.sound,
       notes: node.notes,
       icon: node.icon,
+      state: 'running',
     },
     position: {
       x: position?.x || 0,

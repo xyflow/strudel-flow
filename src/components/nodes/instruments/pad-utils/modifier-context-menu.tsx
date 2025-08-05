@@ -7,7 +7,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
-import { getContextMenuValue, parseContextMenuValue, CellState } from './';
+import { getContextMenuValue, parseContextMenuValue, CellState } from '.';
 import { ReactNode } from 'react';
 
 export interface ModifierContextMenuProps {

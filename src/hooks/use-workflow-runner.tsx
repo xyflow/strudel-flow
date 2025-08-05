@@ -11,10 +11,24 @@ export function useWorkflowRunner() {
   const setPattern = useStrudelStore((s) => s.setPattern);
   const config = useStrudelStore((s) => s.config);
   const cpm = useStrudelStore((s) => s.cpm);
+  const pausedGroups = useStrudelStore((s) => s.pausedGroups);
 
   // Watch for changes in nodes/edges and regenerate pattern
   const nodes = useAppStore((state) => state.nodes);
   const edges = useAppStore((state) => state.edges);
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+
+  useEffect(() => {
+    nodes.forEach((node) => {
+      const isPaused = Object.values(pausedGroups).some(
+        (group) => group[node.id]
+      );
+      const targetState = isPaused ? 'paused' : 'running';
+      if (node.data.state !== targetState) {
+        updateNodeData(node.id, { state: targetState });
+      }
+    });
+  }, [pausedGroups, nodes, updateNodeData]);
 
   // Generate pattern when nodes/edges/config change
   useEffect(() => {
@@ -30,8 +44,13 @@ export function useWorkflowRunner() {
   }, [nodes, edges, config, cpm, setPattern]);
 
   const runWorkflow = useCallback(() => {
-    if (!pattern.trim()) {
-      console.log('No pattern to evaluate.');
+    const activePattern = pattern
+      .split('\n')
+      .filter((line) => !line.trim().startsWith('//'))
+      .join('\n');
+
+    if (!activePattern.trim()) {
+      console.log('No active pattern to evaluate.');
       if (isRunning.current) {
         hush();
         isRunning.current = false;
@@ -44,20 +63,14 @@ export function useWorkflowRunner() {
       hush();
     }
 
-    console.log('Running workflow with pattern:', pattern);
+    console.log('Running workflow with pattern:', activePattern);
     isRunning.current = true;
 
     try {
-      evaluate(pattern);
+      evaluate(activePattern);
     } catch (err) {
-      if (
-        err instanceof Error &&
-        err.message.includes('unexpected ast format without body expression')
-      ) {
-        console.log('Suppressed error:', err.message);
-      } else {
-        console.error(err);
-      }
+      // It's possible to still get errors, but we are trying to minimize them
+      console.error(err);
     }
 
     return () => {
@@ -67,7 +80,9 @@ export function useWorkflowRunner() {
   }, [pattern]);
 
   useEffect(() => {
-    runWorkflow();
+    if (pattern) {
+      runWorkflow();
+    }
   }, [pattern, runWorkflow]);
 
   return {
