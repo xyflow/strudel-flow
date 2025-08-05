@@ -1,13 +1,6 @@
 /**
- * Utility functions for button grouping and sound selection
+ * Simple button utilities
  */
-
-/**
- * Generate button key from step and track indices
- */
-export function createButtonKey(stepIdx: number, trackIdx: number): string {
-  return `${stepIdx}-${trackIdx}`;
-}
 
 /**
  * Check if a button is part of a group
@@ -22,86 +15,33 @@ export function getButtonGroupIndex(
 }
 
 /**
- * Auto-create groups when we have 2 or more selected buttons in the same step
+ * Create groups from selected buttons in a step
  */
 export function createGroupsFromSelection(
   selectedButtons: Set<string>,
   stepIdx: number,
   currentGroups: Record<number, number[][]>
 ): Record<number, number[][]> {
-  const currentStepButtons = Array.from(selectedButtons).filter((key) =>
-    key.startsWith(`${stepIdx}-`)
+  const stepButtons = Array.from(selectedButtons)
+    .filter((key) => key.startsWith(`${stepIdx}-`))
+    .map((key) => parseInt(key.split('-')[1]))
+    .sort((a, b) => a - b);
+
+  if (stepButtons.length < 2) return currentGroups;
+
+  const newGroups = { ...currentGroups };
+  if (!newGroups[stepIdx]) newGroups[stepIdx] = [];
+
+  // Only add if group doesn't already exist
+  const exists = newGroups[stepIdx].some(
+    (group) =>
+      group.length === stepButtons.length &&
+      group.every((val, i) => val === stepButtons[i])
   );
 
-  if (currentStepButtons.length >= 2) {
-    const trackIndices = currentStepButtons
-      .map((key) => parseInt(key.split('-')[1]))
-      .sort((a, b) => a - b);
-
-    const newGroups = { ...currentGroups };
-    if (!newGroups[stepIdx]) {
-      newGroups[stepIdx] = [];
-    }
-
-    // Check if this exact group already exists to avoid duplicates
-    const groupExists = newGroups[stepIdx].some(
-      (existingGroup) =>
-        existingGroup.length === trackIndices.length &&
-        existingGroup.every((idx, i) => idx === trackIndices[i])
-    );
-
-    if (!groupExists) {
-      newGroups[stepIdx].push(trackIndices);
-    }
-
-    return newGroups;
+  if (!exists) {
+    newGroups[stepIdx].push(stepButtons);
   }
 
-  return currentGroups;
-}
-
-/**
- * Clear selection for a specific step
- */
-export function clearSelectionForStep(
-  selectedButtons: Set<string>,
-  stepIdx: number
-): Set<string> {
-  return new Set(
-    Array.from(selectedButtons).filter((key) => !key.startsWith(`${stepIdx}-`))
-  );
-}
-
-/**
- * Clean up sound groups when steps change
- */
-export function cleanupSoundGroupsForSteps(
-  soundGroups: Record<number, number[][]>,
-  maxSteps: number
-): Record<number, number[][]> {
-  const newGroups = { ...soundGroups };
-  Object.keys(newGroups).forEach((stepKey) => {
-    const stepIdx = parseInt(stepKey);
-    if (stepIdx >= maxSteps) {
-      delete newGroups[stepIdx];
-    }
-  });
   return newGroups;
-}
-
-/**
- * Clean up selected buttons when steps change
- */
-export function cleanupSelectedButtonsForSteps(
-  selectedButtons: Set<string>,
-  maxSteps: number
-): Set<string> {
-  const newSelected = new Set<string>();
-  selectedButtons.forEach((key) => {
-    const [stepIdx] = key.split('-').map(Number);
-    if (stepIdx < maxSteps) {
-      newSelected.add(key);
-    }
-  });
-  return newSelected;
 }

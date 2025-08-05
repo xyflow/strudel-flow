@@ -3,106 +3,65 @@
  */
 
 import { useState, useEffect } from 'react';
-import {
-  cleanupSoundGroupsForSteps,
-  cleanupSelectedButtonsForSteps,
-  createButtonKey,
-  createGroupsFromSelection,
-  clearSelectionForStep,
-  CellState,
-} from './';
+import { createGroupsFromSelection, CellState } from './';
 
 /**
- * Hook for managing step count and cleanup
+ * Hook for managing step count
  */
 export function useStepManagement(initialSteps: number = 4) {
   const [steps, setSteps] = useState(initialSteps);
-
   return { steps, setSteps };
 }
 
-/**
- * Hook for managing grid-based step sequencer state
- */
-export function useGridAsStepSequencer(steps: number, noteCount: number) {
-  const [grid, setGrid] = useState<boolean[][]>(
-    Array.from({ length: steps }, () => Array(noteCount).fill(false))
-  );
+interface PadNodeInternalState {
+  grid: boolean[][];
+  buttonModifiers: Record<string, CellState>;
+  selectedButtons: string[];
+  noteGroups: Record<number, number[][]>;
+}
 
+/**
+ * Main hook for managing pad grid state
+ */
+export function usePadGrid(
+  steps: number,
+  notes: string[],
+  initialState?: PadNodeInternalState
+) {
+  const [grid, setGrid] = useState<boolean[][]>(
+    Array.from({ length: steps }, () => Array(notes.length).fill(false))
+  );
   const [selectedButtons, setSelectedButtons] = useState<Set<string>>(
     new Set()
   );
-  const [soundGroups, setSoundGroups] = useState<Record<number, number[][]>>(
-    {}
-  );
-
-  // Update state when steps change
-  useEffect(() => {
-    setSoundGroups((prev) => cleanupSoundGroupsForSteps(prev, steps));
-    setSelectedButtons((prev) => cleanupSelectedButtonsForSteps(prev, steps));
-  }, [steps]);
-
-  // Update grid when steps or noteCount change
-  useEffect(() => {
-    setGrid((prev) =>
-      Array.from({ length: steps }, (_, idx) =>
-        prev[idx]
-          ? prev[idx]
-              .slice(0, noteCount)
-              .concat(
-                Array(Math.max(0, noteCount - (prev[idx]?.length || 0))).fill(
-                  false
-                )
-              )
-          : Array(noteCount).fill(false)
-      )
-    );
-  }, [steps, noteCount]);
-
-  return {
-    grid,
-    setGrid,
-    selectedButtons,
-    setSelectedButtons,
-    soundGroups,
-    setSoundGroups,
-  };
-}
-
-export function usePadGrid(steps: number, notes: string[], initialState?: any) {
-  const {
-    grid,
-    setGrid,
-    selectedButtons,
-    setSelectedButtons,
-    soundGroups: noteGroups,
-    setSoundGroups: setNoteGroups,
-  } = useGridAsStepSequencer(steps, notes.length);
-
+  const [noteGroups, setNoteGroups] = useState<Record<number, number[][]>>({});
   const [buttonModifiers, setButtonModifiers] = useState<
     Record<string, CellState>
   >({});
   const [hasRestoredState, setHasRestoredState] = useState(false);
 
+  // Reset grid when steps or notes change
+  useEffect(() => {
+    setGrid(
+      Array.from({ length: steps }, () => Array(notes.length).fill(false))
+    );
+  }, [steps, notes.length]);
+
+  // Restore state from props
   useEffect(() => {
     if (initialState && !hasRestoredState) {
-      setTimeout(() => {
-        if (initialState.grid) setGrid(initialState.grid);
-        if (initialState.buttonModifiers)
-          setButtonModifiers(initialState.buttonModifiers);
-        if (initialState.selectedButtons)
-          setSelectedButtons(new Set(initialState.selectedButtons));
-        if (initialState.noteGroups) setNoteGroups(initialState.noteGroups);
-      }, 50);
+      if (initialState.grid) setGrid(initialState.grid);
+      if (initialState.buttonModifiers)
+        setButtonModifiers(initialState.buttonModifiers);
+      if (initialState.selectedButtons)
+        setSelectedButtons(new Set(initialState.selectedButtons));
+      if (initialState.noteGroups) setNoteGroups(initialState.noteGroups);
       setHasRestoredState(true);
     }
-  }, [
-    initialState,
-    hasRestoredState,
-    setGrid,
-    setSelectedButtons,
-    setNoteGroups,
-  ]);
+  }, [initialState, hasRestoredState]);
+
+  const createButtonKey = (stepIdx: number, noteIdx: number) =>
+    `${stepIdx}-${noteIdx}`;
 
   const getButtonModifier = (stepIdx: number, noteIdx: number) => {
     const key = createButtonKey(stepIdx, noteIdx);
@@ -141,7 +100,9 @@ export function usePadGrid(steps: number, notes: string[], initialState?: any) {
     event?: React.MouseEvent
   ) => {
     const buttonKey = createButtonKey(stepIdx, noteIdx);
+
     if (event?.shiftKey) {
+      // Group selection mode
       setSelectedButtons((prev) => {
         const newSelected = new Set(prev);
         if (newSelected.has(buttonKey)) {
@@ -149,6 +110,7 @@ export function usePadGrid(steps: number, notes: string[], initialState?: any) {
         } else {
           newSelected.add(buttonKey);
         }
+
         const newGroups = createGroupsFromSelection(
           newSelected,
           stepIdx,
@@ -156,15 +118,22 @@ export function usePadGrid(steps: number, notes: string[], initialState?: any) {
         );
         if (newGroups !== noteGroups) {
           setNoteGroups(newGroups);
-          return clearSelectionForStep(newSelected, stepIdx);
+          // Clear selection for this step after creating group
+          return new Set(
+            Array.from(newSelected).filter(
+              (key) => !key.startsWith(`${stepIdx}-`)
+            )
+          );
         }
         return newSelected;
       });
     } else {
+      // Normal toggle mode
       setGrid((prev) => {
         const next = prev.map((row) => [...row]);
         const wasOn = next[stepIdx][noteIdx];
-        next[stepIdx][noteIdx] = !next[stepIdx][noteIdx];
+        next[stepIdx][noteIdx] = !wasOn;
+
         if (wasOn && !next[stepIdx][noteIdx]) {
           setButtonModifier(stepIdx, noteIdx, { type: 'off' });
         }
