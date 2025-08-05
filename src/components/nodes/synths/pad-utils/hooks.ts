@@ -1,5 +1,5 @@
 /**
- * Common hooks for synth nodes
+ * Hooks for synth nodes
  */
 
 import { useState, useEffect } from 'react';
@@ -9,8 +9,8 @@ import {
   createButtonKey,
   createGroupsFromSelection,
   clearSelectionForStep,
-} from './button-utils';
-import { CellState } from './index';
+  CellState,
+} from './';
 
 /**
  * Hook for managing step count and cleanup

@@ -4,7 +4,6 @@
 
 export type CellState =
   | { type: 'off' }
-  | { type: 'normal' }
   | { type: 'replicate'; count: number }
   | { type: 'slow'; count: number }
   | { type: 'elongate'; duration: number }
@@ -15,10 +14,6 @@ export type CellState =
  */
 export function getCellStateDisplay(cellState: CellState): string {
   switch (cellState.type) {
-    case 'off':
-      return '';
-    case 'normal':
-      return '';
     case 'replicate':
       return `!${cellState.count}`;
     case 'slow':
@@ -36,10 +31,6 @@ export function getCellStateDisplay(cellState: CellState): string {
  * Apply a row modifier to a pattern string
  */
 export function applyRowModifier(pattern: string, modifier: CellState): string {
-  if (modifier.type === 'off' || modifier.type === 'normal') {
-    return pattern;
-  }
-
   if (modifier.type === 'replicate') {
     return `${pattern}!${modifier.count}`;
   }
@@ -74,11 +65,7 @@ export function getContextMenuValue(cellState: CellState): string {
  * Parse context menu value string back to CellState
  */
 export function parseContextMenuValue(value: string): CellState {
-  if (value === 'off') {
-    return { type: 'off' };
-  } else if (value === 'normal') {
-    return { type: 'normal' };
-  } else if (value.startsWith('replicate-')) {
+  if (value.startsWith('replicate-')) {
     const count = parseInt(value.split('-')[1]);
     return { type: 'replicate', count };
   } else if (value.startsWith('slow-')) {
@@ -94,3 +81,25 @@ export function parseContextMenuValue(value: string): CellState {
     return { type: 'off' };
   }
 }
+
+export const getButtonClasses = (
+  isSelected: boolean,
+  isInGroup: boolean,
+  groupIndex: number,
+  isPressed: boolean
+) => {
+  const base =
+    'transition-all duration-150 rounded-md text-xs font-mono select-none';
+  if (isSelected) return `${base} bg-yellow-400 text-black`;
+  if (isInGroup) {
+    const groupColors = [
+      'bg-blue-500',
+      'bg-green-500',
+      'bg-purple-500',
+      'bg-orange-500',
+    ];
+    return `${base} ${groupColors[groupIndex % groupColors.length]} text-white`;
+  }
+  if (isPressed) return `${base} bg-blue-400 text-white`;
+  return `${base} bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600`;
+};

@@ -7,8 +7,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
-import { getContextMenuValue, parseContextMenuValue } from './cell-state-utils';
-import { CellState } from './';
+import { getContextMenuValue, parseContextMenuValue, CellState } from './';
 import { ReactNode } from 'react';
 
 export interface ModifierContextMenuProps {
@@ -18,31 +17,26 @@ export interface ModifierContextMenuProps {
   label?: string;
 }
 
-// Map of modifier options organized by category
 const MODIFIER_OPTIONS = {
-  basic: [
-    { value: 'off', label: 'Off' },
-    { value: 'normal', label: 'Normal' },
-  ],
   replicate: [
-    { value: 'replicate-2', label: '!2 (×2)' },
-    { value: 'replicate-3', label: '!3 (×3)' },
-    { value: 'replicate-4', label: '!4 (×4)' },
+    { value: 'replicate-2', label: '!2' },
+    { value: 'replicate-3', label: '!3' },
+    { value: 'replicate-4', label: '!4' },
   ],
   slow: [
-    { value: 'slow-2', label: '/2 (Half speed)' },
-    { value: 'slow-3', label: '/3 (Third speed)' },
-    { value: 'slow-4', label: '/4 (Quarter speed)' },
+    { value: 'slow-2', label: '/2' },
+    { value: 'slow-3', label: '/3' },
+    { value: 'slow-4', label: '/4' },
   ],
   elongate: [
-    { value: 'elongate-2', label: '@2 (2x longer)' },
-    { value: 'elongate-3', label: '@3 (3x longer)' },
-    { value: 'elongate-4', label: '@4 (4x longer)' },
+    { value: 'elongate-2', label: '@2' },
+    { value: 'elongate-3', label: '@3' },
+    { value: 'elongate-4', label: '@4' },
   ],
   speed: [
-    { value: 'speed-2', label: '*2 (Double speed)' },
-    { value: 'speed-3', label: '*3 (Triple speed)' },
-    { value: 'speed-4', label: '*4 (Quad speed)' },
+    { value: 'speed-2', label: '*2' },
+    { value: 'speed-3', label: '*3' },
+    { value: 'speed-4', label: '*4' },
   ],
 };
 
@@ -67,15 +61,6 @@ export function ModifierContextMenu({
           value={getContextMenuValue(currentState)}
           onValueChange={handleValueChange}
         >
-          {/* Basic options */}
-          {MODIFIER_OPTIONS.basic.map((option) => (
-            <ContextMenuRadioItem key={option.value} value={option.value}>
-              {option.label}
-            </ContextMenuRadioItem>
-          ))}
-
-          <ContextMenuSeparator />
-
           {/* Replicate options */}
           <ContextMenuLabel>Replicate</ContextMenuLabel>
           {MODIFIER_OPTIONS.replicate.map((option) => (
