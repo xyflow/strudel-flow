@@ -90,16 +90,16 @@ export const getButtonClasses = (
 ) => {
   const base =
     'transition-all duration-150 rounded-md text-xs font-mono select-none';
-  if (isSelected) return `${base} bg-yellow-400 text-black`;
+  if (isSelected) return `${base} bg-accent-foreground`;
   if (isInGroup) {
     const groupColors = [
-      'bg-blue-500',
-      'bg-green-500',
-      'bg-purple-500',
-      'bg-orange-500',
+      'bg-chart-1',
+      'bg-chart-2',
+      'bg-chart-3',
+      'bg-chart-4',
     ];
-    return `${base} ${groupColors[groupIndex % groupColors.length]} text-white`;
+    return `${base} ${groupColors[groupIndex % groupColors.length]}`;
   }
-  if (isPressed) return `${base} bg-blue-400 text-white`;
-  return `${base} bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600`;
+  if (isPressed) return `${base} bg-primary`;
+  return `${base} bg-muted hover:bg-popover-foreground/50`;
 };
