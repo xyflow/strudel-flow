@@ -54,13 +54,12 @@ export function WorkflowControls() {
         <ShareUrlPopover />
 
         <AppInfoPopover />
-        <PatternPanelWithCopy isVisible={isPatternPanelVisible} />
-      </Panel>
-      <Panel
-        position="bottom-right"
-        className="flex flex-col gap-4 bg-muted text-muted-foreground"
-      >
+
         {isCpmPanelVisible && <CPM />}
+      </Panel>
+
+      <Panel position="bottom-right" className="flex flex-col gap-4">
+        <PatternPanelWithCopy isVisible={isPatternPanelVisible} />
       </Panel>
     </>
   );

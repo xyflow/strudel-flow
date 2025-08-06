@@ -21,13 +21,13 @@ export function PatternPanelWithCopy({ isVisible }: { isVisible: boolean }) {
   };
 
   return (
-    <div className="flex flex-row  bg-card p-4 shadow mt-2 rounded-md border">
-      <pre className="text-xs m-2 w-96 overflow-y-auto">{pattern}</pre>
-      <div className="flex flex-row justify-between items-center">
+    <div className="flex flex-col bg-card p-4 shadow rounded-md border w-[40vw] min-w-[400px] max-w-[60vw]">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-sm font-medium">Generated Pattern</span>
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" className="p-2" onClick={handleCopy}>
-              <Copy />
+            <Button variant="ghost" size="sm" onClick={handleCopy}>
+              <Copy className="w-4 h-4" />
             </Button>
           </PopoverTrigger>
           {isCopied && (
@@ -41,6 +41,9 @@ export function PatternPanelWithCopy({ isVisible }: { isVisible: boolean }) {
           )}
         </Popover>
       </div>
+      <pre className="text-xs font-mono bg-muted p-3 rounded overflow-auto max-h-[30vh] min-h-[15vh] whitespace-pre-wrap">
+        {pattern}
+      </pre>
     </div>
   );
 }
