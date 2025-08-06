@@ -25,6 +25,7 @@ export interface KeyScaleOctaveControlsProps {
   showKey?: boolean;
   showScale?: boolean;
   showOctave?: boolean;
+  allowedScales?: string[];
 }
 
 export interface PadControlsProps {
@@ -57,6 +58,7 @@ function KeyScaleOctaveControls({
   showKey = true,
   showScale = true,
   showOctave = true,
+  allowedScales,
 }: KeyScaleOctaveControlsProps) {
   return (
     <div className="flex flex-wrap gap-2 w-0 min-w-full">
@@ -85,7 +87,10 @@ function KeyScaleOctaveControls({
               <SelectValue placeholder="Scale" />
             </SelectTrigger>
             <SelectContent>
-              {SCALE_TYPE_OPTIONS.map((scaleType) => (
+              {SCALE_TYPE_OPTIONS.filter(
+                (scaleType) =>
+                  !allowedScales || allowedScales.includes(scaleType.value)
+              ).map((scaleType) => (
                 <SelectItem key={scaleType.value} value={scaleType.value}>
                   {scaleType.label}
                 </SelectItem>

@@ -95,11 +95,13 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
     updateNode,
   ]);
 
-  const currentScaleDegrees = SCALE_DEGREES[scaleType];
+  const currentScaleDegrees =
+    SCALE_DEGREES[scaleType as keyof typeof SCALE_DEGREES] ||
+    SCALE_DEGREES.major;
 
   return (
     <WorkflowNode id={id} data={data} type={type}>
-      <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md w-80">
+      <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md w-full">
         <div className="relative">
           <div className="flex gap-0.5">
             {currentScaleDegrees.map((scaleDegree, index) => {
@@ -112,22 +114,22 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
                     text-xs font-mono font-bold flex flex-col items-center justify-end pb-2
                     ${
                       isPressed
-                        ? 'bg-blue-500 text-white border-blue-600 shadow-inner'
-                        : 'bg-primary text-gray-700 hover:bg-gray-50 shadow-sm hover:shadow-md'
+                        ? 'bg-primary text-primary-foreground border-primary shadow-inner'
+                        : 'bg-background text-foreground hover:bg-muted shadow-sm hover:shadow-md'
                     }
                     ${
                       scaleDegree.quality === 'major'
-                        ? 'border-b-4 border-b-blue-200'
+                        ? 'border-b-4 border-b-primary/30'
                         : ''
                     }
                     ${
                       scaleDegree.quality === 'minor'
-                        ? 'border-b-4 border-b-green-200'
+                        ? 'border-b-4 border-b-accent/30'
                         : ''
                     }
                     ${
                       scaleDegree.quality === 'diminished'
-                        ? 'border-b-4 border-b-red-200'
+                        ? 'border-b-4 border-b-destructive/30'
                         : ''
                     }
                   `}
@@ -144,15 +146,15 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
         </div>
         <div className="text-xs text-muted-foreground flex gap-4">
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-blue-200 rounded"></div>
+            <div className="w-3 h-3 bg-primary/30 rounded"></div>
             <span>Major</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-green-200 rounded"></div>
+            <div className="w-3 h-3 bg-accent/30 rounded"></div>
             <span>Minor</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-red-200 rounded"></div>
+            <div className="w-3 h-3 bg-destructive/30 rounded"></div>
             <span>Diminished</span>
           </div>
         </div>
@@ -162,10 +164,15 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
             selectedKey,
             onKeyChange: (key) => updateNodeData(id, { selectedKey: key }),
             selectedScale: scaleType,
-            onScaleChange: (scale) =>
-              updateNodeData(id, { scaleType: scale as 'major' | 'minor' }),
+            onScaleChange: (scale) => {
+              // Only allow major and minor scales for chord node
+              if (scale === 'major' || scale === 'minor') {
+                updateNodeData(id, { scaleType: scale });
+              }
+            },
             octave,
             onOctaveChange: (oct) => updateNodeData(id, { octave: oct }),
+            allowedScales: ['major', 'minor'],
           }}
           chordControlsProps={{
             chordComplexity,
