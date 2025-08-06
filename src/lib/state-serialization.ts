@@ -1,5 +1,6 @@
-// Pattern A: Simplified state serialization - no StrudelConfig needed
-// All data is now stored in node.data and serialized automatically
+/**
+ * State serialization utilities for workflow persistence
+ */
 import { compressToBase64, decompressFromBase64 } from 'lz-string';
 import { Node, Edge, ColorMode } from '@xyflow/react';
 
@@ -19,21 +20,12 @@ export function serializeState(
   theme: string,
   colorMode: ColorMode
 ): string {
-  const state: SerializableState = {
-    nodes,
-    edges,
-    theme,
-    colorMode,
-  };
-
-  const jsonString = JSON.stringify(state);
-  const compressed = compressToBase64(jsonString);
-
-  return compressed;
+  const state: SerializableState = { nodes, edges, theme, colorMode };
+  return compressToBase64(JSON.stringify(state));
 }
 
 /**
- * Deserialize a compressed base64 string back to nodes, edges, and config
+ * Deserialize a compressed base64 string back to nodes, edges, and theme
  */
 export function deserializeState(compressed: string): SerializableState | null {
   try {
@@ -57,20 +49,15 @@ export function generateShareableUrl(
   theme: string,
   colorMode: ColorMode
 ): string {
-  const compressed = serializeState(nodes, edges, theme, colorMode);
-  const currentUrl = new URL(window.location.href);
-  currentUrl.searchParams.set('state', compressed);
-  return currentUrl.toString();
+  const url = new URL(window.location.href);
+  url.searchParams.set('state', serializeState(nodes, edges, theme, colorMode));
+  return url.toString();
 }
 
 /**
  * Load state from URL parameters
  */
 export function loadStateFromUrl(): SerializableState | null {
-  const urlParams = new URLSearchParams(window.location.search);
-  const stateParam = urlParams.get('state');
-
-  if (!stateParam) return null;
-
-  return deserializeState(stateParam);
+  const stateParam = new URLSearchParams(window.location.search).get('state');
+  return stateParam ? deserializeState(stateParam) : null;
 }

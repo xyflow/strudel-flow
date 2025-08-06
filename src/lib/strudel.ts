@@ -1,5 +1,5 @@
 /**
- * Simplified Strudel pattern generation
+ * Strudel pattern generation and optimization
  */
 
 import { Edge } from '@xyflow/react';
@@ -34,7 +34,6 @@ function optimizeSoundCalls(strudelString: string): string {
  */
 function isSoundSource(node: AppNode): boolean {
   const category = nodesConfig[node.type]?.category;
-  // Only Instruments generate patterns, Sounds are effects that modify patterns
   return category === 'Instruments';
 }
 
@@ -44,86 +43,75 @@ function isSoundSource(node: AppNode): boolean {
 export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
   const cpm = useStrudelStore.getState().cpm;
 
-  // Generate patterns for all nodes
   const nodePatterns: Record<string, string> = {};
-  nodes.forEach((node) => {
+  for (const node of nodes) {
     const strudelOutput = getNodeStrudelOutput(node.type);
-    if (strudelOutput) {
-      try {
-        const pattern = strudelOutput(node, '');
-        if (pattern && typeof pattern === 'string' && pattern.trim()) {
-          nodePatterns[node.id] = pattern;
-        }
-      } catch (err) {
-        console.warn(`Error generating pattern for node ${node.type}:`, err);
-      }
-    }
-  });
+    if (!strudelOutput) continue;
 
-  // Find connected components and build patterns
+    try {
+      const pattern = strudelOutput(node, '');
+      if (pattern?.trim()) {
+        nodePatterns[node.id] = pattern;
+      }
+    } catch (err) {
+      console.warn(`Error generating pattern for node ${node.type}:`, err);
+    }
+  }
+
   const components = findConnectedComponents(nodes, edges);
   const finalPatterns: { pattern: string; paused: boolean }[] = [];
 
-  components.forEach((componentNodeIds) => {
-    // Get nodes in this component
+  for (const componentNodeIds of components) {
     const componentNodes = componentNodeIds
       .map((id) => nodes.find((n) => n.id === id))
       .filter(Boolean) as AppNode[];
 
-    // Separate sources from effects
-    const sources = componentNodes.filter(isSoundSource);
-    const effects = componentNodes.filter((node) => !isSoundSource(node));
+    const [sources, effects] = componentNodes.reduce<[AppNode[], AppNode[]]>(
+      ([src, eff], node) => {
+        isSoundSource(node) ? src.push(node) : eff.push(node);
+        return [src, eff];
+      },
+      [[], []]
+    );
 
-    const allSourcesPaused =
-      sources.length > 0 &&
-      sources.every((node) => node.data.state === 'paused');
+    if (sources.length === 0) continue;
 
-    // Build base pattern from sources
-    // If all sources are paused, we'll generate the full stack and comment it out
-    // Otherwise, only stack active nodes
-    const patternsToStack = allSourcesPaused
-      ? sources
-      : sources.filter((node) => node.data.state !== 'paused');
-
-    const sourcePatterns = patternsToStack
+    const allSourcesPaused = sources.every(
+      (node) => node.data.state === 'paused'
+    );
+    const activePatterns = (
+      allSourcesPaused
+        ? sources
+        : sources.filter((node) => node.data.state !== 'paused')
+    )
       .map((node) => nodePatterns[node.id])
       .filter(Boolean);
 
-    let basePattern = '';
-    if (sourcePatterns.length === 1) {
-      basePattern = sourcePatterns[0];
-    } else if (sourcePatterns.length > 1) {
-      basePattern = `stack(${sourcePatterns.join(', ')})`;
+    if (activePatterns.length === 0) continue;
+
+    let pattern =
+      activePatterns.length === 1
+        ? activePatterns[0]
+        : `stack(${activePatterns.join(', ')})`;
+
+    for (const effect of effects) {
+      const strudelOutput = getNodeStrudelOutput(effect.type);
+      if (strudelOutput && pattern) {
+        pattern = strudelOutput(effect, pattern);
+      }
     }
 
-    // Apply effects in sequence
-    let finalPattern = basePattern;
-    effects.forEach((effect) => {
-      const strudelOutput = getNodeStrudelOutput(effect.type);
-      if (strudelOutput && finalPattern) {
-        finalPattern = strudelOutput(effect, finalPattern);
-      }
-    });
-
-    if (finalPattern) {
-      // Apply optimization to the final pattern
+    if (pattern) {
       finalPatterns.push({
-        pattern: optimizeSoundCalls(finalPattern),
+        pattern: optimizeSoundCalls(pattern),
         paused: allSourcesPaused,
       });
     }
-  });
+  }
 
-  // Format result
   if (finalPatterns.length === 0) return '';
 
-  const validPatterns = finalPatterns.filter(
-    ({ pattern }) => pattern && typeof pattern === 'string' && pattern.trim()
-  );
-
-  if (validPatterns.length === 0) return '';
-
-  const result = validPatterns
+  const result = finalPatterns
     .map(({ pattern, paused }) => {
       const line = `$: ${pattern}`;
       return paused ? `// ${line}` : line;

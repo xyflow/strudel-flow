@@ -11,11 +11,8 @@ export function useWorkflowRunner() {
   const setPattern = useStrudelStore((s) => s.setPattern);
   const cpm = useStrudelStore((s) => s.cpm);
 
-  // Watch for changes in nodes/edges and regenerate pattern
   const nodes = useAppStore((state) => state.nodes);
   const edges = useAppStore((state) => state.edges);
-
-  // Generate pattern when nodes/edges change
   useEffect(() => {
     const newPattern = generateOutput(nodes, edges);
 
@@ -23,7 +20,6 @@ export function useWorkflowRunner() {
       setPattern(newPattern);
     }
 
-    // If pattern is empty or becomes empty, hush immediately
     if (!newPattern.trim() && isRunning.current) {
       console.log('Pattern is empty, stopping workflow...');
       hush();
@@ -37,12 +33,9 @@ export function useWorkflowRunner() {
       .filter((line) => !line.trim().startsWith('//'))
       .join('\n');
 
-    // Check if pattern is empty or only contains setcpm without actual pattern
-    const patternWithoutSetcpm = activePattern
-      .replace(/setcpm\(\d+\)\s*/g, '')
-      .trim();
+    const hasContent = activePattern.replace(/setcpm\(\d+\)\s*/g, '').trim();
 
-    if (!activePattern.trim() || !patternWithoutSetcpm) {
+    if (!hasContent) {
       console.log('No active pattern to evaluate.');
       if (isRunning.current) {
         hush();
@@ -62,12 +55,12 @@ export function useWorkflowRunner() {
     try {
       evaluate(activePattern);
     } catch (err) {
-      // Suppress common Strudel errors that don't affect functionality
       const errorMessage = err instanceof Error ? err.message : String(err);
-      if (
+      const isKnownWarning =
         errorMessage.includes('got "undefined" instead of pattern') ||
-        errorMessage.includes('Cannot read properties of undefined')
-      ) {
+        errorMessage.includes('Cannot read properties of undefined');
+
+      if (isKnownWarning) {
         console.warn('Strudel pattern warning (suppressed):', errorMessage);
       } else {
         console.error('Strudel evaluation error:', err);

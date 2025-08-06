@@ -1,4 +1,6 @@
-// Pattern A: Simplified URL state loading - all data is in node.data
+/**
+ * Hook to load workflow state from URL parameters
+ */
 import { useEffect } from 'react';
 import { useAppStore } from '@/store/app-context';
 import { loadStateFromUrl } from '@/lib/state-serialization';
@@ -23,7 +25,7 @@ export function useUrlStateLoader() {
         edgeCount: urlState.edges.length,
       });
 
-      // Cast the nodes to AppNode type and set all nodes to paused state
+      // Set all nodes to paused state on load
       const nodes = (urlState.nodes as AppNode[]).map((node) => ({
         ...node,
         data: {
@@ -31,11 +33,9 @@ export function useUrlStateLoader() {
           state: 'paused' as const,
         },
       }));
-      const edges = urlState.edges;
 
-      // Restore nodes and edges (Pattern A: all data is in node.data automatically)
       setNodes(nodes);
-      setEdges(edges);
+      setEdges(urlState.edges);
 
       // Restore theme settings
       if (urlState.theme) {
