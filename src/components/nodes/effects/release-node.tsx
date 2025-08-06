@@ -1,13 +1,11 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Slider } from '@/components/ui/slider';
 
 export function ReleaseNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-  const release = useStrudelStore((state) =>
-    parseFloat(state.config[id]?.release || '0.1')
-  );
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+  const release = parseFloat(data.release || '0.1');
 
   return (
     <WorkflowNode id={id} data={data}>
@@ -19,11 +17,11 @@ export function ReleaseNode({ id, data }: WorkflowNodeProps) {
           <Slider
             value={[release]}
             onValueChange={(value) =>
-              updateNode(id, { release: value[0].toString() })
+              updateNodeData(id, { release: value[0].toString() })
             }
-            min={0.01}
-            max={3.0}
-            step={0.01}
+            min={0.001}
+            max={2.0}
+            step={0.001}
             className="w-full"
           />
         </div>
@@ -33,9 +31,9 @@ export function ReleaseNode({ id, data }: WorkflowNodeProps) {
 }
 
 ReleaseNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const release = useStrudelStore.getState().config[node.id]?.release;
-  if (!release) return strudelString;
+  const release = parseFloat(node.data.release || '0.1');
+  if (release === 0.1) return strudelString; // Skip if default value
 
-  const releaseCall = `release(${release})`;
+  const releaseCall = `release("${release}")`;
   return strudelString ? `${strudelString}.${releaseCall}` : releaseCall;
 };

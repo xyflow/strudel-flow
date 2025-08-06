@@ -1,19 +1,18 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Slider } from '@/components/ui/slider';
 
 export function PhaserNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-  const config = useStrudelStore((state) => state.config[id]);
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
   // Extract values or set defaults
-  const speed = config?.phaser ? parseFloat(config.phaser) : 1;
-  const depth = config?.phaserdepth ? parseFloat(config.phaserdepth) : 0.5;
+  const speed = data.phaser ? parseFloat(data.phaser) : 1;
+  const depth = data.phaserdepth ? parseFloat(data.phaserdepth) : 0.5;
 
   // Handler for speed changes
   const handleSpeedChange = (value: number[]) => {
-    updateNode(id, {
+    updateNodeData(id, {
       phaser: value[0].toString(),
       phaserdepth: depth.toString(),
     });
@@ -21,7 +20,7 @@ export function PhaserNode({ id, data }: WorkflowNodeProps) {
 
   // Handler for depth changes
   const handleDepthChange = (value: number[]) => {
-    updateNode(id, {
+    updateNodeData(id, {
       phaser: speed.toString(),
       phaserdepth: value[0].toString(),
     });
@@ -92,9 +91,8 @@ export function PhaserNode({ id, data }: WorkflowNodeProps) {
 }
 
 PhaserNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const config = useStrudelStore.getState().config[node.id];
-  const phaser = config?.phaser;
-  const phaserdepth = config?.phaserdepth;
+  const phaser = node.data.phaser;
+  const phaserdepth = node.data.phaserdepth;
 
   if (!phaser || !phaserdepth) return strudelString;
 

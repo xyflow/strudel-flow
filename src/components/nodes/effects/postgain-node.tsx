@@ -1,31 +1,26 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Slider } from '@/components/ui/slider';
 
 export function PostGainNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-  const postgain = useStrudelStore((state) =>
-    state.config[id]?.postgain ? parseFloat(state.config[id].postgain!) : 1.5
-  );
-
-  // Handler for postgain changes
-  const handlePostgainChange = (value: number[]) => {
-    updateNode(id, { postgain: value[0].toString() });
-  };
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+  const postgain = parseFloat(data.postgain || '1');
 
   return (
     <WorkflowNode id={id} data={data}>
       <div className="space-y-3 p-3">
         <div>
           <label className="text-xs text-muted-foreground mb-2 block">
-            PostGain: {postgain.toFixed(1)}
+            Post Gain: {postgain.toFixed(1)}x
           </label>
           <Slider
             value={[postgain]}
-            onValueChange={handlePostgainChange}
+            onValueChange={(value) =>
+              updateNodeData(id, { postgain: value[0].toString() })
+            }
             min={0.1}
-            max={5.0}
+            max={5}
             step={0.1}
             className="w-full"
           />
@@ -36,8 +31,8 @@ export function PostGainNode({ id, data }: WorkflowNodeProps) {
 }
 
 PostGainNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const postgain = useStrudelStore.getState().config[node.id]?.postgain;
-  if (!postgain) return strudelString;
+  const postgain = parseFloat(node.data.postgain || '1');
+  if (postgain === 1) return strudelString; // Skip if default value
 
   const postgainCall = `postgain(${postgain})`;
   return strudelString ? `${strudelString}.${postgainCall}` : postgainCall;

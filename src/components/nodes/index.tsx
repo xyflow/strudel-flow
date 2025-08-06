@@ -18,7 +18,7 @@ import { BeatMachineNode } from './instruments/beat-machine-node';
 // Effects
 import { MaskNode } from './effects/mask-node';
 import { PlyNode } from './effects/ply-node';
-import { FMNode } from './effects/fm-node';
+import { FmNode } from './effects/fm-node';
 import { LateNode } from './effects/late-node';
 import { PalindromeNode } from './effects/palindrome-node';
 import { RoomNode } from './effects/room-node';
@@ -84,6 +84,41 @@ export type WorkflowNodeData = {
   // Arpeggiator node data
   selectedPattern?: string;
   selectedChordType?: string;
+
+  gain?: string;
+  pan?: string;
+  fast?: string;
+  slow?: string;
+  attack?: string;
+  release?: string;
+  sustain?: string;
+  crush?: string;
+  postgain?: string;
+  fm?: string;
+  distort?: string;
+  lpf?: string;
+  jux?: string;
+  phaser?: string;
+  phaserdepth?: string;
+  room?: string;
+  roomsize?: string;
+  roomfade?: string;
+  roomlp?: string;
+  roomdim?: string;
+  // Complex effect node data
+  maskPattern?: string;
+  maskProbability?: string;
+  maskPatternId?: string;
+  maskProbabilityId?: string;
+  plyMultiplier?: string;
+  plyProbability?: string;
+  plyMultiplierId?: string;
+  plyProbabilityId?: string;
+  lateOffset?: string;
+  latePattern?: string;
+  lateOffsetId?: string;
+  latePatternId?: string;
+  // Note: Simple effects like rev, palindrome don't need data storage
 };
 
 export type WorkflowNodeProps = NodeProps<Node<WorkflowNodeData>> & {
@@ -299,7 +334,7 @@ export const nodeTypes = {
   'slow-node': SlowNode,
   'mask-node': MaskNode,
   'ply-node': PlyNode,
-  'fm-node': FMNode,
+  'fm-node': FmNode,
   'late-node': LateNode,
 };
 

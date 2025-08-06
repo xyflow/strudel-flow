@@ -1,29 +1,27 @@
+// Pattern A: Simplified state serialization - no StrudelConfig needed
+// All data is now stored in node.data and serialized automatically
 import { compressToBase64, decompressFromBase64 } from 'lz-string';
 import { Node, Edge, ColorMode } from '@xyflow/react';
-import { StrudelConfig } from '@/types';
 
 export interface SerializableState {
   nodes: Node[];
   edges: Edge[];
-  strudelConfig: Record<string, StrudelConfig>;
   theme: string;
   colorMode: ColorMode;
 }
 
 /**
- * Serialize nodes, edges, strudel config, and theme to a compressed base64 string
+ * Serialize nodes, edges, and theme to a compressed base64 string
  */
 export function serializeState(
   nodes: Node[],
   edges: Edge[],
-  strudelConfig: Record<string, StrudelConfig>,
   theme: string,
   colorMode: ColorMode
 ): string {
   const state: SerializableState = {
     nodes,
     edges,
-    strudelConfig,
     theme,
     colorMode,
   };
@@ -56,17 +54,10 @@ export function deserializeState(compressed: string): SerializableState | null {
 export function generateShareableUrl(
   nodes: Node[],
   edges: Edge[],
-  strudelConfig: Record<string, StrudelConfig>,
   theme: string,
   colorMode: ColorMode
 ): string {
-  const compressed = serializeState(
-    nodes,
-    edges,
-    strudelConfig,
-    theme,
-    colorMode
-  );
+  const compressed = serializeState(nodes, edges, theme, colorMode);
   const currentUrl = new URL(window.location.href);
   currentUrl.searchParams.set('state', compressed);
   return currentUrl.toString();

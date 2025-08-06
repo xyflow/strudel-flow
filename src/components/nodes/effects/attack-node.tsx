@@ -1,13 +1,11 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Slider } from '@/components/ui/slider';
 
 export function AttackNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-  const attack = useStrudelStore((state) =>
-    parseFloat(state.config[id]?.attack || '0.01')
-  );
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+  const attack = parseFloat(data.attack || '0.01');
 
   return (
     <WorkflowNode id={id} data={data}>
@@ -19,7 +17,7 @@ export function AttackNode({ id, data }: WorkflowNodeProps) {
           <Slider
             value={[attack]}
             onValueChange={(value) =>
-              updateNode(id, { attack: value[0].toString() })
+              updateNodeData(id, { attack: value[0].toString() })
             }
             min={0.001}
             max={2.0}
@@ -33,8 +31,8 @@ export function AttackNode({ id, data }: WorkflowNodeProps) {
 }
 
 AttackNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const attack = useStrudelStore.getState().config[node.id]?.attack;
-  if (!attack) return strudelString;
+  const attack = parseFloat(node.data.attack || '0.01');
+  if (attack === 0.01) return strudelString; // Skip if default value
 
   const attackCall = `attack("${attack}")`;
   return strudelString ? `${strudelString}.${attackCall}` : attackCall;

@@ -1,7 +1,7 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import { useState, useEffect } from 'react';
 import { getNodeStrudelOutput } from '@/lib/node-registry';
 import { useReactFlow } from '@xyflow/react';
+import { useAppStore } from '@/store/app-context';
 import { AppNode } from '@/components/nodes';
 
 export default function PatternPopup({
@@ -14,11 +14,11 @@ export default function PatternPopup({
   rows?: number;
 }) {
   const { getNode } = useReactFlow();
-  // Subscribe to the specific node's config to trigger re-renders
-  const nodeConfig = useStrudelStore((state) => state.config[id]);
+  // Subscribe to nodes to trigger re-renders when node data changes
+  const nodes = useAppStore((state) => state.nodes);
   const [strudelPattern, setStrudelPattern] = useState('');
 
-  // Update pattern whenever the node's config changes
+  // Update pattern whenever the node's data changes
   useEffect(() => {
     const node = getNode(id);
     if (!node || !node.type) {
@@ -33,7 +33,7 @@ export default function PatternPopup({
     } else {
       setStrudelPattern('');
     }
-  }, [getNode, id, nodeConfig]);
+  }, [getNode, id, nodes]);
 
   return (
     <div

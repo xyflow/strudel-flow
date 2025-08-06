@@ -1,17 +1,15 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Slider } from '@/components/ui/slider';
 
 export function FastNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-  const factor = useStrudelStore((state) =>
-    state.config[id]?.fast ? parseFloat(state.config[id].fast!) : 2
-  );
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+  const factor = data.fast ? parseFloat(data.fast) : 2;
 
   const handleSliderChange = (values: number[]) => {
     const value = values[0];
-    updateNode(id, { fast: value.toString() });
+    updateNodeData(id, { fast: value.toString() });
   };
 
   return (
@@ -41,8 +39,8 @@ export function FastNode({ id, data }: WorkflowNodeProps) {
 }
 
 FastNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const fast = useStrudelStore.getState().config[node.id]?.fast;
-  if (!fast) return strudelString;
+  const fast = node.data.fast ? parseFloat(node.data.fast) : 2;
+  if (fast === 2) return strudelString; // Skip if default value
 
   const fastCall = `fast(${fast})`;
   return strudelString ? `${strudelString}.${fastCall}` : fastCall;

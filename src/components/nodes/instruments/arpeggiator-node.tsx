@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { useAppStore } from '@/store/app-context';
@@ -78,7 +76,6 @@ function ArpeggioVisualizer({
 
 export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
-  const updateNode = useStrudelStore((state) => state.updateNode);
 
   // Use node data directly with defaults
   const selectedPattern = data.selectedPattern || '';
@@ -86,40 +83,6 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
   const selectedChordType = data.selectedChordType || 'major';
   const selectedKey = data.selectedKey || 'C';
 
-  useEffect(() => {
-    const hasSelection = selectedPattern;
-
-    if (!hasSelection) {
-      updateNode(id, {
-        arpPattern: undefined,
-        arpOctaves: undefined,
-        arpChordType: undefined,
-        arpKey: undefined,
-      });
-      return;
-    }
-
-    const patternId = selectedPattern || 'up';
-    const octaves = octave || 1;
-    const chordTypeId = selectedChordType || 'major';
-    const key = selectedKey || 'C';
-
-    const patternData = ARP_PATTERNS.find((p) => p.id === patternId);
-
-    if (patternData) {
-      const finalPattern = expandPatternAcrossOctaves(
-        patternData.pattern,
-        octaves
-      );
-
-      updateNode(id, {
-        arpPattern: finalPattern,
-        arpOctaves: octaves,
-        arpChordType: chordTypeId,
-        arpKey: key,
-      });
-    }
-  }, [selectedPattern, octave, selectedChordType, selectedKey, id, updateNode]);
 
   return (
     <WorkflowNode id={id} data={data} type={type}>
@@ -176,14 +139,19 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
 }
 
 ArpeggiatorNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const config = useStrudelStore.getState().config[node.id];
-  const pattern = config?.arpPattern;
-  const chordType = config?.arpChordType;
-  const key = config?.arpKey;
+  const data = node.data;
+  const selectedPattern = data.selectedPattern || '';
+  const octave = data.octave || 1;
+  const selectedChordType = data.selectedChordType || 'major';
+  const selectedKey = data.selectedKey || 'C';
 
-  if (!pattern || !chordType || !key) return strudelString;
+  if (!selectedPattern) return strudelString;
 
-  const arpCall = `n("${pattern}").scale("${key}4:${chordType}")`;
+  const patternData = ARP_PATTERNS.find((p) => p.id === selectedPattern);
+  if (!patternData) return strudelString;
+
+  const finalPattern = expandPatternAcrossOctaves(patternData.pattern, octave);
+  const arpCall = `n("${finalPattern}").scale("${selectedKey}4:${selectedChordType}")`;
 
   return strudelString ? `${strudelString}.stack(${arpCall})` : arpCall;
 };

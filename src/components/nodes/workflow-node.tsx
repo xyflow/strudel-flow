@@ -36,7 +36,6 @@ function WorkflowNode({
 
   const { runWorkflow } = useWorkflowRunner();
   const [show, setShow] = useState(false);
-  const removeNodeConfig = useStrudelStore((state) => state.removeNodeConfig);
 
   const { removeNode, edges, nodes, updateNodeData } = useAppStore(
     (state) => state
@@ -76,9 +75,8 @@ function WorkflowNode({
   }, [connectedNodeIds, updateNodeData]);
 
   const onDelete = useCallback(() => {
-    removeNodeConfig(id);
     removeNode(id);
-  }, [id, removeNode, removeNodeConfig]);
+  }, [id, removeNode]);
 
   const IconComponent = data?.icon ? iconMapping[data.icon] : undefined;
 

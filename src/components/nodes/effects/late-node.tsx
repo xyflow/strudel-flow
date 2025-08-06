@@ -1,4 +1,4 @@
-import { useStrudelStore } from '@/store/strudel-store';
+import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { Button } from '@/components/ui/button';
@@ -39,12 +39,11 @@ const LATE_PATTERNS = [
 ];
 
 export function LateNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Read current values from Strudel store
-  const config = useStrudelStore((state) => state.config[id] || {});
-  const selectedOffset = config.lateOffsetId || 'small';
-  const selectedPattern = config.latePatternId || 'constant';
+  // Read current values from node.data
+  const selectedOffset = data.lateOffsetId || 'small';
+  const selectedPattern = data.latePatternId || 'constant';
 
   const handleOffsetChange = (offsetId: string) => {
     const offsetData = LATE_OFFSETS.find((o) => o.id === offsetId);
@@ -61,7 +60,7 @@ export function LateNode({ id, data }: WorkflowNodeProps) {
         finalPattern = offsetData.offset;
       }
 
-      updateNode(id, {
+      updateNodeData(id, {
         lateOffsetId: offsetId,
         lateOffset: offsetData.offset,
         latePattern: finalPattern,
@@ -84,7 +83,7 @@ export function LateNode({ id, data }: WorkflowNodeProps) {
         finalPattern = offsetData.offset;
       }
 
-      updateNode(id, {
+      updateNodeData(id, {
         latePatternId: patternId,
         lateOffset: offsetData.offset,
         latePattern: finalPattern,
@@ -133,9 +132,8 @@ export function LateNode({ id, data }: WorkflowNodeProps) {
 }
 
 LateNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const config = useStrudelStore.getState().config[node.id];
-  const offset = config?.lateOffset;
-  const pattern = config?.latePattern;
+  const offset = node.data.lateOffset;
+  const pattern = node.data.latePattern;
 
   if (!offset) return strudelString;
 

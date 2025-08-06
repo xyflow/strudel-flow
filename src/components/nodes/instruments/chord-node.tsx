@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { useAppStore } from '@/store/app-context';
@@ -50,7 +48,6 @@ const getChordNotes = (
 
 export function ChordNode({ id, data, type }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
-  const updateNode = useStrudelStore((state) => state.updateNode);
 
   // Use node data directly with defaults
   const selectedKey = data.selectedKey || 'C';
@@ -70,30 +67,6 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
     updateNodeData(id, { pressedKeys: Array.from(newPressed) });
   };
 
-  useEffect(() => {
-    if (pressedKeys.length === 0) {
-      updateNode(id, { notes: '' });
-      return;
-    }
-
-    const chords = pressedKeys
-      .sort((a, b) => a - b)
-      .map((scaleStep) => getChordNotes(scaleStep, chordComplexity));
-
-    const pattern = chords.join(' ');
-    updateNode(id, {
-      notes: pattern,
-      scale: `${selectedKey}${octave}:${scaleType}`,
-    });
-  }, [
-    pressedKeys,
-    selectedKey,
-    scaleType,
-    chordComplexity,
-    octave,
-    id,
-    updateNode,
-  ]);
 
   const currentScaleDegrees =
     SCALE_DEGREES[scaleType as keyof typeof SCALE_DEGREES] ||
@@ -187,10 +160,24 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
 }
 
 ChordNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const notes = useStrudelStore.getState().config[node.id]?.notes;
-  const scale = useStrudelStore.getState().config[node.id]?.scale;
+  const data = node.data;
 
-  if (!notes) return strudelString;
+  // Get data directly from node.data with defaults
+  const pressedKeys = data.pressedKeys || [];
+  const selectedKey = data.selectedKey || 'C';
+  const scaleType = data.scaleType || 'major';
+  const chordComplexity = data.chordComplexity || 'triad';
+  const octave = data.octave || 4;
+
+  if (pressedKeys.length === 0) return strudelString;
+
+  // Process chords inline (same logic as before)
+  const chords = pressedKeys
+    .sort((a, b) => a - b)
+    .map((scaleStep) => getChordNotes(scaleStep, chordComplexity));
+
+  const notes = chords.join(' ');
+  const scale = `${selectedKey}${octave}:${scaleType}`;
 
   const calls = [];
   calls.push(`n("${notes}")`);

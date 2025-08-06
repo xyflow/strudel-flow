@@ -5,21 +5,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useStrudelStore } from '@/store/strudel-store';
+import { useAppStore } from '@/store/app-context';
 import { WorkflowNodeProps, AppNode } from '..';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { DRUM_OPTIONS } from '@/data/sound-options';
 
 export function DrumSoundsNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Get current sound from strudel store
-  const currentSound = useStrudelStore(
-    (state) => state.config[id]?.sound || ''
-  );
+  // Get current sound from node.data
+  const currentSound = data.sound || '';
 
   const handleValueChange = (value: string) => {
-    updateNode(id, { sound: value });
+    updateNodeData(id, { sound: value });
   };
 
   return (
@@ -43,7 +41,7 @@ export function DrumSoundsNode({ id, data }: WorkflowNodeProps) {
 }
 
 DrumSoundsNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const sound = useStrudelStore.getState().config[node.id]?.sound;
+  const sound = node.data.sound;
   if (!sound) return strudelString;
 
   const soundCall = `sound("${sound}")`;

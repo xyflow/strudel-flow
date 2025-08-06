@@ -1,6 +1,6 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
-import { useStrudelStore } from '@/store/strudel-store';
+import { useAppStore } from '@/store/app-context';
 import { Button } from '@/components/ui/button';
 
 const PLY_MULTIPLIERS = [
@@ -50,17 +50,16 @@ const PROBABILITY_OPTIONS = [
 ];
 
 export function PlyNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Read current values from Strudel store
-  const config = useStrudelStore((state) => state.config[id] || {});
-  const selectedMultiplier = config.plyMultiplierId || 'x2';
-  const selectedProbability = config.plyProbabilityId || 'always';
+  // Read current values from node.data
+  const selectedMultiplier = data.plyMultiplierId || 'x2';
+  const selectedProbability = data.plyProbabilityId || 'always';
 
   const handleMultiplierChange = (multiplierId: string) => {
     const multiplierData = PLY_MULTIPLIERS.find((m) => m.id === multiplierId);
     if (multiplierData) {
-      updateNode(id, {
+      updateNodeData(id, {
         plyMultiplierId: multiplierId,
         plyMultiplier: multiplierData.multiplier,
       });
@@ -72,7 +71,7 @@ export function PlyNode({ id, data }: WorkflowNodeProps) {
       (p) => p.id === probabilityId
     );
     if (probabilityData) {
-      updateNode(id, {
+      updateNodeData(id, {
         plyProbabilityId: probabilityId,
         plyProbability: probabilityData.probability,
       });
@@ -125,9 +124,8 @@ export function PlyNode({ id, data }: WorkflowNodeProps) {
 }
 
 PlyNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const config = useStrudelStore.getState().config[node.id];
-  const multiplier = config?.plyMultiplier;
-  const probability = config?.plyProbability;
+  const multiplier = node.data.plyMultiplier;
+  const probability = node.data.plyProbability;
 
   if (!multiplier) return strudelString;
 

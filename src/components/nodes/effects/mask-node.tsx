@@ -1,4 +1,4 @@
-import { useStrudelStore } from '@/store/strudel-store';
+import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { Button } from '@/components/ui/button';
@@ -65,17 +65,16 @@ const PROBABILITY_OPTIONS = [
 ];
 
 export function MaskNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Read current values from Strudel store
-  const config = useStrudelStore((state) => state.config[id] || {});
-  const selectedPattern = config.maskPatternId || 'half';
-  const selectedProbability = config.maskProbabilityId || 'always';
+  // Read current values from node.data
+  const selectedPattern = data.maskPatternId || 'half';
+  const selectedProbability = data.maskProbabilityId || 'always';
 
   const handlePatternChange = (patternId: string) => {
     const patternData = MASK_PATTERNS.find((p) => p.id === patternId);
     if (patternData) {
-      updateNode(id, {
+      updateNodeData(id, {
         maskPatternId: patternId,
         maskPattern: patternData.pattern,
       });
@@ -87,7 +86,7 @@ export function MaskNode({ id, data }: WorkflowNodeProps) {
       (p) => p.id === probabilityId
     );
     if (probabilityData) {
-      updateNode(id, {
+      updateNodeData(id, {
         maskProbabilityId: probabilityId,
         maskProbability: probabilityData.probability,
       });
@@ -138,9 +137,8 @@ export function MaskNode({ id, data }: WorkflowNodeProps) {
 }
 
 MaskNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const config = useStrudelStore.getState().config[node.id];
-  const pattern = config?.maskPattern;
-  const probability = config?.maskProbability;
+  const pattern = node.data.maskPattern;
+  const probability = node.data.maskProbability;
 
   if (!pattern) return strudelString;
 

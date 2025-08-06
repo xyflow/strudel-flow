@@ -1,17 +1,15 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Slider } from '@/components/ui/slider';
 
 export function SlowNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-  const factor = useStrudelStore((state) =>
-    state.config[id]?.slow ? parseFloat(state.config[id].slow!) : 0.5
-  );
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+  const factor = data.slow ? parseFloat(data.slow) : 0.5;
 
   const handleSliderChange = (values: number[]) => {
     const value = values[0];
-    updateNode(id, { slow: value.toString() });
+    updateNodeData(id, { slow: value.toString() });
   };
 
   return (
@@ -41,8 +39,8 @@ export function SlowNode({ id, data }: WorkflowNodeProps) {
 }
 
 SlowNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const slow = useStrudelStore.getState().config[node.id]?.slow;
-  if (!slow) return strudelString;
+  const slow = node.data.slow ? parseFloat(node.data.slow) : 0.5;
+  if (slow === 0.5) return strudelString; // Skip if default value
 
   const slowCall = `slow(${slow})`;
   return strudelString ? `${strudelString}.${slowCall}` : slowCall;

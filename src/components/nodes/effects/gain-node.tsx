@@ -1,17 +1,15 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Slider } from '@/components/ui/slider';
 
 export function GainNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-  const gain = useStrudelStore((state) =>
-    state.config[id]?.gain ? parseFloat(state.config[id].gain!) : 1
-  );
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+  const gain = data.gain ? parseFloat(data.gain) : 1;
 
   // Handler for gain changes
   const handleGainChange = (value: number[]) => {
-    updateNode(id, { gain: value[0].toString() });
+    updateNodeData(id, { gain: value[0].toString() });
   };
 
   return (
@@ -45,8 +43,8 @@ export function GainNode({ id, data }: WorkflowNodeProps) {
 }
 
 GainNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const gain = useStrudelStore.getState().config[node.id]?.gain;
-  if (!gain) return strudelString;
+  const gain = node.data.gain ? parseFloat(node.data.gain) : 1;
+  if (gain === 1) return strudelString; // Skip if default value
 
   const gainCall = `gain(${gain})`;
   return strudelString ? `${strudelString}.${gainCall}` : gainCall;

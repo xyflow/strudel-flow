@@ -1,10 +1,8 @@
+// Pattern A: Simplified URL state loading - all data is in node.data
 import { useEffect } from 'react';
 import { useAppStore } from '@/store/app-context';
-import { useStrudelStore } from '@/store/strudel-store';
 import { loadStateFromUrl } from '@/lib/state-serialization';
 import { AppNode } from '@/components/nodes';
-import { findConnectedComponents } from '@/lib/graph-utils';
-import { StrudelConfig } from '@/types';
 
 /**
  * Hook to load state from URL parameters on app startup
@@ -13,7 +11,6 @@ export function useUrlStateLoader() {
   const { setNodes, setEdges, setTheme, setColorMode } = useAppStore(
     (state) => state
   );
-  const strudelStore = useStrudelStore();
 
   useEffect(() => {
     const urlState = loadStateFromUrl();
@@ -36,7 +33,7 @@ export function useUrlStateLoader() {
       }));
       const edges = urlState.edges;
 
-      // Restore nodes and edges first (this will trigger PadNode components to restore their internal states)
+      // Restore nodes and edges (Pattern A: all data is in node.data automatically)
       setNodes(nodes);
       setEdges(edges);
 
@@ -46,40 +43,6 @@ export function useUrlStateLoader() {
       }
       if (urlState.colorMode) {
         setColorMode(urlState.colorMode);
-      }
-
-      // Restore Strudel configuration and set everything to paused groups
-      if (urlState.strudelConfig) {
-        // Clear existing config first
-        Object.keys(strudelStore.config).forEach((nodeId) => {
-          strudelStore.removeNodeConfig(nodeId);
-        });
-
-        // Find connected components and restore config directly into paused groups
-        setTimeout(() => {
-          const connectedComponents = findConnectedComponents(nodes, edges);
-
-          connectedComponents.forEach((component) => {
-            if (component.length > 0) {
-              // Create the group config from the restored Strudel config
-              const groupConfigs: Record<string, StrudelConfig> = {};
-              component.forEach((nodeId) => {
-                const nodeConfig = urlState.strudelConfig[nodeId];
-                if (nodeConfig && Object.keys(nodeConfig).length > 0) {
-                  groupConfigs[nodeId] = nodeConfig;
-                }
-              });
-
-              // First restore the config to active state, then pause (which moves it to paused state)
-              if (Object.keys(groupConfigs).length > 0) {
-                // Restore configs to active state
-                Object.entries(groupConfigs).forEach(([nodeId, config]) => {
-                  strudelStore.updateNode(nodeId, config);
-                });
-              }
-            }
-          });
-        }, 100);
       }
     }
   }, [setNodes, setEdges, setTheme, setColorMode]);

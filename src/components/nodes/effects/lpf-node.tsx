@@ -1,13 +1,11 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Slider } from '@/components/ui/slider';
 
 export function LpfNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-  const lpfValue = useStrudelStore(
-    (state) => state.config[id]?.lpf || '1000 1'
-  );
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+  const lpfValue = data.lpf || '1000 1';
 
   // Extract values or set defaults
   const parts = lpfValue.split(' ');
@@ -17,13 +15,13 @@ export function LpfNode({ id, data }: WorkflowNodeProps) {
   // Handler for frequency changes
   const handleFrequencyChange = (value: number[]) => {
     const newFrequency = value[0];
-    updateNode(id, { lpf: `${newFrequency} ${resonance}` });
+    updateNodeData(id, { lpf: `${newFrequency} ${resonance}` });
   };
 
   // Handler for resonance changes
   const handleResonanceChange = (value: number[]) => {
     const newResonance = value[0];
-    updateNode(id, { lpf: `${frequency} ${newResonance}` });
+    updateNodeData(id, { lpf: `${frequency} ${newResonance}` });
   };
 
   return (
@@ -66,8 +64,8 @@ export function LpfNode({ id, data }: WorkflowNodeProps) {
 }
 
 LpfNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const lpf = useStrudelStore.getState().config[node.id]?.lpf;
-  if (!lpf) return strudelString;
+  const lpf = node.data.lpf || '1000 1';
+  if (lpf === '1000 1') return strudelString; // Skip if default value
 
   const lpfCall = `lpf("${lpf}")`;
   return strudelString ? `${strudelString}.${lpfCall}` : lpfCall;

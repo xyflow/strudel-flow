@@ -5,17 +5,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useStrudelStore } from '@/store/strudel-store';
+import { useAppStore } from '@/store/app-context';
 import { WorkflowNodeProps, AppNode } from '..';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { SOUND_OPTIONS } from '@/data/sound-options';
 
 export function SampleSelect({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-  const sound = useStrudelStore((state) => state.config[id]?.sound || '');
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+  const sound = data.sound || '';
 
   const handleValueChange = (value: string) => {
-    updateNode(id, { sound: value });
+    updateNodeData(id, { sound: value });
   };
 
   return (
@@ -39,7 +39,7 @@ export function SampleSelect({ id, data }: WorkflowNodeProps) {
 }
 
 SampleSelect.strudelOutput = (node: AppNode, strudelString: string) => {
-  const sound = useStrudelStore.getState().config[node.id]?.sound;
+  const sound = node.data.sound;
   if (!sound) return strudelString;
 
   const soundCall = `sound("${sound}")`;

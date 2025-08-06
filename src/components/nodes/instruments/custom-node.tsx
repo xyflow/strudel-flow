@@ -1,7 +1,6 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { useAppStore } from '@/store/app-context';
-import { useStrudelStore } from '@/store/strudel-store';
 import {
   Accordion,
   AccordionContent,
@@ -103,8 +102,7 @@ export function CustomNode({ id, data, type }: WorkflowNodeProps) {
 }
 
 CustomNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const customPattern =
-    useStrudelStore.getState().config[node.id]?.customPattern;
+  const customPattern = node.data.customPattern;
 
   if (!customPattern || !customPattern.trim()) return strudelString;
 

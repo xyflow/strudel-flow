@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { useAppStore } from '@/store/app-context';
@@ -73,7 +71,6 @@ function SequencerRow({
 
 export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
-  const updateNode = useStrudelStore((state) => state.updateNode);
 
   // Use node data directly with defaults
   const rows = data.rows || [
@@ -82,13 +79,6 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
     { instrument: 'hh', pattern: Array(8).fill(false) },
   ];
 
-  useEffect(() => {
-    const patterns = rows.map(
-      (row) =>
-        `sound("${row.instrument}").struct("${patternToString(row.pattern)}")`
-    );
-    updateNode(id, { beatPatterns: patterns });
-  }, [rows, id, updateNode]);
 
   const toggleStep = (rowIndex: number, step: number) => {
     const newRows = rows.map((row, rIndex) => {
@@ -147,14 +137,19 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
 }
 
 BeatMachineNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const config = useStrudelStore.getState().config[node.id];
-  const beatPatterns = config?.beatPatterns as string[] | undefined;
+  const data = node.data;
+  const rows = data.rows || [
+    { instrument: 'bd', pattern: Array(8).fill(false) },
+    { instrument: 'sd', pattern: Array(8).fill(false) },
+    { instrument: 'hh', pattern: Array(8).fill(false) },
+  ];
 
-  if (!beatPatterns || beatPatterns.length === 0) {
-    return strudelString;
-  }
+  const patterns = rows.map(
+    (row) =>
+      `sound("${row.instrument}").struct("${patternToString(row.pattern)}")`
+  );
 
-  const validPatterns = beatPatterns.filter(
+  const validPatterns = patterns.filter(
     (p) => !p.includes(Array(8).fill('~').join(''))
   );
 

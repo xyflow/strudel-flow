@@ -1,13 +1,11 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Slider } from '@/components/ui/slider';
 
 export function PanNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-  const pan = useStrudelStore((state) =>
-    state.config[id]?.pan ? parseFloat(state.config[id].pan!) : 0.5
-  );
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+  const pan = data.pan ? parseFloat(data.pan) : 0.5;
 
   // Get pan description
   const getPanDescription = () => {
@@ -18,7 +16,7 @@ export function PanNode({ id, data }: WorkflowNodeProps) {
 
   // Handler for pan changes
   const handlePanChange = (value: number[]) => {
-    updateNode(id, { pan: value[0].toString() });
+    updateNodeData(id, { pan: value[0].toString() });
   };
 
   return (
@@ -68,8 +66,8 @@ export function PanNode({ id, data }: WorkflowNodeProps) {
 }
 
 PanNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const pan = useStrudelStore.getState().config[node.id]?.pan;
-  if (!pan) return strudelString;
+  const pan = node.data.pan ? parseFloat(node.data.pan) : 0.5;
+  if (pan === 0.5) return strudelString; // Skip if default value (center)
 
   const panCall = `pan(${pan})`;
   return strudelString ? `${strudelString}.${panCall}` : panCall;

@@ -1,18 +1,11 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Slider } from '@/components/ui/slider';
 
 export function SustainNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-  const sustain = useStrudelStore((state) =>
-    state.config[id]?.sustain ? parseFloat(state.config[id].sustain!) : 0.5
-  );
-
-  // Handler for sustain changes
-  const handleSustainChange = (value: number[]) => {
-    updateNode(id, { sustain: value[0].toString() });
-  };
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+  const sustain = parseFloat(data.sustain || '1');
 
   return (
     <WorkflowNode id={id} data={data}>
@@ -23,7 +16,9 @@ export function SustainNode({ id, data }: WorkflowNodeProps) {
           </label>
           <Slider
             value={[sustain]}
-            onValueChange={handleSustainChange}
+            onValueChange={(value) =>
+              updateNodeData(id, { sustain: value[0].toString() })
+            }
             min={0}
             max={1}
             step={0.01}
@@ -36,9 +31,9 @@ export function SustainNode({ id, data }: WorkflowNodeProps) {
 }
 
 SustainNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const sustain = useStrudelStore.getState().config[node.id]?.sustain;
-  if (!sustain) return strudelString;
+  const sustain = parseFloat(node.data.sustain || '1');
+  if (sustain === 1) return strudelString; // Skip if default value
 
-  const sustainCall = `sustain(${sustain})`;
+  const sustainCall = `sustain("${sustain}")`;
   return strudelString ? `${strudelString}.${sustainCall}` : sustainCall;
 };

@@ -9,14 +9,13 @@ export function useWorkflowRunner() {
   const isRunning = useRef(false);
   const pattern = useStrudelStore((s) => s.pattern);
   const setPattern = useStrudelStore((s) => s.setPattern);
-  const config = useStrudelStore((s) => s.config);
   const cpm = useStrudelStore((s) => s.cpm);
 
   // Watch for changes in nodes/edges and regenerate pattern
   const nodes = useAppStore((state) => state.nodes);
   const edges = useAppStore((state) => state.edges);
 
-  // Generate pattern when nodes/edges/config change
+  // Generate pattern when nodes/edges change
   useEffect(() => {
     const newPattern = generateOutput(nodes, edges);
 
@@ -30,7 +29,7 @@ export function useWorkflowRunner() {
       hush();
       isRunning.current = false;
     }
-  }, [nodes, edges, config, cpm, setPattern]);
+  }, [nodes, edges, cpm, setPattern]);
 
   const runWorkflow = useCallback(() => {
     const activePattern = pattern

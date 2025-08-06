@@ -1,22 +1,21 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Slider } from '@/components/ui/slider';
 
 export function RoomNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-  const config = useStrudelStore((state) => state.config[id]);
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
   // Extract values or set defaults
-  const room = config?.room ? parseFloat(config.room) : 0;
-  const roomsize = config?.roomsize ? parseFloat(config.roomsize) : 1;
-  const roomfade = config?.roomfade ? parseFloat(config.roomfade) : 0.5;
-  const roomlp = config?.roomlp ? parseFloat(config.roomlp) : 10000;
-  const roomdim = config?.roomdim ? parseFloat(config.roomdim) : 8000;
+  const room = data.room ? parseFloat(data.room) : 0;
+  const roomsize = data.roomsize ? parseFloat(data.roomsize) : 1;
+  const roomfade = data.roomfade ? parseFloat(data.roomfade) : 0.5;
+  const roomlp = data.roomlp ? parseFloat(data.roomlp) : 10000;
+  const roomdim = data.roomdim ? parseFloat(data.roomdim) : 8000;
 
   // Handlers for each property
   const handleSliderChange = (key: string, value: number[]) => {
-    updateNode(id, { [key]: value[0].toFixed(2) });
+    updateNodeData(id, { [key]: value[0].toFixed(2) });
   };
 
   return (
@@ -92,12 +91,11 @@ export function RoomNode({ id, data }: WorkflowNodeProps) {
 }
 
 RoomNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const config = useStrudelStore.getState().config[node.id];
-  const room = config?.room;
-  const roomsize = config?.roomsize;
-  const roomfade = config?.roomfade;
-  const roomlp = config?.roomlp;
-  const roomdim = config?.roomdim;
+  const room = node.data.room;
+  const roomsize = node.data.roomsize;
+  const roomfade = node.data.roomfade;
+  const roomlp = node.data.roomlp;
+  const roomdim = node.data.roomdim;
 
   const calls = [];
 

@@ -1,13 +1,11 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Slider } from '@/components/ui/slider';
 
 export function DistortNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-  const distortValue = useStrudelStore(
-    (state) => state.config[id]?.distort || '0.5'
-  );
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+  const distortValue = data.distort || '0.5';
 
   // Extract values or set defaults
   const amount = distortValue.includes(':')
@@ -22,7 +20,7 @@ export function DistortNode({ id, data }: WorkflowNodeProps) {
     const newAmount = value[0];
     const distortValue =
       postgain !== 1 ? `${newAmount}:${postgain}` : `${newAmount}`;
-    updateNode(id, { distort: distortValue });
+    updateNodeData(id, { distort: distortValue });
   };
 
   return (
@@ -51,8 +49,8 @@ export function DistortNode({ id, data }: WorkflowNodeProps) {
 }
 
 DistortNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const distort = useStrudelStore.getState().config[node.id]?.distort;
-  if (!distort) return strudelString;
+  const distort = node.data.distort || '0.5';
+  if (distort === '0.5') return strudelString; // Skip if default value
 
   const distortCall = `distort(${distort})`;
   return strudelString ? `${strudelString}.${distortCall}` : distortCall;

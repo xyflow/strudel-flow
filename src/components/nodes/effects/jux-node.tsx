@@ -1,11 +1,11 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Button } from '@/components/ui/button';
 
 export function JuxNode({ id, data }: WorkflowNodeProps) {
-  const updateNode = useStrudelStore((state) => state.updateNode);
-  const effect = useStrudelStore((state) => state.config[id]?.jux || 'rev');
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+  const effect = data.jux || 'rev';
 
   // Available jux effects
   const effects = [
@@ -17,7 +17,7 @@ export function JuxNode({ id, data }: WorkflowNodeProps) {
 
   // Handler for effect changes
   const handleEffectChange = (newEffect: string) => {
-    updateNode(id, { jux: newEffect });
+    updateNodeData(id, { jux: newEffect });
   };
 
   return (
@@ -54,8 +54,8 @@ export function JuxNode({ id, data }: WorkflowNodeProps) {
 }
 
 JuxNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const jux = useStrudelStore.getState().config[node.id]?.jux;
-  if (!jux) return strudelString;
+  const jux = node.data.jux || 'rev';
+  if (jux === 'rev') return strudelString; // Skip if default value
 
   const juxCall = `jux(${jux})`;
   return strudelString ? `${strudelString}.${juxCall}` : juxCall;
