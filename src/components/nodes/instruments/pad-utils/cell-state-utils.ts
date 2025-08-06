@@ -93,7 +93,7 @@ export const getButtonClasses = (
   if (isSelected) return `${base} bg-accent-foreground`;
   if (isInGroup) {
     const groupColors = [
-      'bg-chart-1',
+      'bg-chart-5',
       'bg-chart-2',
       'bg-chart-3',
       'bg-chart-4',
