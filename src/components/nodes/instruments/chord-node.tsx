@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -10,18 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useNodeState } from '@/hooks/use-node-state';
 import { AccordionControls } from '@/components/accordion-controls';
 
 type ChordComplexity = 'triad' | 'seventh' | 'ninth' | 'eleventh';
-
-interface ChordNodeInternalState {
-  selectedKey: string;
-  scaleType: 'major' | 'minor';
-  chordComplexity: ChordComplexity;
-  octave: number;
-  pressedKeys: number[];
-}
 
 const CHORD_COMPLEXITY_OPTIONS = [
   { value: 'triad', label: 'Triad' },
@@ -71,30 +63,25 @@ const getChordNotes = (
 };
 
 export function ChordNode({ id, data, type }: WorkflowNodeProps) {
-  const [
-    { selectedKey, scaleType, chordComplexity, octave, pressedKeys },
-    setState,
-  ] = useNodeState(id, data as { internalState?: ChordNodeInternalState }, {
-    selectedKey: 'C',
-    scaleType: 'major',
-    chordComplexity: 'triad',
-    octave: 4,
-    pressedKeys: [],
-  });
-
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
   const updateNode = useStrudelStore((state) => state.updateNode);
+
+  // Use node data directly with defaults
+  const selectedKey = data.selectedKey || 'C';
+  const scaleType = data.scaleType || 'major';
+  const chordComplexity = data.chordComplexity || 'triad';
+  const octave = data.octave || 4;
+  const pressedKeys = data.pressedKeys || [];
   const pressedKeysSet = new Set(pressedKeys);
 
   const handleKeyPress = (scaleStep: number) => {
-    setState((prev) => {
-      const newPressed = new Set(prev.pressedKeys);
-      if (newPressed.has(scaleStep)) {
-        newPressed.delete(scaleStep);
-      } else {
-        newPressed.add(scaleStep);
-      }
-      return { ...prev, pressedKeys: Array.from(newPressed) };
-    });
+    const newPressed = new Set(pressedKeys);
+    if (newPressed.has(scaleStep)) {
+      newPressed.delete(scaleStep);
+    } else {
+      newPressed.add(scaleStep);
+    }
+    updateNodeData(id, { pressedKeys: Array.from(newPressed) });
   };
 
   useEffect(() => {
@@ -187,17 +174,12 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
           triggerText="Chord Controls"
           keyScaleOctaveProps={{
             selectedKey,
-            onKeyChange: (key) =>
-              setState((prev) => ({ ...prev, selectedKey: key })),
+            onKeyChange: (key) => updateNodeData(id, { selectedKey: key }),
             selectedScale: scaleType,
             onScaleChange: (scale) =>
-              setState((prev) => ({
-                ...prev,
-                scaleType: scale as 'major' | 'minor',
-              })),
+              updateNodeData(id, { scaleType: scale as 'major' | 'minor' }),
             octave,
-            onOctaveChange: (oct) =>
-              setState((prev) => ({ ...prev, octave: oct })),
+            onOctaveChange: (oct) => updateNodeData(id, { octave: oct }),
           }}
         >
           <div className="flex flex-col gap-3 text-xs font-mono">
@@ -207,10 +189,9 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
                 <Select
                   value={chordComplexity}
                   onValueChange={(value) =>
-                    setState((prev) => ({
-                      ...prev,
+                    updateNodeData(id, {
                       chordComplexity: value as ChordComplexity,
-                    }))
+                    })
                   }
                 >
                   <SelectTrigger className="w-20 h-7 text-xs">
@@ -232,9 +213,7 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
                   variant="outline"
                   size="sm"
                   className="h-7 text-xs px-2"
-                  onClick={() =>
-                    setState((prev) => ({ ...prev, pressedKeys: [] }))
-                  }
+                  onClick={() => updateNodeData(id, { pressedKeys: [] })}
                 >
                   Clear All
                 </Button>

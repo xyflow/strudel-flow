@@ -1,20 +1,10 @@
 import { useCallback } from 'react';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
-import { useNodeState } from '@/hooks/use-node-state';
+import { useAppStore } from '@/store/app-context';
 import { useStrudelStore } from '@/store/strudel-store';
 import { PresetGroup } from '@/components/preset-group';
 import { DRUM_OPTIONS } from '@/data/sound-options';
-
-interface PolyrhythmInternalState {
-  polyPattern1: string;
-  polyPattern2: string;
-  polyPattern3: string;
-  polySound1: string;
-  polySound2: string;
-  polySound3: string;
-  activePolyPatterns: string;
-}
 
 const RHYTHM_PRESETS = [
   { id: '3:2', label: '3:2', pattern: 'euclidean(3,8)' },
@@ -28,25 +18,16 @@ const RHYTHM_PRESETS = [
 ];
 
 export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
-  const [
-    {
-      polyPattern1,
-      polyPattern2,
-      polyPattern3,
-      polySound1,
-      polySound2,
-      polySound3,
-    },
-    setState,
-  ] = useNodeState(id, data as { internalState?: PolyrhythmInternalState }, {
-    polyPattern1: '',
-    polyPattern2: '',
-    polyPattern3: '',
-    polySound1: 'bd',
-    polySound2: 'sd',
-    polySound3: 'hh',
-    activePolyPatterns: '',
-  });
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+
+  // Use node data directly with defaults
+  const polyPattern1 = data.polyPattern1 || '';
+  const polyPattern2 = data.polyPattern2 || '';
+  const polyPattern3 = data.polyPattern3 || '';
+  const polySound1 = data.polySound1 || 'bd';
+  const polySound2 = data.polySound2 || 'sd';
+  const polySound3 = data.polySound3 || 'hh';
+  const activePolyPatterns = data.activePolyPatterns || '';
 
   const handlePresetClick = useCallback(
     (
@@ -54,27 +35,28 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
       patternNumber: 1 | 2 | 3
     ) => {
       const patternId = `pattern${patternNumber}`;
-      const key =
-        `polyPattern${patternNumber}` as keyof PolyrhythmInternalState;
-      setState((prev) => ({
-        ...prev,
+      const key = `polyPattern${patternNumber}` as keyof typeof data;
+
+      const newActivePatterns = activePolyPatterns.includes(patternId)
+        ? activePolyPatterns
+        : [...activePolyPatterns.split(','), patternId]
+            .filter(Boolean)
+            .join(',');
+
+      updateNodeData(id, {
         [key]: preset.pattern,
-        activePolyPatterns: prev.activePolyPatterns.includes(patternId)
-          ? prev.activePolyPatterns
-          : [...prev.activePolyPatterns.split(','), patternId]
-              .filter(Boolean)
-              .join(','),
-      }));
+        activePolyPatterns: newActivePatterns,
+      });
     },
-    [setState]
+    [id, updateNodeData, activePolyPatterns]
   );
 
   const handleSoundChange = useCallback(
     (patternNumber: 1 | 2 | 3, sound: string) => {
-      const key = `polySound${patternNumber}` as keyof PolyrhythmInternalState;
-      setState((prev) => ({ ...prev, [key]: sound }));
+      const key = `polySound${patternNumber}` as keyof typeof data;
+      updateNodeData(id, { [key]: sound });
     },
-    [setState]
+    [id, updateNodeData]
   );
 
   return (

@@ -47,6 +47,7 @@ export type WorkflowNodeData = {
   notes?: string;
   status?: 'loading' | 'success' | 'error' | 'initial';
   state?: 'running' | 'paused' | 'stopped';
+
   // Pad node specific data
   steps?: number;
   mode?: 'arp' | 'chord';
@@ -57,6 +58,30 @@ export type WorkflowNodeData = {
   buttonModifiers?: Record<string, CellState>;
   selectedButtons?: string[];
   noteGroups?: Record<number, number[][]>;
+
+  // Polyrhythm node data
+  polyPattern1?: string;
+  polyPattern2?: string;
+  polyPattern3?: string;
+  polySound1?: string;
+  polySound2?: string;
+  polySound3?: string;
+  activePolyPatterns?: string;
+
+  // Custom node data
+  customPattern?: string;
+
+  // Chord node data
+  scaleType?: 'major' | 'minor';
+  chordComplexity?: 'triad' | 'seventh' | 'ninth' | 'eleventh';
+  pressedKeys?: number[];
+
+  // Beat machine node data
+  rows?: Array<{ instrument: string; pattern: boolean[] }>;
+
+  // Arpeggiator node data
+  selectedPattern?: string;
+  selectedChordType?: string;
 };
 
 export type WorkflowNodeProps = NodeProps<Node<WorkflowNodeData>> & {

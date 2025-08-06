@@ -2,17 +2,10 @@ import { useEffect } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
-import { useNodeState } from '@/hooks/use-node-state';
+import { useAppStore } from '@/store/app-context';
 import { AccordionControls } from '@/components/accordion-controls';
 import { cn } from '@/lib/utils';
 import { PresetGroup } from '@/components/preset-group';
-
-interface ArpeggiatorInternalState {
-  selectedPattern: string;
-  octave: number;
-  selectedChordType: string;
-  selectedKey: string;
-}
 
 const ARP_PATTERNS = [
   { id: 'up', label: 'Up', pattern: [0, 1, 2] },
@@ -86,17 +79,14 @@ function ArpeggioVisualizer({
 }
 
 export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
-  const [
-    { selectedPattern, octave, selectedChordType, selectedKey },
-    setState,
-  ] = useNodeState(id, data as { internalState?: ArpeggiatorInternalState }, {
-    selectedPattern: '',
-    octave: 1,
-    selectedChordType: 'major',
-    selectedKey: 'C',
-  });
-
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
   const updateNode = useStrudelStore((state) => state.updateNode);
+
+  // Use node data directly with defaults
+  const selectedPattern = data.selectedPattern || '';
+  const octave = data.octave || 1;
+  const selectedChordType = data.selectedChordType || 'major';
+  const selectedKey = data.selectedKey || 'C';
 
   useEffect(() => {
     const hasSelection = selectedPattern;
@@ -141,9 +131,7 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
             <div
               key={p.id}
               className="flex flex-col items-center gap-2 cursor-pointer"
-              onClick={() =>
-                setState((prev) => ({ ...prev, selectedPattern: p.id }))
-              }
+              onClick={() => updateNodeData(id, { selectedPattern: p.id })}
             >
               <ArpeggioVisualizer
                 pattern={p.pattern}
@@ -157,14 +145,12 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
           triggerText="Arpeggio Controls"
           keyScaleOctaveProps={{
             selectedKey,
-            onKeyChange: (key) =>
-              setState((prev) => ({ ...prev, selectedKey: key })),
+            onKeyChange: (key) => updateNodeData(id, { selectedKey: key }),
             selectedScale: selectedChordType,
             onScaleChange: (scale) =>
-              setState((prev) => ({ ...prev, selectedChordType: scale })),
+              updateNodeData(id, { selectedChordType: scale }),
             octave,
-            onOctaveChange: (oct) =>
-              setState((prev) => ({ ...prev, octave: oct })),
+            onOctaveChange: (oct) => updateNodeData(id, { octave: oct }),
             showOctave: false,
           }}
         >
@@ -172,9 +158,7 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
             label="Octave Range"
             presets={OCTAVE_RANGES}
             selectedValue={octave}
-            onSelect={(oct) =>
-              setState((prev) => ({ ...prev, octave: oct as number }))
-            }
+            onSelect={(oct) => updateNodeData(id, { octave: oct as number })}
             idKey="octaves"
           />
         </AccordionControls>

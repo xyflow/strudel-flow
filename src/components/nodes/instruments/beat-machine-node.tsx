@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
 import { Button } from '@/components/ui/button';
 import { PadButton } from './pad-utils/pad-button';
-import { useNodeState } from '@/hooks/use-node-state';
 import { DRUM_OPTIONS } from '@/data/sound-options';
 import {
   Select,
@@ -17,10 +17,6 @@ import {
 interface BeatMachineRow {
   instrument: string;
   pattern: boolean[];
-}
-
-interface BeatMachineInternalState {
-  rows: BeatMachineRow[];
 }
 
 const patternToString = (pattern: boolean[]) => {
@@ -76,19 +72,15 @@ function SequencerRow({
 }
 
 export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
-  const [{ rows }, setState] = useNodeState(
-    id,
-    data as { internalState?: BeatMachineInternalState },
-    {
-      rows: [
-        { instrument: 'bd', pattern: Array(8).fill(false) },
-        { instrument: 'sd', pattern: Array(8).fill(false) },
-        { instrument: 'hh', pattern: Array(8).fill(false) },
-      ],
-    }
-  );
-
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
   const updateNode = useStrudelStore((state) => state.updateNode);
+
+  // Use node data directly with defaults
+  const rows = data.rows || [
+    { instrument: 'bd', pattern: Array(8).fill(false) },
+    { instrument: 'sd', pattern: Array(8).fill(false) },
+    { instrument: 'hh', pattern: Array(8).fill(false) },
+  ];
 
   useEffect(() => {
     const patterns = rows.map(
@@ -99,36 +91,30 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
   }, [rows, id, updateNode]);
 
   const toggleStep = (rowIndex: number, step: number) => {
-    setState((prev) => {
-      const newRows = prev.rows.map((row, rIndex) => {
-        if (rIndex === rowIndex) {
-          const newPattern = row.pattern.map((val, pIndex) =>
-            pIndex === step ? !val : val
-          );
-          return { ...row, pattern: newPattern };
-        }
-        return row;
-      });
-      return { ...prev, rows: newRows };
+    const newRows = rows.map((row, rIndex) => {
+      if (rIndex === rowIndex) {
+        const newPattern = row.pattern.map((val, pIndex) =>
+          pIndex === step ? !val : val
+        );
+        return { ...row, pattern: newPattern };
+      }
+      return row;
     });
+    updateNodeData(id, { rows: newRows });
   };
 
   const handleInstrumentChange = (rowIndex: number, instrument: string) => {
-    setState((prev) => {
-      const newRows = [...prev.rows];
-      newRows[rowIndex].instrument = instrument;
-      return { ...prev, rows: newRows };
-    });
+    const newRows = [...rows];
+    newRows[rowIndex].instrument = instrument;
+    updateNodeData(id, { rows: newRows });
   };
 
   const clearAll = () => {
-    setState((prev) => ({
-      ...prev,
-      rows: prev.rows.map((row) => ({
-        ...row,
-        pattern: Array(8).fill(false),
-      })),
+    const newRows = rows.map((row) => ({
+      ...row,
+      pattern: Array(8).fill(false),
     }));
+    updateNodeData(id, { rows: newRows });
   };
 
   return (

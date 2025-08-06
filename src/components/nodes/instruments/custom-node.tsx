@@ -1,6 +1,7 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-context';
+import { useStrudelStore } from '@/store/strudel-store';
 import {
   Accordion,
   AccordionContent,
@@ -8,25 +9,17 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Textarea } from '@/components/ui/textarea';
-import { useNodeState } from '@/hooks/use-node-state';
-
-interface CustomNodeInternalState {
-  customPattern: string;
-}
 
 export function CustomNode({ id, data, type }: WorkflowNodeProps) {
-  const [{ customPattern }, setState] = useNodeState(
-    id,
-    data as { internalState?: CustomNodeInternalState },
-    {
-      customPattern: 'sound("bd sd hh sd")',
-    }
-  );
+  const updateNodeData = useAppStore((state) => state.updateNodeData);
+
+  // Use node data directly with defaults
+  const customPattern = data.customPattern || 'sound("bd sd hh sd")';
 
   const handlePatternChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
-    setState({ customPattern: event.target.value });
+    updateNodeData(id, { customPattern: event.target.value });
   };
 
   return (
