@@ -1,8 +1,9 @@
 import { ZoomSlider } from '@/components/zoom-slider';
 import { Panel } from '@xyflow/react';
 import { useState } from 'react';
-import { NotebookText, Timer } from 'lucide-react';
+import { NotebookText, Timer, Play, Pause } from 'lucide-react';
 import { PatternPanelWithCopy } from '@/components/pattern-panel';
+import { useGlobalPlayback } from '@/hooks/use-global-playback';
 import { CPM } from '../cpm';
 import { ShareUrlPopover } from '@/components/share-url-popover';
 import { PresetPopover } from '@/components/preset-popover';
@@ -11,12 +12,28 @@ import { AppInfoPopover } from '@/components/app-info-popover';
 export function WorkflowControls() {
   const [isPatternPanelVisible, setPatternPanelVisible] = useState(false);
   const [isCpmPanelVisible, setCpmPanelVisible] = useState(false);
+  const { isGloballyPaused, toggleGlobalPlayback } = useGlobalPlayback();
 
   return (
     <>
       <ZoomSlider position="bottom-left" className="bg-card" />
 
       <Panel position="top-right" className="flex flex-col items-end gap-4">
+        <button
+          className={`p-2 rounded transition ${
+            isGloballyPaused
+              ? 'bg-primary'
+              : 'bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground'
+          }`}
+          onClick={toggleGlobalPlayback}
+          title={`${isGloballyPaused ? 'Resume' : 'Pause'} All (Spacebar)`}
+        >
+          {isGloballyPaused ? (
+            <Play className="w-5 h-5" />
+          ) : (
+            <Pause className="w-5 h-5" />
+          )}
+        </button>
         <button
           className="p-2 rounded bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition"
           onClick={() => setPatternPanelVisible((prev) => !prev)}

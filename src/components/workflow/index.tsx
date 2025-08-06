@@ -7,9 +7,12 @@ import { useAppStore } from '@/store/app-context';
 import { WorkflowControls } from './controls';
 import { useDragAndDrop } from './useDragAndDrop';
 import { useUrlStateLoader } from '@/hooks/use-url-state';
+import { useGlobalPlayback } from '@/hooks/use-global-playback';
 
 export default function Workflow() {
   useUrlStateLoader();
+  useGlobalPlayback(); // Enable global spacebar pause/play
+
   const {
     nodes,
     edges,
