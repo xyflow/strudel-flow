@@ -1,6 +1,4 @@
-/**
- * Simple button utilities
- */
+import { CellState } from './';
 
 /**
  * Check if a button is part of a group
@@ -44,4 +42,100 @@ export function createGroupsFromSelection(
   }
 
   return newGroups;
+}
+
+export function toggleCell(
+  stepIdx: number,
+  noteIdx: number,
+  grid: boolean[][],
+  buttonModifiers: Record<string, CellState>,
+  noteGroups: Record<number, number[][]>,
+  selectedButtons: Set<string>,
+  updateNodeData: (nodeId: string, updates: Record<string, unknown>) => void,
+  setNoteGroups: (groups: Record<number, number[][]>) => void,
+  setSelectedButtons: (buttons: Set<string>) => void,
+  nodeId: string,
+  event?: React.MouseEvent
+) {
+  const buttonKey = `${stepIdx}-${noteIdx}`;
+
+  if (event?.shiftKey) {
+    const newSelected = new Set(selectedButtons);
+    if (newSelected.has(buttonKey)) {
+      newSelected.delete(buttonKey);
+    } else {
+      newSelected.add(buttonKey);
+    }
+
+    const newGroups = createGroupsFromSelection(
+      newSelected,
+      stepIdx,
+      noteGroups
+    );
+    if (newGroups !== noteGroups) {
+      setNoteGroups(newGroups);
+      const clearedSelection = new Set(
+        Array.from(newSelected).filter((key) => !key.startsWith(`${stepIdx}-`))
+      );
+      setSelectedButtons(clearedSelection);
+    } else {
+      setSelectedButtons(newSelected);
+    }
+  } else {
+    const newGrid = grid.map((row) => [...row]);
+    const wasOn = newGrid[stepIdx][noteIdx];
+    newGrid[stepIdx][noteIdx] = !wasOn;
+
+    if (wasOn && !newGrid[stepIdx][noteIdx]) {
+      const newModifiers = { ...buttonModifiers };
+      delete newModifiers[buttonKey];
+      updateNodeData(nodeId, { grid: newGrid, buttonModifiers: newModifiers });
+    } else {
+      updateNodeData(nodeId, { grid: newGrid });
+    }
+  }
+}
+
+export function getButtonModifier(
+  stepIdx: number,
+  noteIdx: number,
+  buttonModifiers: Record<string, CellState>
+): CellState {
+  return buttonModifiers[`${stepIdx}-${noteIdx}`] || { type: 'off' };
+}
+
+export function handleModifierSelect(
+  stepIdx: number,
+  noteIdx: number,
+  modifier: CellState,
+  grid: boolean[][],
+  buttonModifiers: Record<string, CellState>,
+  updateNodeData: (nodeId: string, updates: Record<string, unknown>) => void,
+  nodeId: string
+) {
+  const buttonKey = `${stepIdx}-${noteIdx}`;
+  const newModifiers = {
+    ...buttonModifiers,
+    [buttonKey]: modifier,
+  };
+
+  if (modifier.type !== 'off') {
+    const newGrid = grid.map((row) => [...row]);
+    if (!newGrid[stepIdx][noteIdx]) {
+      newGrid[stepIdx][noteIdx] = true;
+      updateNodeData(nodeId, { grid: newGrid, buttonModifiers: newModifiers });
+    } else {
+      updateNodeData(nodeId, { buttonModifiers: newModifiers });
+    }
+  } else {
+    updateNodeData(nodeId, { buttonModifiers: newModifiers });
+  }
+}
+
+export function isButtonSelected(
+  stepIdx: number,
+  noteIdx: number,
+  selectedButtons: Set<string>
+): boolean {
+  return selectedButtons.has(`${stepIdx}-${noteIdx}`);
 }

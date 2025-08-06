@@ -5,8 +5,11 @@ import { WorkflowNodeProps, AppNode } from '..';
 
 import {
   applyRowModifier,
+  toggleCell,
+  getButtonModifier,
+  handleModifierSelect,
+  isButtonSelected,
   CellState,
-  createGroupsFromSelection,
 } from './pad-utils';
 import { PadButton } from './pad-utils/pad-button';
 import { AccordionControls } from '@/components/accordion-controls';
@@ -48,89 +51,46 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
   const setSelectedButtons = (newButtons: Set<string>) =>
     updateNodeData(id, { selectedButtons: Array.from(newButtons) });
 
-  // Grid utilities
-  const toggleCell = (
+  // Grid utility functions
+  const handleToggleCell = (
     stepIdx: number,
     noteIdx: number,
     event?: React.MouseEvent
-  ) => {
-    const buttonKey = `${stepIdx}-${noteIdx}`;
+  ) =>
+    toggleCell(
+      stepIdx,
+      noteIdx,
+      grid,
+      buttonModifiers,
+      noteGroups,
+      selectedButtons,
+      updateNodeData,
+      setNoteGroups,
+      setSelectedButtons,
+      id,
+      event
+    );
 
-    if (event?.shiftKey) {
-      // Group selection mode
-      const newSelected = new Set(selectedButtons);
-      if (newSelected.has(buttonKey)) {
-        newSelected.delete(buttonKey);
-      } else {
-        newSelected.add(buttonKey);
-      }
+  const handleGetButtonModifier = (stepIdx: number, noteIdx: number) =>
+    getButtonModifier(stepIdx, noteIdx, buttonModifiers);
 
-      const newGroups = createGroupsFromSelection(
-        newSelected,
-        stepIdx,
-        noteGroups
-      );
-      if (newGroups !== noteGroups) {
-        setNoteGroups(newGroups);
-        // Clear selection for this step after creating group
-        const clearedSelection = new Set(
-          Array.from(newSelected).filter(
-            (key) => !key.startsWith(`${stepIdx}-`)
-          )
-        );
-        setSelectedButtons(clearedSelection);
-      } else {
-        setSelectedButtons(newSelected);
-      }
-    } else {
-      // Normal toggle mode
-      const newGrid = grid.map((row) => [...row]);
-      const wasOn = newGrid[stepIdx][noteIdx];
-      newGrid[stepIdx][noteIdx] = !wasOn;
-
-      // If turning off, also reset modifier
-      if (wasOn && !newGrid[stepIdx][noteIdx]) {
-        const newModifiers = { ...buttonModifiers };
-        delete newModifiers[buttonKey];
-        updateNodeData(id, { grid: newGrid, buttonModifiers: newModifiers });
-      } else {
-        updateNodeData(id, { grid: newGrid });
-      }
-    }
-  };
-
-  const getButtonModifier = (stepIdx: number, noteIdx: number) => {
-    return buttonModifiers[`${stepIdx}-${noteIdx}`] || { type: 'off' };
-  };
-
-  const handleModifierSelect = (
+  const handleModifierSelectCell = (
     stepIdx: number,
     noteIdx: number,
     modifier: CellState
-  ) => {
-    const buttonKey = `${stepIdx}-${noteIdx}`;
-    const newModifiers = {
-      ...buttonModifiers,
-      [buttonKey]: modifier,
-    };
+  ) =>
+    handleModifierSelect(
+      stepIdx,
+      noteIdx,
+      modifier,
+      grid,
+      buttonModifiers,
+      updateNodeData,
+      id
+    );
 
-    // If modifier is not 'off', also activate the button
-    if (modifier.type !== 'off') {
-      const newGrid = grid.map((row) => [...row]);
-      if (!newGrid[stepIdx][noteIdx]) {
-        newGrid[stepIdx][noteIdx] = true;
-        updateNodeData(id, { grid: newGrid, buttonModifiers: newModifiers });
-      } else {
-        updateNodeData(id, { buttonModifiers: newModifiers });
-      }
-    } else {
-      updateNodeData(id, { buttonModifiers: newModifiers });
-    }
-  };
-
-  const isButtonSelected = (stepIdx: number, noteIdx: number) => {
-    return selectedButtons.has(`${stepIdx}-${noteIdx}`);
-  };
+  const handleIsButtonSelected = (stepIdx: number, noteIdx: number) =>
+    isButtonSelected(stepIdx, noteIdx, selectedButtons);
 
   return (
     <WorkflowNode id={id} data={data} type={type}>
@@ -144,11 +104,11 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
                   stepIdx={stepIdx}
                   noteIdx={noteIdx}
                   on={grid[stepIdx]?.[noteIdx] || false}
-                  isSelected={isButtonSelected(stepIdx, noteIdx)}
+                  isSelected={handleIsButtonSelected(stepIdx, noteIdx)}
                   noteGroups={noteGroups}
-                  modifier={getButtonModifier(stepIdx, noteIdx)}
-                  handleModifierSelect={handleModifierSelect}
-                  toggleCell={toggleCell}
+                  modifier={handleGetButtonModifier(stepIdx, noteIdx)}
+                  handleModifierSelect={handleModifierSelectCell}
+                  toggleCell={handleToggleCell}
                 />
               ))}
             </div>
