@@ -55,13 +55,23 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
     ) => {
       const patternKey = `polyPattern${patternNumber}`;
       const activeKey = `pattern${patternNumber}Active`;
+      const currentPattern = data[patternKey as keyof typeof data];
+      const currentActive = data[activeKey as keyof typeof data];
 
-      updateNodeData(id, {
-        [patternKey]: preset.pattern,
-        [activeKey]: true,
-      });
+      // If clicking the same pattern, toggle its active state
+      if (currentPattern === preset.pattern) {
+        updateNodeData(id, {
+          [activeKey]: !currentActive,
+        });
+      } else {
+        // Different pattern - set new pattern and activate
+        updateNodeData(id, {
+          [patternKey]: preset.pattern,
+          [activeKey]: true,
+        });
+      }
     },
-    [id, updateNodeData]
+    [id, updateNodeData, data]
   );
 
   const handleSoundChange = useCallback(
@@ -191,16 +201,18 @@ PolyrhythmNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const sound2 = data.polySound2 || 'sd';
   const sound3 = data.polySound3 || 'hh';
 
-  if (data.pattern1Active && data.polyPattern1) {
+  // Only add patterns that are both active AND have a pattern set
+  if (data.pattern1Active === true && data.polyPattern1) {
     patterns.push(`sound("${sound1}").struct("${data.polyPattern1}")`);
   }
-  if (data.pattern2Active && data.polyPattern2) {
+  if (data.pattern2Active === true && data.polyPattern2) {
     patterns.push(`sound("${sound2}").struct("${data.polyPattern2}")`);
   }
-  if (data.pattern3Active && data.polyPattern3) {
+  if (data.pattern3Active === true && data.polyPattern3) {
     patterns.push(`sound("${sound3}").struct("${data.polyPattern3}")`);
   }
 
+  // If no active patterns, return the input string unchanged
   if (patterns.length === 0) return strudelString;
 
   const stackPattern =
