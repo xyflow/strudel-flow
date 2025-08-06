@@ -49,7 +49,7 @@ function ArpeggioVisualizer({
   const numCols = pattern.length;
 
   return (
-    <div className="flex items-center justify-center w-full h-12 p-2 bg-muted/80 rounded-md">
+    <div className="flex items-center justify-center w-full h-12 p-2 bg-muted/50 rounded-md border border-border/50">
       <div className="flex gap-1.5">
         {Array.from({ length: numCols }).map((_, colIndex) => (
           <div key={colIndex} className="flex flex-col-reverse gap-1">
@@ -60,9 +60,12 @@ function ArpeggioVisualizer({
                 <div
                   key={rowIndex}
                   className={cn(
-                    'w-2 h-2 rounded-full',
-                    isSet && isActive ? 'bg-primary' : 'bg-muted',
-                    isSet ? 'opacity-100' : 'opacity-25'
+                    'w-2 h-2 rounded-full transition-all duration-200',
+                    isSet && isActive
+                      ? 'bg-primary'
+                      : isSet
+                      ? 'bg-muted-foreground/40'
+                      : 'bg-muted-foreground/10'
                   )}
                 />
               );
@@ -82,7 +85,6 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
   const octave = data.octave || 1;
   const selectedChordType = data.selectedChordType || 'major';
   const selectedKey = data.selectedKey || 'C';
-
 
   return (
     <WorkflowNode id={id} data={data} type={type}>
