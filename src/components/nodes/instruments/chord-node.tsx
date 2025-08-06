@@ -3,24 +3,10 @@ import { useStrudelStore } from '@/store/strudel-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { useAppStore } from '@/store/app-context';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import { AccordionControls } from '@/components/accordion-controls';
 
 type ChordComplexity = 'triad' | 'seventh' | 'ninth' | 'eleventh';
-
-const CHORD_COMPLEXITY_OPTIONS = [
-  { value: 'triad', label: 'Triad' },
-  { value: 'seventh', label: '7th' },
-  { value: 'ninth', label: '9th' },
-  { value: 'eleventh', label: '11th' },
-];
 
 const SCALE_DEGREES = {
   major: [
@@ -181,50 +167,14 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
             octave,
             onOctaveChange: (oct) => updateNodeData(id, { octave: oct }),
           }}
-        >
-          <div className="flex flex-col gap-3 text-xs font-mono">
-            <div className="flex flex-wrap gap-2 items-center">
-              <div className="flex items-center gap-1">
-                <span>Complexity:</span>
-                <Select
-                  value={chordComplexity}
-                  onValueChange={(value) =>
-                    updateNodeData(id, {
-                      chordComplexity: value as ChordComplexity,
-                    })
-                  }
-                >
-                  <SelectTrigger className="w-20 h-7 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CHORD_COMPLEXITY_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            {pressedKeys.length > 0 && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs px-2"
-                  onClick={() => updateNodeData(id, { pressedKeys: [] })}
-                >
-                  Clear All
-                </Button>
-                <span className="text-muted-foreground">
-                  {pressedKeys.length} chord
-                  {pressedKeys.length !== 1 ? 's' : ''} active
-                </span>
-              </div>
-            )}
-          </div>
-        </AccordionControls>
+          chordControlsProps={{
+            chordComplexity,
+            onChordComplexityChange: (complexity) =>
+              updateNodeData(id, { chordComplexity: complexity }),
+            pressedKeys,
+            onClearAll: () => updateNodeData(id, { pressedKeys: [] }),
+          }}
+        />
       </div>
     </WorkflowNode>
   );

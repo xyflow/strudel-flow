@@ -38,6 +38,15 @@ export interface PadControlsProps {
   onClearSelection: () => void;
 }
 
+export interface ChordControlsProps {
+  chordComplexity: 'triad' | 'seventh' | 'ninth' | 'eleventh';
+  onChordComplexityChange: (
+    complexity: 'triad' | 'seventh' | 'ninth' | 'eleventh'
+  ) => void;
+  pressedKeys: number[];
+  onClearAll: () => void;
+}
+
 function KeyScaleOctaveControls({
   selectedKey,
   onKeyChange,
@@ -178,11 +187,62 @@ function PadControls({
   );
 }
 
+const CHORD_COMPLEXITY_OPTIONS = [
+  { value: 'triad', label: 'Triad' },
+  { value: 'seventh', label: '7th' },
+  { value: 'ninth', label: '9th' },
+  { value: 'eleventh', label: '11th' },
+];
+
+function ChordControls({
+  chordComplexity,
+  onChordComplexityChange,
+  pressedKeys,
+  onClearAll,
+}: ChordControlsProps) {
+  return (
+    <div className="flex flex-wrap gap-2 w-0 min-w-full">
+      <div className="flex items-center gap-1">
+        <span className="text-xs whitespace-nowrap">Complexity:</span>
+        <Select value={chordComplexity} onValueChange={onChordComplexityChange}>
+          <SelectTrigger className="w-20 h-7 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {CHORD_COMPLEXITY_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      {pressedKeys.length > 0 && (
+        <>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs px-2 whitespace-nowrap"
+            onClick={onClearAll}
+          >
+            Clear All
+          </Button>
+          <span className="text-xs text-muted-foreground whitespace-nowrap">
+            {pressedKeys.length} chord{pressedKeys.length !== 1 ? 's' : ''}{' '}
+            active
+          </span>
+        </>
+      )}
+    </div>
+  );
+}
+
 interface AccordionControlsProps {
   triggerText: string;
   children?: React.ReactNode;
   keyScaleOctaveProps?: KeyScaleOctaveControlsProps;
   padControlsProps?: PadControlsProps;
+  chordControlsProps?: ChordControlsProps;
 }
 
 export const AccordionControls: React.FC<AccordionControlsProps> = ({
@@ -190,6 +250,7 @@ export const AccordionControls: React.FC<AccordionControlsProps> = ({
   children,
   keyScaleOctaveProps,
   padControlsProps,
+  chordControlsProps,
 }) => {
   return (
     <Accordion type="single" collapsible className="w-full">
@@ -207,6 +268,11 @@ export const AccordionControls: React.FC<AccordionControlsProps> = ({
             {padControlsProps && (
               <div className="w-0 min-w-full">
                 <PadControls {...padControlsProps} />
+              </div>
+            )}
+            {chordControlsProps && (
+              <div className="w-0 min-w-full">
+                <ChordControls {...chordControlsProps} />
               </div>
             )}
             {children && <div className="w-0 min-w-full">{children}</div>}
