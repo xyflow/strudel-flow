@@ -21,7 +21,7 @@ export function PatternPanelWithCopy({ isVisible }: { isVisible: boolean }) {
   };
 
   return (
-    <div className="flex flex-col bg-card p-4 shadow rounded-md border w-[40vw] min-w-[400px] max-w-[60vw]">
+    <div className="flex flex-col bg-card p-4 shadow rounded-md border w-[40vw] min-w-[300px] max-w-[60vw] md:min-w-[400px]">
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm font-medium">Generated Pattern</span>
         <Popover>
