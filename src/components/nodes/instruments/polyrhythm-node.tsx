@@ -27,7 +27,7 @@ const RHYTHM_PRESETS = [
   { id: '4:5', label: '4:5', pattern: 'euclidean(4,20)' },
 ];
 
-export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
+export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
   const [
     {
       polyPattern1,
@@ -78,7 +78,7 @@ export function PolyrhythmNode({ id, data }: WorkflowNodeProps) {
   );
 
   return (
-    <WorkflowNode id={id} data={data}>
+    <WorkflowNode id={id} data={data} type={type}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md w-80">
         <div className="flex flex-col gap-2">
           <select

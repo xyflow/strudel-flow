@@ -70,7 +70,7 @@ const getChordNotes = (
   return `[${chordNotes.join(', ')}]`;
 };
 
-export function ChordNode({ id, data }: WorkflowNodeProps) {
+export function ChordNode({ id, data, type }: WorkflowNodeProps) {
   const [
     { selectedKey, scaleType, chordComplexity, octave, pressedKeys },
     setState,
@@ -125,7 +125,7 @@ export function ChordNode({ id, data }: WorkflowNodeProps) {
   const currentScaleDegrees = SCALE_DEGREES[scaleType];
 
   return (
-    <WorkflowNode id={id} data={data}>
+    <WorkflowNode id={id} data={data} type={type}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md w-80">
         <div className="relative">
           <div className="flex gap-0.5">

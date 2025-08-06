@@ -27,7 +27,7 @@ interface PadNodeInternalState {
   noteGroups: Record<number, number[][]>;
 }
 
-export function PadNode({ id, data }: WorkflowNodeProps) {
+export function PadNode({ id, data, type }: WorkflowNodeProps) {
   const [notes] = useState(generateNotes());
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
@@ -145,7 +145,7 @@ export function PadNode({ id, data }: WorkflowNodeProps) {
   ]);
 
   return (
-    <WorkflowNode id={id} data={data}>
+    <WorkflowNode id={id} data={data} type={type}>
       <div className="flex flex-col gap-2 p-3 bg-card text-card-foreground rounded-md">
         <div className="flex flex-col gap-1">
           {notes.map((_, noteIdx) => (

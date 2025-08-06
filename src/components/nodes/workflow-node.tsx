@@ -1,12 +1,5 @@
 import { useCallback, useState, useMemo } from 'react';
-import {
-  Play,
-  Pause,
-  Trash,
-  NotebookText,
-  VolumeX,
-  Volume2,
-} from 'lucide-react';
+import { Play, Pause, Trash, NotebookText } from 'lucide-react';
 
 import {
   NodeHeaderTitle,
@@ -15,7 +8,8 @@ import {
   NodeHeaderAction,
   NodeHeaderIcon,
 } from '@/components/node-header';
-import { WorkflowNodeData } from '@/components/nodes/';
+import { WorkflowNodeData, AppNodeType } from '@/components/nodes/';
+import nodesConfig from '@/components/nodes/';
 import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
 import { iconMapping } from '@/data/icon-mapping';
 import { BaseNode } from '@/components/base-node';
@@ -30,10 +24,12 @@ import { findConnectedComponents } from '@/lib/graph-utils';
 function WorkflowNode({
   id,
   data,
+  type,
   children,
 }: {
   id: string;
   data: WorkflowNodeData;
+  type?: AppNodeType;
   children?: React.ReactNode;
 }) {
   useStrudelStore((s) => s.pattern);
@@ -49,6 +45,11 @@ function WorkflowNode({
     ?.data?.state;
 
   const isPaused = nodeState === 'paused';
+
+  // Determine if this node is an instrument based on its type
+  const isInstrument = type
+    ? nodesConfig[type]?.category === 'Instruments'
+    : false;
 
   // Find all connected nodes for this group using findConnectedComponents
   const { connectedNodeIds } = useMemo(() => {
@@ -92,13 +93,15 @@ function WorkflowNode({
           </NodeHeaderIcon>
           <NodeHeaderTitle>{data?.title}</NodeHeaderTitle>
           <NodeHeaderActions>
-            <NodeHeaderAction
-              onClick={isPaused ? onPlay : onPause}
-              label={isPaused ? 'Resume group' : 'Pause group'}
-              variant={isPaused ? 'default' : 'ghost'}
-            >
-              {isPaused ? <Play /> : <Pause />}
-            </NodeHeaderAction>
+            {isInstrument && (
+              <NodeHeaderAction
+                onClick={isPaused ? onPlay : onPause}
+                label={isPaused ? 'Resume group' : 'Pause group'}
+                variant={isPaused ? 'default' : 'ghost'}
+              >
+                {isPaused ? <Play /> : <Pause />}
+              </NodeHeaderAction>
+            )}
             <NodeHeaderAction
               label="Pattern Preview"
               onClick={() => setShow(!show)}

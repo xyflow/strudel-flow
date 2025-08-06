@@ -75,7 +75,7 @@ function SequencerRow({
   );
 }
 
-export function BeatMachineNode({ id, data }: WorkflowNodeProps) {
+export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
   const [{ rows }, setState] = useNodeState(
     id,
     data as { internalState?: BeatMachineInternalState },
@@ -132,7 +132,7 @@ export function BeatMachineNode({ id, data }: WorkflowNodeProps) {
   };
 
   return (
-    <WorkflowNode id={id} data={data}>
+    <WorkflowNode id={id} data={data} type={type}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md min-w-96">
         <div className="flex flex-col gap-2 p-3 rounded border">
           {rows.map((row, index) => (

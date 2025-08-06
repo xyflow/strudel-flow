@@ -85,7 +85,7 @@ function ArpeggioVisualizer({
   );
 }
 
-export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
+export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
   const [
     { selectedPattern, octave, selectedChordType, selectedKey },
     setState,
@@ -134,7 +134,7 @@ export function ArpeggiatorNode({ id, data }: WorkflowNodeProps) {
   }, [selectedPattern, octave, selectedChordType, selectedKey, id, updateNode]);
 
   return (
-    <WorkflowNode id={id} data={data}>
+    <WorkflowNode id={id} data={data} type={type}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md w-80">
         <div className="grid grid-cols-3 gap-2">
           {ARP_PATTERNS.map((p) => (
