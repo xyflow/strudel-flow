@@ -38,7 +38,12 @@ export function useWorkflowRunner() {
       .filter((line) => !line.trim().startsWith('//'))
       .join('\n');
 
-    if (!activePattern.trim()) {
+    // Check if pattern is empty or only contains setcpm without actual pattern
+    const patternWithoutSetcpm = activePattern
+      .replace(/setcpm\(\d+\)\s*/g, '')
+      .trim();
+
+    if (!activePattern.trim() || !patternWithoutSetcpm) {
       console.log('No active pattern to evaluate.');
       if (isRunning.current) {
         hush();
@@ -58,8 +63,16 @@ export function useWorkflowRunner() {
     try {
       evaluate(activePattern);
     } catch (err) {
-      // It's possible to still get errors, but we are trying to minimize them
-      console.error(err);
+      // Suppress common Strudel errors that don't affect functionality
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      if (
+        errorMessage.includes('got "undefined" instead of pattern') ||
+        errorMessage.includes('Cannot read properties of undefined')
+      ) {
+        console.warn('Strudel pattern warning (suppressed):', errorMessage);
+      } else {
+        console.error('Strudel evaluation error:', err);
+      }
     }
 
     return () => {

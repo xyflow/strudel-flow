@@ -49,9 +49,13 @@ export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
   nodes.forEach((node) => {
     const strudelOutput = getNodeStrudelOutput(node.type);
     if (strudelOutput) {
-      const pattern = strudelOutput(node, '');
-      if (pattern) {
-        nodePatterns[node.id] = pattern;
+      try {
+        const pattern = strudelOutput(node, '');
+        if (pattern && typeof pattern === 'string' && pattern.trim()) {
+          nodePatterns[node.id] = pattern;
+        }
+      } catch (err) {
+        console.warn(`Error generating pattern for node ${node.type}:`, err);
       }
     }
   });
@@ -112,11 +116,19 @@ export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
 
   // Format result
   if (finalPatterns.length === 0) return '';
-  const result = finalPatterns
+
+  const validPatterns = finalPatterns.filter(
+    ({ pattern }) => pattern && typeof pattern === 'string' && pattern.trim()
+  );
+
+  if (validPatterns.length === 0) return '';
+
+  const result = validPatterns
     .map(({ pattern, paused }) => {
       const line = `$: ${pattern}`;
       return paused ? `// ${line}` : line;
     })
     .join('\n');
+
   return cpm ? `setcpm(${cpm})\n${result}` : result;
 }
