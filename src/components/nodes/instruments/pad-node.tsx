@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { useStrudelStore } from '@/store/strudel-store';
+import { useState } from 'react';
 import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
@@ -13,7 +12,6 @@ const generateNotes = () => [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`];
 export function PadNode({ id, data, type }: WorkflowNodeProps) {
   const [notes] = useState(generateNotes());
   const updateNodeData = useAppStore((state) => state.updateNodeData);
-  const updateNode = useStrudelStore((state) => state.updateNode);
 
   // Use node data directly with defaults
   const steps = data.steps || 5;
@@ -73,59 +71,6 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
     return selectedButtons.has(`${stepIdx}-${noteIdx}`);
   };
 
-  // Generate pattern whenever relevant data changes
-  useEffect(() => {
-    const getModifier = (stepIdx: number, noteIdx: number) => {
-      return buttonModifiers[`${stepIdx}-${noteIdx}`] || { type: 'none' };
-    };
-
-    const stepPatterns = grid.map((row, stepIdx) => {
-      const individualNotes = row
-        .map((on, noteIdx) => {
-          if (!on) return null;
-          const note = notes[noteIdx];
-          const modifier = getModifier(stepIdx, noteIdx);
-          return applyRowModifier(note, modifier);
-        })
-        .filter(Boolean);
-
-      const stepGroups = noteGroups[stepIdx] || [];
-      const groupPatterns = stepGroups.map((group) => {
-        const groupNoteValues = group.map((noteIdx) => notes[noteIdx]);
-        return `<${groupNoteValues.join(' ')}>`;
-      });
-
-      const allPatterns = [...individualNotes, ...groupPatterns];
-      if (allPatterns.length === 0) return '';
-
-      const separator = mode === 'arp' ? ' ' : ', ';
-      const notesPattern = allPatterns.join(separator);
-      return `[${notesPattern}]`;
-    });
-
-    const pattern = stepPatterns.filter(Boolean).join(' ');
-    const finalScale = `${selectedKey}${octave}:${selectedScaleType}`;
-
-    updateNode(id, {
-      notes: pattern,
-      scale:
-        pattern && pattern.trim() && !/^[~\s]*$/.test(pattern.trim())
-          ? finalScale
-          : undefined,
-    });
-  }, [
-    grid,
-    buttonModifiers,
-    noteGroups,
-    notes,
-    mode,
-    octave,
-    selectedKey,
-    selectedScaleType,
-    id,
-    updateNode,
-  ]);
-
   return (
     <WorkflowNode id={id} data={data} type={type}>
       <div className="flex flex-col gap-2 p-3 bg-card text-card-foreground rounded-md w-full max-w-full overflow-hidden">
@@ -177,15 +122,59 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
 }
 
 PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const notes = useStrudelStore.getState().config[node.id]?.notes;
-  const scale = useStrudelStore.getState().config[node.id]?.scale;
+  const data = node.data;
+  const notes = [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`];
 
-  if (!notes) return strudelString;
+  // Get state from node data
+  const grid =
+    data.grid ||
+    Array(16)
+      .fill(null)
+      .map(() => Array(8).fill(false));
+  const buttonModifiers = data.buttonModifiers || {};
+  const noteGroups = data.noteGroups || {};
+  const mode = data.mode || 'arp';
+  const selectedKey = data.selectedKey || 'C';
+  const octave = data.octave || 4;
+  const selectedScaleType = data.selectedScaleType || 'major';
 
-  const calls = [];
-  calls.push(`n("${notes}")`);
-  if (scale) calls.push(`scale("${scale}")`);
+  const generateStepPattern = (row: boolean[], stepIdx: number) => {
+    // Individual notes
+    const individualNotes = row
+      .map((on, noteIdx) => {
+        if (!on) return null;
+        const note = notes[noteIdx];
+        const modifier = buttonModifiers[`${stepIdx}-${noteIdx}`] || {
+          type: 'none',
+        };
+        return applyRowModifier(note, modifier);
+      })
+      .filter(Boolean);
 
+    // Group patterns
+    const stepGroups = noteGroups[stepIdx] || [];
+    const groupPatterns = stepGroups.map((group) => {
+      const groupNoteValues = group.map((noteIdx) => notes[noteIdx]);
+      return `<${groupNoteValues.join(' ')}>`;
+    });
+
+    const allPatterns = [...individualNotes, ...groupPatterns];
+    if (allPatterns.length === 0) return '';
+
+    const separator = mode === 'arp' ? ' ' : ', ';
+    return `[${allPatterns.join(separator)}]`;
+  };
+
+  const stepPatterns = grid.map(generateStepPattern).filter(Boolean);
+  const pattern = stepPatterns.join(' ');
+
+  if (!pattern || !pattern.trim() || /^[~\s]*$/.test(pattern.trim())) {
+    return strudelString;
+  }
+
+  const scale = `${selectedKey}${octave}:${selectedScaleType}`;
+  const calls = [`n("${pattern}")`, `scale("${scale}")`];
   const notePattern = calls.join('.');
+
   return strudelString ? `${strudelString}.${notePattern}` : notePattern;
 };
