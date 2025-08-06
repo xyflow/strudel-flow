@@ -37,27 +37,24 @@ export default function PatternPopup({
 
   return (
     <div
-      className={`px-3 py-2 border-t ${className}`}
-      style={{
-        background: 'var(--color-card)',
-        color: 'var(--color-card-foreground)',
-        borderColor: 'var(--color-border)',
-      }}
+      className={`px-3 py-2 border-t bg-card text-card-foreground border-border w-0 min-w-full ${className}`}
     >
       <label htmlFor="pre" className="text-xs font-mono">
         Preview
       </label>
       <pre
-        className="w-full p-2 border rounded font-mono text-sm mt-1"
+        className="w-full p-2 border rounded font-mono text-sm mt-1 whitespace-pre-wrap bg-muted text-muted-foreground border-border w-0 min-w-full select-text"
         id="pre"
         style={{
           minHeight: `${rows * 1.5}em`,
-          background: 'var(--color-muted)',
-          color: 'var(--color-muted-foreground)',
-          borderColor: 'var(--color-border)',
+          wordBreak: 'break-all',
+          overflowWrap: 'break-word',
+          lineBreak: 'anywhere',
         }}
       >
-        {strudelPattern ? strudelPattern : 'No pattern.'}
+        {strudelPattern
+          ? strudelPattern.replace(/\./g, '.\u200B')
+          : 'No pattern.'}
       </pre>
     </div>
   );
