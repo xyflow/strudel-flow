@@ -48,7 +48,7 @@ To get started, follow these steps:
 
 - **shadcn CLI**: The project uses the [shadcn CLI](https://ui.shadcn.com/docs/cli) to manage UI components. This tool builds on top of [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/) components, making it easy to add and customize UI elements.
 
-- **State Management with Zustand**: The application uses Zustand with a clean Pattern A architecture, where UI state and audio state are efficiently separated for optimal performance.
+- **State Management with Zustand**: The application uses Zustand for state management, providing a simple and efficient way to manage the state of nodes, edges, and other workflow-related data.
 
 ## Features
 
