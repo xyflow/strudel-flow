@@ -26,8 +26,14 @@ export function useUrlStateLoader() {
         edgeCount: urlState.edges.length,
       });
 
-      // Cast the nodes to AppNode type since they come from JSON deserialization
-      const nodes = urlState.nodes as AppNode[];
+      // Cast the nodes to AppNode type and set all nodes to paused state
+      const nodes = (urlState.nodes as AppNode[]).map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          state: 'paused' as const,
+        },
+      }));
       const edges = urlState.edges;
 
       // Restore nodes and edges first (this will trigger PadNode components to restore their internal states)
