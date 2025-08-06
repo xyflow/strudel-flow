@@ -1,10 +1,9 @@
-# Strudel Flow Machine
+# Flow Machine
 
-A visual drum machine and pattern sequencer built with [Strudel.cc](https://strudel.cc), [React Flow](https://reactflow.dev), [React Flow Components](https://reactflow.dev/components) and styled using [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/).
+A visual drum machine and pattern sequencer built with [Strudel.cc](https://strudel.cc), [React Flow](https://reactflow.dev), and styled using [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/). Create complex musical patterns by connecting instrument nodes to effect nodes in an intuitive drag-and-drop interface.
 
 ## Table of Contents
 
-- [Features](#features)
 - [Getting Started](#getting-started)
 - [Tech Stack](#tech-stack)
 - [Node Types](#node-types)
@@ -49,48 +48,60 @@ To get started, follow these steps:
 
 - **shadcn CLI**: The project uses the [shadcn CLI](https://ui.shadcn.com/docs/cli) to manage UI components. This tool builds on top of [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/) components, making it easy to add and customize UI elements.
 
-- **State Management with Zustand**: The application uses Zustand for state management, providing a simple and efficient way to manage the state of nodes, edges, and other workflow-related data.
+- **State Management with Zustand**: The application uses Zustand with a clean Pattern A architecture, where UI state and audio state are efficiently separated for optimal performance.
 
 ## Features
 
-- **Drag-and-Drop Sidebar**: Add and arrange nodes using a drag-and-drop mechanism.
-- **Customizable Components**: Uses React Flow Components and the shadcn library to create highly-customizable nodes and edges.
-- **Dark Mode**: Toggles between light and dark themes, managed through the Zustand store.
-- **Runner Functionality**: Executes and monitors nodes sequentially with a workflow runner.
+- **Visual Node Editor**: Drag-and-drop interface for creating musical workflows
+- **Real-time Audio Generation**: Live pattern compilation and playback using Strudel
+- **Advanced Pattern Editing**: Step sequencers with modifiers, grouping, and visual feedback
+- **Global Playback Controls**: Spacebar for global pause/play, individual node controls
+- **Smart Edge Management**: Click-to-delete edges with visual feedback
+- **Theme System**: Multiple color themes with dark/light mode support
+- **Pattern Sharing**: Generate shareable URLs for your musical creations
+- **Live Pattern Preview**: Real-time Strudel code generation and display
 
 ## Node Types
 
-### 🎵 Sound Sources
-- **Drum Machine Node** - Classic drum sounds with step sequencer
-- **Pad Node** - Melodic patterns with scales and chords
-- **Arpeggiator Node** - Complex arpeggiated sequences
-- **Sounds Node** - Custom sample playback
+### 🎵 Instruments
 
-### 🎛️ Effect Nodes
+- **Pad Node** - Grid-based step sequencer with scales and modifiers
+- **Beat Machine** - Classic drum machine with multiple instrument tracks
+- **Arpeggiator** - Pattern-based arpeggiated sequences with visual feedback
+- **Chord Node** - Interactive chord player with scale selection
+- **Polyrhythm** - Multiple overlapping rhythmic patterns
+- **Custom Node** - Direct Strudel pattern input
 
-#### Audio Effects
-- **Gain** - Volume control
-- **Distortion** - Add saturation
-- **LPF** - Low-pass filtering
-- **Pan** - Stereo positioning
-- **Phaser** - Sweeping phase effect
-- **Compressor** - Dynamic range control
+### 🎛️ Synths
 
-#### Time Effects
-- **Fast** - Speed up patterns
-- **Slow** - Slow down patterns
-- **Attack** - Control note attack
-- **Release** - Control note release
-- **Sustain** - Control note sustain
+- **Drum Sounds** - Sample-based drum sound selection
+- **Sample Select** - Custom sample playback and selection
 
-#### Pattern Effects
-- **Jux** - Alternating channel effects
-- **Palindrome** - Reverse pattern playback
-- **Size** - Reverb room size
-- **Crush** - Bit-crushing distortion
+### 🎚️ Audio Effects
 
-#### Room Simulation
-- **Room** - Realistic acoustic spaces with adjustable parameters
+- **Gain** - Volume control and amplification
+- **PostGain** - Secondary gain stage
+- **Distortion** - Saturation and harmonic distortion
+- **LPF** - Low-pass filtering with cutoff control
+- **Pan** - Stereo positioning and width
+- **Phaser** - Sweeping phase modulation effect
+- **Crush** - Bit-crushing and sample rate reduction
+- **Jux** - Alternating left/right channel effects
+- **FM** - Frequency modulation synthesis
+- **Room** - Realistic acoustic space simulation with size, fade, and filtering controls
+
+### ⏱️ Time Effects
+
+- **Fast** - Speed multiplication (×2, ×3, ×4)
+- **Slow** - Speed division (÷2, ÷3, ÷4)
+- **Late** - Pattern delay and offset timing
+- **Attack** - Note attack time control
+- **Release** - Note release time control
+- **Sustain** - Note sustain level control
+- **Reverse** - Reverse pattern playback
+- **Palindrome** - Bidirectional pattern playback
+- **Mask** - Probabilistic pattern masking
+- **Ply** - Pattern subdivision and multiplication
 
 ## Usage Guide
 
@@ -100,7 +111,7 @@ To get started, follow these steps:
 
    - Add a drum machine or pad node
    - Click buttons to activate steps
-   - Adjust tempo with CPM control
+   - Adjust tempo with BPM control
 
 2. **Complex Patterns**:
    - Use Shift+click to select multiple notes for grouping
@@ -125,27 +136,42 @@ Each step can have modifiers applied:
 
 ### Performance Controls
 
-- **Global Play/Pause**: Control all patterns
-- **Group Controls**: Pause/resume connected node groups
-- **Individual Muting**: Mute specific nodes
-- **Live Pattern Editing**: Modify patterns while playing
+- **Global Play/Pause**: Press spacebar to pause/resume all active patterns
+- **Smart Pause Behavior**: Individually paused nodes stay paused during global resume
+- **Group Controls**: Pause/resume connected node groups independently
+- **Individual Node Controls**: Play/pause buttons on each instrument node
+- **Live Pattern Editing**: Modify patterns while playing with real-time updates
+- **Edge Management**: Click the X button on edges to delete connections
+- **Pattern Preview**: View generated Strudel code for each node
+
+### Keyboard Shortcuts
+
+- **Spacebar**: Global play/pause toggle
+- **Shift + Click**: Multi-select grid cells for grouping (in Pad nodes)
+- **Right-click**: Context menu for pattern modifiers
 
 ## Pattern Syntax
 
 The app generates [Strudel](https://strudel.cc) code in real-time. Here are some examples:
 
 ```javascript
-// Basic drum pattern
+// Basic drum pattern from Beat Machine
 $: sound('bd sd bd sd');
 
-// Melodic pattern with scale
-$: n('[0 2 4]').scale('C4:major');
+// Melodic pattern with scale from Pad Node
+$: n('[0 2 4 7]').scale('C4:major');
 
-// Effect chain
-$: sound('bd sd').gain(0.8).lpf(1000);
+// Arpeggiated pattern
+$: n('0 1 2').scale('C4:major').stack(n('0 1 2 1').scale('C4:major'));
 
-// Complex pattern with modifiers
-$: sound('bd sd').fast(2).palindrome();
+// Effect chain with multiple processors
+$: sound('bd sd').gain(0.8).lpf(1000).room(0.5);
+
+// Complex pattern with time effects
+$: sound('bd sd').fast(2).palindrome().jux(rev);
+
+// Polyrhythmic patterns
+$: stack(sound('bd').every(4), sound('sd').every(3));
 ```
 
 ## Development
@@ -156,23 +182,25 @@ $: sound('bd sd').fast(2).palindrome();
 src/
 ├── components/          # React components
 │   ├── nodes/          # Flow node components
+│   │   ├── instruments/ # Instrument node implementations
 │   │   ├── effects/    # Effect node implementations
 │   │   └── synths/     # Synthesizer node implementations
 │   ├── ui/             # shadcn/ui components
-│   └── workflow/       # Flow editor components
+│   ├── workflow/       # Flow editor components
+│   └── edges/          # Custom edge components
 ├── data/               # Static data and configurations
 ├── hooks/              # Custom React hooks
-├── lib/                # Utility libraries
+├── lib/                # Utility libraries and core logic
 ├── store/              # Zustand state management
 └── types/              # TypeScript type definitions
 ```
 
 ## Acknowledgments
 
-- [Strudel.cc](https://strudel.cc) - The amazing live coding platform
-- [React Flow](https://reactflow.dev) - Node-based editor foundation
-- [shadcn/ui](https://ui.shadcn.com) - Beautiful UI components
-- The live coding and web audio communities
+- [Strudel.cc](https://strudel.cc)
+- [tweakcn](https://tweakcn.com)
+- [React Flow](https://reactflow.dev)
+- [shadcn/ui](https://ui.shadcn.com)
 
 ---
 
