@@ -25,25 +25,28 @@ export function useUrlStateLoader() {
         edgeCount: urlState.edges.length,
       });
 
-      // Set all nodes to paused state on load
-      const nodes = (urlState.nodes as AppNode[]).map((node) => ({
-        ...node,
-        data: {
-          ...node.data,
-          state: 'paused' as const,
-        },
-      }));
-
-      setNodes(nodes);
-      setEdges(urlState.edges);
-
-      // Restore theme settings
+      // Restore theme settings FIRST to ensure CSS loads before nodes render
       if (urlState.theme) {
         setTheme(urlState.theme);
       }
       if (urlState.colorMode) {
         setColorMode(urlState.colorMode);
       }
+
+      // Small delay to ensure theme CSS loads on mobile before nodes render
+      setTimeout(() => {
+        // Set all nodes to paused state on load
+        const nodes = (urlState.nodes as AppNode[]).map((node) => ({
+          ...node,
+          data: {
+            ...node.data,
+            state: 'paused' as const,
+          },
+        }));
+
+        setNodes(nodes);
+        setEdges(urlState.edges);
+      }, 50); // Small delay for mobile CSS loading
     }
   }, [setNodes, setEdges, setTheme, setColorMode]);
 }

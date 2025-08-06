@@ -8,6 +8,7 @@ import { WorkflowControls } from './controls';
 import { useDragAndDrop } from './useDragAndDrop';
 import { useUrlStateLoader } from '@/hooks/use-url-state';
 import { useGlobalPlayback } from '@/hooks/use-global-playback';
+import { useThemeCss } from '@/hooks/use-theme-css';
 
 export default function Workflow() {
   useUrlStateLoader();
@@ -17,6 +18,7 @@ export default function Workflow() {
     nodes,
     edges,
     colorMode,
+    theme,
     onNodesChange,
     onEdgesChange,
     onConnect,
@@ -27,6 +29,7 @@ export default function Workflow() {
       nodes: state.nodes,
       edges: state.edges,
       colorMode: state.colorMode,
+      theme: state.theme,
       onNodesChange: state.onNodesChange,
       onEdgesChange: state.onEdgesChange,
       onConnect: state.onConnect,
@@ -34,6 +37,9 @@ export default function Workflow() {
       onNodeDragStop: state.onNodeDragStop,
     }))
   );
+
+  // Load theme CSS at the app level - fixes mobile color loading
+  useThemeCss(theme);
 
   const { onDragOver, onDrop } = useDragAndDrop();
 

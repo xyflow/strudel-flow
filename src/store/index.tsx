@@ -7,15 +7,6 @@ import {
   AppStoreContext,
   type AppStoreProviderProps,
 } from '@/store/app-context';
-import { useThemeCss } from '@/hooks/use-theme-css';
-import { useAppStore } from '@/store/app-context';
-
-// Component to load theme CSS based on current theme in store
-function ThemeLoader() {
-  const theme = useAppStore((state) => state.theme);
-  useThemeCss(theme);
-  return null;
-}
 
 export const AppStoreProvider = ({
   children,
@@ -35,7 +26,6 @@ export const AppStoreProvider = ({
 
   return (
     <AppStoreContext.Provider value={storeRef.current}>
-      <ThemeLoader />
       {children}
     </AppStoreContext.Provider>
   );
