@@ -66,7 +66,9 @@ export type WorkflowNodeData = {
   polySound1?: string;
   polySound2?: string;
   polySound3?: string;
-  activePolyPatterns?: string;
+  pattern1Active?: boolean;
+  pattern2Active?: boolean;
+  pattern3Active?: boolean;
 
   // Custom node data
   customPattern?: string;

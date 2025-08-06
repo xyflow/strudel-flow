@@ -64,7 +64,9 @@ export interface StrudelConfig {
   polySound1?: string;
   polySound2?: string;
   polySound3?: string;
-  activePolyPatterns?: string;
+  pattern1Active?: boolean;
+  pattern2Active?: boolean;
+  pattern3Active?: boolean;
 
   // Arpeggiator node
   arpPattern?: string;

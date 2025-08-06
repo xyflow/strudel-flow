@@ -1,9 +1,15 @@
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { useAppStore } from '@/store/app-context';
-import { useStrudelStore } from '@/store/strudel-store';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { DRUM_OPTIONS } from '@/data/sound-options';
 
 const RHYTHM_PRESETS = [
@@ -20,40 +26,47 @@ const RHYTHM_PRESETS = [
 export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Use node data directly with defaults
+  // Use node data directly with defaults - ensure sounds are always set
   const polyPattern1 = data.polyPattern1 || '';
   const polyPattern2 = data.polyPattern2 || '';
   const polyPattern3 = data.polyPattern3 || '';
   const polySound1 = data.polySound1 || 'bd';
   const polySound2 = data.polySound2 || 'sd';
   const polySound3 = data.polySound3 || 'hh';
-  const activePolyPatterns = data.activePolyPatterns || '';
+  const pattern1Active = data.pattern1Active || false;
+  const pattern2Active = data.pattern2Active || false;
+  const pattern3Active = data.pattern3Active || false;
+
+  // Initialize default sounds if not set
+  React.useEffect(() => {
+    if (!data.polySound1 || !data.polySound2 || !data.polySound3) {
+      updateNodeData(id, {
+        polySound1: data.polySound1 || 'bd',
+        polySound2: data.polySound2 || 'sd',
+        polySound3: data.polySound3 || 'hh',
+      });
+    }
+  }, [id, updateNodeData, data.polySound1, data.polySound2, data.polySound3]);
 
   const handlePresetClick = useCallback(
     (
       preset: { id: string; pattern: string; label: string },
       patternNumber: 1 | 2 | 3
     ) => {
-      const patternId = `pattern${patternNumber}`;
-      const key = `polyPattern${patternNumber}` as keyof typeof data;
-
-      const newActivePatterns = activePolyPatterns.includes(patternId)
-        ? activePolyPatterns
-        : [...activePolyPatterns.split(','), patternId]
-            .filter(Boolean)
-            .join(',');
+      const patternKey = `polyPattern${patternNumber}`;
+      const activeKey = `pattern${patternNumber}Active`;
 
       updateNodeData(id, {
-        [key]: preset.pattern,
-        activePolyPatterns: newActivePatterns,
+        [patternKey]: preset.pattern,
+        [activeKey]: true,
       });
     },
-    [id, updateNodeData, activePolyPatterns]
+    [id, updateNodeData]
   );
 
   const handleSoundChange = useCallback(
     (patternNumber: 1 | 2 | 3, sound: string) => {
-      const key = `polySound${patternNumber}` as keyof typeof data;
+      const key = `polySound${patternNumber}`;
       updateNodeData(id, { [key]: sound });
     },
     [id, updateNodeData]
@@ -63,23 +76,29 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
     <WorkflowNode id={id} data={data} type={type}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md w-80">
         <div className="flex flex-col gap-2">
-          <select
+          <Select
             value={polySound1}
-            onChange={(e) => handleSoundChange(1, e.target.value)}
-            className="px-2 py-1 text-xs border rounded bg-transparent"
+            onValueChange={(sound) => handleSoundChange(1, sound)}
           >
-            {DRUM_OPTIONS.map((sound) => (
-              <option key={sound} value={sound}>
-                {sound}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger size="sm" className="text-xs">
+              <SelectValue placeholder="bd" />
+            </SelectTrigger>
+            <SelectContent>
+              {DRUM_OPTIONS.map((sound) => (
+                <SelectItem key={sound} value={sound}>
+                  {sound}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <div className="grid grid-cols-4 gap-1">
             {RHYTHM_PRESETS.map((preset) => (
               <Button
                 key={preset.id}
                 variant={
-                  polyPattern1 === preset.pattern ? 'default' : 'outline'
+                  pattern1Active && polyPattern1 === preset.pattern
+                    ? 'default'
+                    : 'outline'
                 }
                 size="sm"
                 className="h-8 text-xs font-bold"
@@ -91,23 +110,29 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <select
+          <Select
             value={polySound2}
-            onChange={(e) => handleSoundChange(2, e.target.value)}
-            className="px-2 py-1 text-xs border rounded bg-transparent"
+            onValueChange={(sound) => handleSoundChange(2, sound)}
           >
-            {DRUM_OPTIONS.map((sound) => (
-              <option key={sound} value={sound}>
-                {sound}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger size="sm" className="text-xs">
+              <SelectValue placeholder="sd" />
+            </SelectTrigger>
+            <SelectContent>
+              {DRUM_OPTIONS.map((sound) => (
+                <SelectItem key={sound} value={sound}>
+                  {sound}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <div className="grid grid-cols-4 gap-1">
             {RHYTHM_PRESETS.map((preset) => (
               <Button
                 key={preset.id}
                 variant={
-                  polyPattern2 === preset.pattern ? 'default' : 'outline'
+                  pattern2Active && polyPattern2 === preset.pattern
+                    ? 'default'
+                    : 'outline'
                 }
                 size="sm"
                 className="h-8 text-xs font-bold"
@@ -119,23 +144,29 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <select
+          <Select
             value={polySound3}
-            onChange={(e) => handleSoundChange(3, e.target.value)}
-            className="px-2 py-1 text-xs border rounded bg-transparent"
+            onValueChange={(sound) => handleSoundChange(3, sound)}
           >
-            {DRUM_OPTIONS.map((sound) => (
-              <option key={sound} value={sound}>
-                {sound}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger size="sm" className="text-xs">
+              <SelectValue placeholder="hh" />
+            </SelectTrigger>
+            <SelectContent>
+              {DRUM_OPTIONS.map((sound) => (
+                <SelectItem key={sound} value={sound}>
+                  {sound}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <div className="grid grid-cols-4 gap-1">
             {RHYTHM_PRESETS.map((preset) => (
               <Button
                 key={preset.id}
                 variant={
-                  polyPattern3 === preset.pattern ? 'default' : 'outline'
+                  pattern3Active && polyPattern3 === preset.pattern
+                    ? 'default'
+                    : 'outline'
                 }
                 size="sm"
                 className="h-8 text-xs font-bold"
@@ -152,39 +183,22 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
 }
 
 PolyrhythmNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const config = useStrudelStore.getState().config[node.id];
-  const activePatterns = config?.activePolyPatterns?.split(',') || [];
-
-  if (activePatterns.length === 0) return strudelString;
-
+  const data = node.data;
   const patterns = [];
 
-  if (
-    activePatterns.includes('pattern1') &&
-    config?.polyPattern1 &&
-    config?.polySound1
-  ) {
-    patterns.push(
-      `sound("${config.polySound1}").struct("${config.polyPattern1}")`
-    );
+  // Use default sounds if not set
+  const sound1 = data.polySound1 || 'bd';
+  const sound2 = data.polySound2 || 'sd';
+  const sound3 = data.polySound3 || 'hh';
+
+  if (data.pattern1Active && data.polyPattern1) {
+    patterns.push(`sound("${sound1}").struct("${data.polyPattern1}")`);
   }
-  if (
-    activePatterns.includes('pattern2') &&
-    config?.polyPattern2 &&
-    config?.polySound2
-  ) {
-    patterns.push(
-      `sound("${config.polySound2}").struct("${config.polyPattern2}")`
-    );
+  if (data.pattern2Active && data.polyPattern2) {
+    patterns.push(`sound("${sound2}").struct("${data.polyPattern2}")`);
   }
-  if (
-    activePatterns.includes('pattern3') &&
-    config?.polyPattern3 &&
-    config?.polySound3
-  ) {
-    patterns.push(
-      `sound("${config.polySound3}").struct("${config.polyPattern3}")`
-    );
+  if (data.pattern3Active && data.polyPattern3) {
+    patterns.push(`sound("${sound3}").struct("${data.polyPattern3}")`);
   }
 
   if (patterns.length === 0) return strudelString;
