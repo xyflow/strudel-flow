@@ -2,6 +2,7 @@ import { Node, NodeProps, XYPosition } from '@xyflow/react';
 import { nanoid } from 'nanoid';
 
 import { iconMapping } from '@/data/icon-mapping';
+import { CellState } from './instruments/pad-utils';
 
 import { SampleSelect } from './synths/sample-select';
 import { DrumSoundsNode } from './synths/drum-sounds';
@@ -46,6 +47,16 @@ export type WorkflowNodeData = {
   notes?: string;
   status?: 'loading' | 'success' | 'error' | 'initial';
   state?: 'running' | 'paused' | 'stopped';
+  // Pad node specific data
+  steps?: number;
+  mode?: 'arp' | 'chord';
+  octave?: number;
+  selectedKey?: string;
+  selectedScaleType?: string;
+  grid?: boolean[][];
+  buttonModifiers?: Record<string, CellState>;
+  selectedButtons?: string[];
+  noteGroups?: Record<number, number[][]>;
 };
 
 export type WorkflowNodeProps = NodeProps<Node<WorkflowNodeData>> & {

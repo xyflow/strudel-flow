@@ -12,7 +12,7 @@ type StrudelStore = {
   setCpm: (cpm: string) => void;
 };
 
-export const useStrudelStore = create<StrudelStore>((set, get) => ({
+export const useStrudelStore = create<StrudelStore>((set) => ({
   config: {},
   pattern: '',
   cpm: '60',
