@@ -44,8 +44,6 @@ export interface ChordControlsProps {
   onChordComplexityChange: (
     complexity: 'triad' | 'seventh' | 'ninth' | 'eleventh'
   ) => void;
-  pressedKeys: number[];
-  onClearAll: () => void;
 }
 
 function KeyScaleOctaveControls({
@@ -202,8 +200,6 @@ const CHORD_COMPLEXITY_OPTIONS = [
 function ChordControls({
   chordComplexity,
   onChordComplexityChange,
-  pressedKeys,
-  onClearAll,
 }: ChordControlsProps) {
   return (
     <div className="flex flex-wrap gap-2 w-0 min-w-full">
@@ -222,22 +218,6 @@ function ChordControls({
           </SelectContent>
         </Select>
       </div>
-      {pressedKeys.length > 0 && (
-        <>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 text-xs px-2 whitespace-nowrap"
-            onClick={onClearAll}
-          >
-            Clear All
-          </Button>
-          <span className="text-xs text-muted-foreground whitespace-nowrap">
-            {pressedKeys.length} chord{pressedKeys.length !== 1 ? 's' : ''}{' '}
-            active
-          </span>
-        </>
-      )}
     </div>
   );
 }

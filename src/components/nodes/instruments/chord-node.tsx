@@ -67,7 +67,6 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
     updateNodeData(id, { pressedKeys: Array.from(newPressed) });
   };
 
-
   const currentScaleDegrees =
     SCALE_DEGREES[scaleType as keyof typeof SCALE_DEGREES] ||
     SCALE_DEGREES.major;
@@ -151,7 +150,6 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
             onChordComplexityChange: (complexity) =>
               updateNodeData(id, { chordComplexity: complexity }),
             pressedKeys,
-            onClearAll: () => updateNodeData(id, { pressedKeys: [] }),
           }}
         />
       </div>
