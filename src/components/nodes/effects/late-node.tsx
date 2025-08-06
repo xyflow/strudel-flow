@@ -1,14 +1,7 @@
-import { useState, useEffect } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
-import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { Button } from '@/components/ui/button';
-
-interface LateNodeInternalState {
-  selectedOffset: string;
-  selectedPattern: string;
-}
 
 const LATE_OFFSETS = [
   { id: 'micro', label: '0.01s', offset: '0.01', description: 'Micro delay' },
@@ -47,36 +40,14 @@ const LATE_PATTERNS = [
 
 export function LateNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  const savedInternalState = (data as { internalState?: LateNodeInternalState })
-    ?.internalState;
-  const [selectedOffset, setSelectedOffset] = useState(
-    savedInternalState?.selectedOffset || 'small'
-  );
-  const [selectedPattern, setSelectedPattern] = useState(
-    savedInternalState?.selectedPattern || 'constant'
-  );
-  const [hasRestoredState, setHasRestoredState] = useState(false);
+  // Read current values from Strudel store
+  const config = useStrudelStore((state) => state.config[id] || {});
+  const selectedOffset = config.lateOffsetId || 'small';
+  const selectedPattern = config.latePatternId || 'constant';
 
-  useEffect(() => {
-    if (savedInternalState && !hasRestoredState) {
-      setSelectedOffset(savedInternalState.selectedOffset);
-      setSelectedPattern(savedInternalState.selectedPattern);
-      setHasRestoredState(true);
-    }
-  }, [savedInternalState, hasRestoredState, id]);
-
-  useEffect(() => {
-    const internalState: LateNodeInternalState = {
-      selectedOffset,
-      selectedPattern,
-    };
-    updateNodeData(id, { internalState });
-  }, [selectedOffset, selectedPattern, id, updateNodeData]);
-
-  useEffect(() => {
-    const offsetData = LATE_OFFSETS.find((o) => o.id === selectedOffset);
+  const handleOffsetChange = (offsetId: string) => {
+    const offsetData = LATE_OFFSETS.find((o) => o.id === offsetId);
     const patternData = LATE_PATTERNS.find((p) => p.id === selectedPattern);
 
     if (offsetData && patternData) {
@@ -89,12 +60,37 @@ export function LateNode({ id, data }: WorkflowNodeProps) {
       } else {
         finalPattern = offsetData.offset;
       }
+
       updateNode(id, {
+        lateOffsetId: offsetId,
         lateOffset: offsetData.offset,
         latePattern: finalPattern,
       });
     }
-  }, [selectedOffset, selectedPattern, id, updateNode]);
+  };
+
+  const handlePatternChange = (patternId: string) => {
+    const offsetData = LATE_OFFSETS.find((o) => o.id === selectedOffset);
+    const patternData = LATE_PATTERNS.find((p) => p.id === patternId);
+
+    if (offsetData && patternData) {
+      let finalPattern;
+      if (patternData.pattern) {
+        finalPattern = patternData.pattern.replace(
+          /{offset}/g,
+          offsetData.offset
+        );
+      } else {
+        finalPattern = offsetData.offset;
+      }
+
+      updateNode(id, {
+        latePatternId: patternId,
+        lateOffset: offsetData.offset,
+        latePattern: finalPattern,
+      });
+    }
+  };
   return (
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md min-w-80">
@@ -106,7 +102,7 @@ export function LateNode({ id, data }: WorkflowNodeProps) {
                 key={offset.id}
                 variant={selectedOffset === offset.id ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedOffset(offset.id)}
+                onClick={() => handleOffsetChange(offset.id)}
                 title={offset.description}
               >
                 {offset.label}
@@ -123,7 +119,7 @@ export function LateNode({ id, data }: WorkflowNodeProps) {
                 key={pattern.id}
                 variant={selectedPattern === pattern.id ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedPattern(pattern.id)}
+                onClick={() => handlePatternChange(pattern.id)}
                 title={pattern.description}
               >
                 {pattern.label}

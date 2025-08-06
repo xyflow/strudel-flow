@@ -1,14 +1,7 @@
-import { useState, useEffect } from 'react';
-import { useStrudelStore } from '@/store/strudel-store';
-import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
+import { useStrudelStore } from '@/store/strudel-store';
 import { Button } from '@/components/ui/button';
-
-interface PlyNodeInternalState {
-  selectedMultiplier: string;
-  selectedProbability: string;
-}
 
 const PLY_MULTIPLIERS = [
   { id: 'x2', label: '×2', multiplier: '2', description: 'Double each note' },
@@ -58,49 +51,33 @@ const PROBABILITY_OPTIONS = [
 
 export function PlyNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  const savedInternalState = (data as { internalState?: PlyNodeInternalState })
-    ?.internalState;
-  const [selectedMultiplier, setSelectedMultiplier] = useState(
-    savedInternalState?.selectedMultiplier || 'x2'
-  );
-  const [selectedProbability, setSelectedProbability] = useState(
-    savedInternalState?.selectedProbability || 'always'
-  );
-  const [hasRestoredState, setHasRestoredState] = useState(false);
+  // Read current values from Strudel store
+  const config = useStrudelStore((state) => state.config[id] || {});
+  const selectedMultiplier = config.plyMultiplierId || 'x2';
+  const selectedProbability = config.plyProbabilityId || 'always';
 
-  useEffect(() => {
-    if (savedInternalState && !hasRestoredState) {
-      setSelectedMultiplier(savedInternalState.selectedMultiplier);
-      setSelectedProbability(savedInternalState.selectedProbability);
-      setHasRestoredState(true);
-    }
-  }, [savedInternalState, hasRestoredState, id]);
-
-  useEffect(() => {
-    const internalState: PlyNodeInternalState = {
-      selectedMultiplier,
-      selectedProbability,
-    };
-    updateNodeData(id, { internalState });
-  }, [selectedMultiplier, selectedProbability, id, updateNodeData]);
-
-  useEffect(() => {
-    const multiplierData = PLY_MULTIPLIERS.find(
-      (m) => m.id === selectedMultiplier
-    );
-    const probabilityData = PROBABILITY_OPTIONS.find(
-      (p) => p.id === selectedProbability
-    );
-
-    if (multiplierData && probabilityData) {
+  const handleMultiplierChange = (multiplierId: string) => {
+    const multiplierData = PLY_MULTIPLIERS.find((m) => m.id === multiplierId);
+    if (multiplierData) {
       updateNode(id, {
+        plyMultiplierId: multiplierId,
         plyMultiplier: multiplierData.multiplier,
+      });
+    }
+  };
+
+  const handleProbabilityChange = (probabilityId: string) => {
+    const probabilityData = PROBABILITY_OPTIONS.find(
+      (p) => p.id === probabilityId
+    );
+    if (probabilityData) {
+      updateNode(id, {
+        plyProbabilityId: probabilityId,
         plyProbability: probabilityData.probability,
       });
     }
-  }, [selectedMultiplier, selectedProbability, id, updateNode]);
+  };
 
   return (
     <WorkflowNode id={id} data={data}>
@@ -115,7 +92,7 @@ export function PlyNode({ id, data }: WorkflowNodeProps) {
                   selectedMultiplier === multiplier.id ? 'default' : 'outline'
                 }
                 size="sm"
-                onClick={() => setSelectedMultiplier(multiplier.id)}
+                onClick={() => handleMultiplierChange(multiplier.id)}
                 title={multiplier.description}
               >
                 {multiplier.label}
@@ -134,7 +111,7 @@ export function PlyNode({ id, data }: WorkflowNodeProps) {
                   selectedProbability === prob.id ? 'default' : 'outline'
                 }
                 size="sm"
-                onClick={() => setSelectedProbability(prob.id)}
+                onClick={() => handleProbabilityChange(prob.id)}
                 title={prob.description}
               >
                 {prob.label}

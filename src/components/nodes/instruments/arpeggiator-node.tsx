@@ -51,7 +51,7 @@ function ArpeggioVisualizer({
   const numCols = pattern.length;
 
   return (
-    <div className="flex items-center justify-center w-full h-12 p-2 bg-gray-200 dark:bg-gray-700 rounded-md">
+    <div className="flex items-center justify-center w-full h-12 p-2 bg-muted/80 rounded-md">
       <div className="flex gap-1.5">
         {Array.from({ length: numCols }).map((_, colIndex) => (
           <div key={colIndex} className="flex flex-col-reverse gap-1">
@@ -63,9 +63,7 @@ function ArpeggioVisualizer({
                   key={rowIndex}
                   className={cn(
                     'w-2 h-2 rounded-full',
-                    isSet && isActive
-                      ? 'bg-blue-500'
-                      : 'bg-gray-400 dark:bg-gray-500',
+                    isSet && isActive ? 'bg-primary' : 'bg-muted',
                     isSet ? 'opacity-100' : 'opacity-25'
                   )}
                 />

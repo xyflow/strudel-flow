@@ -1,14 +1,7 @@
-import { useState, useEffect } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
-import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { Button } from '@/components/ui/button';
-
-interface MaskNodeInternalState {
-  selectedPattern: string;
-  selectedProbability: string;
-}
 
 const MASK_PATTERNS = [
   {
@@ -73,47 +66,33 @@ const PROBABILITY_OPTIONS = [
 
 export function MaskNode({ id, data }: WorkflowNodeProps) {
   const updateNode = useStrudelStore((state) => state.updateNode);
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  const savedInternalState = (data as { internalState?: MaskNodeInternalState })
-    ?.internalState;
-  const [selectedPattern, setSelectedPattern] = useState(
-    savedInternalState?.selectedPattern || 'half'
-  );
-  const [selectedProbability, setSelectedProbability] = useState(
-    savedInternalState?.selectedProbability || 'always'
-  );
-  const [hasRestoredState, setHasRestoredState] = useState(false);
+  // Read current values from Strudel store
+  const config = useStrudelStore((state) => state.config[id] || {});
+  const selectedPattern = config.maskPatternId || 'half';
+  const selectedProbability = config.maskProbabilityId || 'always';
 
-  useEffect(() => {
-    if (savedInternalState && !hasRestoredState) {
-      setSelectedPattern(savedInternalState.selectedPattern);
-      setSelectedProbability(savedInternalState.selectedProbability);
-      setHasRestoredState(true);
-    }
-  }, [savedInternalState, hasRestoredState, id]);
-
-  useEffect(() => {
-    const internalState: MaskNodeInternalState = {
-      selectedPattern,
-      selectedProbability,
-    };
-    updateNodeData(id, { internalState });
-  }, [selectedPattern, selectedProbability, id, updateNodeData]);
-
-  useEffect(() => {
-    const patternData = MASK_PATTERNS.find((p) => p.id === selectedPattern);
-    const probabilityData = PROBABILITY_OPTIONS.find(
-      (p) => p.id === selectedProbability
-    );
-
-    if (patternData && probabilityData) {
+  const handlePatternChange = (patternId: string) => {
+    const patternData = MASK_PATTERNS.find((p) => p.id === patternId);
+    if (patternData) {
       updateNode(id, {
+        maskPatternId: patternId,
         maskPattern: patternData.pattern,
+      });
+    }
+  };
+
+  const handleProbabilityChange = (probabilityId: string) => {
+    const probabilityData = PROBABILITY_OPTIONS.find(
+      (p) => p.id === probabilityId
+    );
+    if (probabilityData) {
+      updateNode(id, {
+        maskProbabilityId: probabilityId,
         maskProbability: probabilityData.probability,
       });
     }
-  }, [selectedPattern, selectedProbability, id, updateNode]);
+  };
 
   return (
     <WorkflowNode id={id} data={data}>
@@ -126,7 +105,7 @@ export function MaskNode({ id, data }: WorkflowNodeProps) {
                 key={pattern.id}
                 variant={selectedPattern === pattern.id ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedPattern(pattern.id)}
+                onClick={() => handlePatternChange(pattern.id)}
                 title={pattern.description}
               >
                 {pattern.label}
@@ -145,7 +124,7 @@ export function MaskNode({ id, data }: WorkflowNodeProps) {
                   selectedProbability === prob.id ? 'default' : 'outline'
                 }
                 size="sm"
-                onClick={() => setSelectedProbability(prob.id)}
+                onClick={() => handleProbabilityChange(prob.id)}
                 title={prob.description}
               >
                 {prob.label}

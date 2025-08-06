@@ -3,15 +3,15 @@ import { Node, Edge, ColorMode } from '@xyflow/react';
 import { StrudelConfig } from '@/types';
 
 export interface SerializableState {
-  nodes: Node[]; // Now includes internal states in node.data.internalState
+  nodes: Node[];
   edges: Edge[];
-  strudelConfig: Record<string, StrudelConfig>; // Node configurations from Strudel store
-  theme: string; // Visual theme name
-  colorMode: ColorMode; // Dark/light mode
+  strudelConfig: Record<string, StrudelConfig>;
+  theme: string;
+  colorMode: ColorMode;
 }
 
 /**
- * Serialize nodes (with internal states), edges, strudel config, and theme to a compressed base64 string
+ * Serialize nodes, edges, strudel config, and theme to a compressed base64 string
  */
 export function serializeState(
   nodes: Node[],
@@ -21,7 +21,7 @@ export function serializeState(
   colorMode: ColorMode
 ): string {
   const state: SerializableState = {
-    nodes, // Nodes now contain internal states in their data property
+    nodes,
     edges,
     strudelConfig,
     theme,

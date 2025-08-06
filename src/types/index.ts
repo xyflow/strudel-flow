@@ -37,10 +37,14 @@ export interface StrudelConfig {
   probability?: number;
   maskPattern?: string;
   maskProbability?: string;
+  maskPatternId?: string;
+  maskProbabilityId?: string;
 
   // Ply node
   plyMultiplier?: string;
   plyProbability?: string;
+  plyMultiplierId?: string;
+  plyProbabilityId?: string;
 
   // FM node
   fmFrequency?: string;
@@ -50,6 +54,8 @@ export interface StrudelConfig {
   // Late node
   lateOffset?: string;
   latePattern?: string;
+  lateOffsetId?: string;
+  latePatternId?: string;
 
   // Polyrhythm node
   polyPattern1?: string;
