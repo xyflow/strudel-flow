@@ -159,7 +159,6 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
           </div>
         </div>
         <AccordionControls
-          triggerText="Chord Controls"
           keyScaleOctaveProps={{
             selectedKey,
             onKeyChange: (key) => updateNodeData(id, { selectedKey: key }),

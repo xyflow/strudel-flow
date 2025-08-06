@@ -156,7 +156,6 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
         </div>
         <div className="w-full max-w-full overflow-hidden">
           <AccordionControls
-            triggerText="Controls"
             keyScaleOctaveProps={{
               selectedKey,
               onKeyChange: setSelectedKey,

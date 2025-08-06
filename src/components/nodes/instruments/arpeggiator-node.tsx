@@ -140,7 +140,6 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
           ))}
         </div>
         <AccordionControls
-          triggerText="Arpeggio Controls"
           keyScaleOctaveProps={{
             selectedKey,
             onKeyChange: (key) => updateNodeData(id, { selectedKey: key }),

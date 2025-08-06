@@ -243,7 +243,6 @@ function ChordControls({
 }
 
 interface AccordionControlsProps {
-  triggerText: string;
   children?: React.ReactNode;
   keyScaleOctaveProps?: KeyScaleOctaveControlsProps;
   padControlsProps?: PadControlsProps;
@@ -251,7 +250,6 @@ interface AccordionControlsProps {
 }
 
 export const AccordionControls: React.FC<AccordionControlsProps> = ({
-  triggerText,
   children,
   keyScaleOctaveProps,
   padControlsProps,
@@ -261,7 +259,7 @@ export const AccordionControls: React.FC<AccordionControlsProps> = ({
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="controls" className="border-none">
         <AccordionTrigger className="text-xs font-mono py-2 px-0">
-          {triggerText}
+          Controls
         </AccordionTrigger>
         <AccordionContent className="overflow-hidden">
           <div className="flex flex-col gap-2 w-0 min-w-full">
