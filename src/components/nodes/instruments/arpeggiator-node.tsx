@@ -5,7 +5,7 @@ import { WorkflowNodeProps, AppNode } from '..';
 import { useAppStore } from '@/store/app-context';
 import { AccordionControls } from '@/components/accordion-controls';
 import { cn } from '@/lib/utils';
-import { PresetGroup } from '@/components/preset-group';
+import { Button } from '@/components/ui/button';
 
 const ARP_PATTERNS = [
   { id: 'up', label: 'Up', pattern: [0, 1, 2] },
@@ -152,13 +152,24 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
             showOctave: false,
           }}
         >
-          <PresetGroup
-            label="Octave Range"
-            presets={OCTAVE_RANGES}
-            selectedValue={octave}
-            onSelect={(oct) => updateNodeData(id, { octave: oct as number })}
-            idKey="octaves"
-          />
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-mono font-medium">
+              Octave Range
+            </label>
+            <div className="grid grid-cols-4 gap-1">
+              {OCTAVE_RANGES.map((preset) => (
+                <Button
+                  key={preset.octaves}
+                  variant={octave === preset.octaves ? 'default' : 'outline'}
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => updateNodeData(id, { octave: preset.octaves })}
+                >
+                  {preset.label}
+                </Button>
+              ))}
+            </div>
+          </div>
         </AccordionControls>
       </div>
     </WorkflowNode>

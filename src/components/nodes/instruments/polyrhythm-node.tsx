@@ -3,7 +3,7 @@ import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { useAppStore } from '@/store/app-context';
 import { useStrudelStore } from '@/store/strudel-store';
-import { PresetGroup } from '@/components/preset-group';
+import { Button } from '@/components/ui/button';
 import { DRUM_OPTIONS } from '@/data/sound-options';
 
 const RHYTHM_PRESETS = [
@@ -74,18 +74,21 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
               </option>
             ))}
           </select>
-          <PresetGroup
-            presets={RHYTHM_PRESETS}
-            selectedValue={polyPattern1}
-            onSelect={(id) =>
-              handlePresetClick(
-                { id: id as string, pattern: id as string, label: '' },
-                1
-              )
-            }
-            idKey="pattern"
-            buttonClassName="font-bold"
-          />
+          <div className="grid grid-cols-4 gap-1">
+            {RHYTHM_PRESETS.map((preset) => (
+              <Button
+                key={preset.id}
+                variant={
+                  polyPattern1 === preset.pattern ? 'default' : 'outline'
+                }
+                size="sm"
+                className="h-8 text-xs font-bold"
+                onClick={() => handlePresetClick(preset, 1)}
+              >
+                {preset.label}
+              </Button>
+            ))}
+          </div>
         </div>
         <div className="flex flex-col gap-2">
           <select
@@ -99,18 +102,21 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
               </option>
             ))}
           </select>
-          <PresetGroup
-            presets={RHYTHM_PRESETS}
-            selectedValue={polyPattern2}
-            onSelect={(id) =>
-              handlePresetClick(
-                { id: id as string, pattern: id as string, label: '' },
-                2
-              )
-            }
-            idKey="pattern"
-            buttonClassName="font-bold"
-          />
+          <div className="grid grid-cols-4 gap-1">
+            {RHYTHM_PRESETS.map((preset) => (
+              <Button
+                key={preset.id}
+                variant={
+                  polyPattern2 === preset.pattern ? 'default' : 'outline'
+                }
+                size="sm"
+                className="h-8 text-xs font-bold"
+                onClick={() => handlePresetClick(preset, 2)}
+              >
+                {preset.label}
+              </Button>
+            ))}
+          </div>
         </div>
         <div className="flex flex-col gap-2">
           <select
@@ -124,18 +130,21 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
               </option>
             ))}
           </select>
-          <PresetGroup
-            presets={RHYTHM_PRESETS}
-            selectedValue={polyPattern3}
-            onSelect={(id) =>
-              handlePresetClick(
-                { id: id as string, pattern: id as string, label: '' },
-                3
-              )
-            }
-            idKey="pattern"
-            buttonClassName="font-bold"
-          />
+          <div className="grid grid-cols-4 gap-1">
+            {RHYTHM_PRESETS.map((preset) => (
+              <Button
+                key={preset.id}
+                variant={
+                  polyPattern3 === preset.pattern ? 'default' : 'outline'
+                }
+                size="sm"
+                className="h-8 text-xs font-bold"
+                onClick={() => handlePresetClick(preset, 3)}
+              >
+                {preset.label}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
     </WorkflowNode>
