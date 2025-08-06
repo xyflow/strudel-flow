@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { useAppStore } from '@/store/app-context';
 import { useStrudelStore } from '@/store/strudel-store';
 import { generateShareableUrl } from '@/lib/state-serialization';
-import { findConnectedComponents } from '@/lib/graph-utils';
 
 export function ShareUrlPopover() {
   const [isCopied, setIsCopied] = useState(false);
@@ -23,18 +22,6 @@ export function ShareUrlPopover() {
     try {
       // Capture the current Strudel config BEFORE pausing (so we get the full patterns)
       const currentStrudelConfig = { ...strudelStore.config };
-
-      // Now pause all groups to prepare for sharing
-      const connectedComponents = findConnectedComponents(nodes, edges);
-
-      connectedComponents.forEach((component) => {
-        if (component.length > 0) {
-          const groupId = component.sort().join('-');
-          if (!strudelStore.isGroupPaused(groupId)) {
-            strudelStore.pauseGroup(groupId, component);
-          }
-        }
-      });
 
       // Generate URL with the captured config (before pausing) and current nodes
       const shareableUrl = generateShareableUrl(

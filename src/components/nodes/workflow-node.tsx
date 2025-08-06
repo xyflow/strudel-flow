@@ -41,16 +41,13 @@ function WorkflowNode({
   const { runWorkflow } = useWorkflowRunner();
   const [show, setShow] = useState(false);
   const removeNodeConfig = useStrudelStore((state) => state.removeNodeConfig);
-  const muteNode = useStrudelStore((state) => state.muteNode);
-  const unmuteNode = useStrudelStore((state) => state.unmuteNode);
-  const isNodeMuted = useStrudelStore((state) => state.isNodeMuted);
+
   const { removeNode, edges, nodes, updateNodeData } = useAppStore(
     (state) => state
   );
   const nodeState = useAppStore((state) => state.nodes.find((n) => n.id === id))
     ?.data?.state;
 
-  const isMuted = isNodeMuted(id);
   const isPaused = nodeState === 'paused';
 
   // Find all connected nodes for this group using findConnectedComponents
@@ -77,14 +74,6 @@ function WorkflowNode({
     });
   }, [connectedNodeIds, updateNodeData]);
 
-  const onMute = useCallback(() => {
-    if (isMuted) {
-      unmuteNode(id);
-    } else {
-      muteNode(id);
-    }
-  }, [id, isMuted, muteNode, unmuteNode]);
-
   const onDelete = useCallback(() => {
     removeNodeConfig(id);
     removeNode(id);
@@ -109,13 +98,6 @@ function WorkflowNode({
               variant={isPaused ? 'default' : 'ghost'}
             >
               {isPaused ? <Play /> : <Pause />}
-            </NodeHeaderAction>
-            <NodeHeaderAction
-              onClick={onMute}
-              label={isMuted ? 'Unmute node' : 'Mute node'}
-              variant={isMuted ? 'default' : 'ghost'}
-            >
-              {isMuted ? <VolumeX /> : <Volume2 />}
             </NodeHeaderAction>
             <NodeHeaderAction
               label="Pattern Preview"

@@ -55,8 +55,6 @@ export function useUrlStateLoader() {
 
           connectedComponents.forEach((component) => {
             if (component.length > 0) {
-              const groupId = component.sort().join('-');
-
               // Create the group config from the restored Strudel config
               const groupConfigs: Record<string, StrudelConfig> = {};
               component.forEach((nodeId) => {
@@ -72,9 +70,6 @@ export function useUrlStateLoader() {
                 Object.entries(groupConfigs).forEach(([nodeId, config]) => {
                   strudelStore.updateNode(nodeId, config);
                 });
-
-                // Now pause the group (this moves the active config to paused state)
-                strudelStore.pauseGroup(groupId, component);
               }
             }
           });
