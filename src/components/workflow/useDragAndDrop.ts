@@ -1,10 +1,10 @@
 import { useCallback, useMemo } from 'react';
 import { useReactFlow } from '@xyflow/react';
+import { useShallow } from 'zustand/react/shallow';
 
 import { AppNode, createNodeByType } from '@/components/nodes';
 import { useAppStore } from '@/store/app-context';
 import { AppStore } from '@/store/app-store';
-import { useShallow } from 'zustand/react/shallow';
 
 const selector = (state: AppStore) => ({
   addNode: state.addNode,

@@ -2,6 +2,7 @@ import { Background, ReactFlow } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { nodeTypes } from '@/components/nodes';
+import { edgeTypes } from '@/components/edges';
 import { useAppStore } from '@/store/app-context';
 import { WorkflowControls } from './controls';
 import { useDragAndDrop } from './useDragAndDrop';
@@ -42,6 +43,7 @@ export default function Workflow() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         onDragOver={onDragOver}
         onDrop={onDrop}
         nodeDragThreshold={30}
