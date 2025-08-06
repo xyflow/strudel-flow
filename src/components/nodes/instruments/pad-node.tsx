@@ -3,7 +3,7 @@ import { useStrudelStore } from '@/store/strudel-store';
 import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
-import { Button } from '@/components/ui/button';
+
 import {
   useStepManagement,
   applyRowModifier,
@@ -34,7 +34,7 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
   const savedInternalState = (data as { internalState?: PadNodeInternalState })
     ?.internalState;
 
-  const { steps, setSteps } = useStepManagement(savedInternalState?.steps || 4);
+  const { steps, setSteps } = useStepManagement(savedInternalState?.steps || 5);
   const [mode, setMode] = useState<'arp' | 'chord'>(
     savedInternalState?.mode || 'arp'
   );
@@ -146,8 +146,8 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
 
   return (
     <WorkflowNode id={id} data={data} type={type}>
-      <div className="flex flex-col gap-2 p-3 bg-card text-card-foreground rounded-md">
-        <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2 p-3 bg-card text-card-foreground rounded-md w-full max-w-full overflow-hidden">
+        <div className="flex flex-col gap-1 w-full">
           {notes.map((_, noteIdx) => (
             <div key={noteIdx} className="flex gap-1 items-center">
               {Array.from({ length: steps }, (_, stepIdx) => (
@@ -166,80 +166,29 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
             </div>
           ))}
         </div>
-        <AccordionControls
-          triggerText="Controls"
-          keyScaleOctaveProps={{
-            selectedKey,
-            onKeyChange: setSelectedKey,
-            selectedScale: selectedScaleType,
-            onScaleChange: setSelectedScaleType,
-            octave,
-            onOctaveChange: setOctave,
-          }}
-        >
-          <div className="flex flex-col gap-2 text-xs font-mono w-full">
-            <div className="flex flex-wrap gap-2">
-              <div className="flex items-center gap-1">
-                <span className="text-xs">Steps: {steps}</span>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="h-7 w-7 p-0 ml-2"
-                  onClick={() => setSteps((prev) => Math.max(prev - 1, 1))}
-                >
-                  -
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="h-7 w-7 p-0"
-                  onClick={() => setSteps((prev) => Math.min(prev + 1, 16))}
-                >
-                  +
-                </Button>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-xs">Mode:</span>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="h-7 text-xs px-2"
-                  onClick={() =>
-                    setMode((prevMode) =>
-                      prevMode === 'arp' ? 'chord' : 'arp'
-                    )
-                  }
-                >
-                  {mode === 'arp' ? 'Arp' : 'Chord'}
-                </Button>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2 items-center">
-              {Object.keys(noteGroups).some(
-                (stepIdx) => noteGroups[parseInt(stepIdx)].length > 0
-              ) && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs px-2"
-                  onClick={() => setNoteGroups({})}
-                >
-                  Clear All Groups
-                </Button>
-              )}
-              {selectedButtons.size > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs px-2"
-                  onClick={() => setSelectedButtons(new Set())}
-                >
-                  Clear Selection
-                </Button>
-              )}
-            </div>
-          </div>
-        </AccordionControls>
+        <div className="w-full max-w-full overflow-hidden">
+          <AccordionControls
+            triggerText="Controls"
+            keyScaleOctaveProps={{
+              selectedKey,
+              onKeyChange: setSelectedKey,
+              selectedScale: selectedScaleType,
+              onScaleChange: setSelectedScaleType,
+              octave,
+              onOctaveChange: setOctave,
+            }}
+            padControlsProps={{
+              steps,
+              onStepsChange: setSteps,
+              mode,
+              onModeChange: setMode,
+              noteGroups,
+              onClearGroups: () => setNoteGroups({}),
+              selectedButtons,
+              onClearSelection: () => setSelectedButtons(new Set()),
+            }}
+          />
+        </div>
       </div>
     </WorkflowNode>
   );

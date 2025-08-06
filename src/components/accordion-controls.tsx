@@ -27,6 +27,17 @@ export interface KeyScaleOctaveControlsProps {
   showOctave?: boolean;
 }
 
+export interface PadControlsProps {
+  steps: number;
+  onStepsChange: (steps: number) => void;
+  mode: 'arp' | 'chord';
+  onModeChange: (mode: 'arp' | 'chord') => void;
+  noteGroups: Record<number, number[][]>;
+  onClearGroups: () => void;
+  selectedButtons: Set<string>;
+  onClearSelection: () => void;
+}
+
 function KeyScaleOctaveControls({
   selectedKey,
   onKeyChange,
@@ -39,10 +50,10 @@ function KeyScaleOctaveControls({
   showOctave = true,
 }: KeyScaleOctaveControlsProps) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2 w-0 min-w-full">
       {showKey && (
         <div className="flex items-center gap-1">
-          <span className="text-xs">Key:</span>
+          <span className="text-xs whitespace-nowrap">Key:</span>
           <Select value={selectedKey} onValueChange={onKeyChange}>
             <SelectTrigger className="w-16 h-7 text-xs">
               <SelectValue placeholder="Key" />
@@ -59,7 +70,7 @@ function KeyScaleOctaveControls({
       )}
       {showScale && (
         <div className="flex items-center gap-1">
-          <span className="text-xs">Scale:</span>
+          <span className="text-xs whitespace-nowrap">Scale:</span>
           <Select value={selectedScale} onValueChange={onScaleChange}>
             <SelectTrigger className="w-24 h-7 text-xs">
               <SelectValue placeholder="Scale" />
@@ -76,11 +87,11 @@ function KeyScaleOctaveControls({
       )}
       {showOctave && (
         <div className="flex items-center gap-1">
-          <span className="text-xs">Oct: {octave} </span>
+          <span className="text-xs whitespace-nowrap">Oct: {octave}</span>
           <Button
             variant="secondary"
             size="sm"
-            className="h-7 w-7 p-0 ml-2"
+            className="h-7 w-7 p-0 text-xs"
             onClick={() => onOctaveChange(Math.max(octave - 1, 1))}
           >
             -
@@ -88,7 +99,7 @@ function KeyScaleOctaveControls({
           <Button
             variant="secondary"
             size="sm"
-            className="h-7 w-7 p-0"
+            className="h-7 w-7 p-0 text-xs"
             onClick={() => onOctaveChange(Math.min(octave + 1, 8))}
           >
             +
@@ -99,29 +110,106 @@ function KeyScaleOctaveControls({
   );
 }
 
+function PadControls({
+  steps,
+  onStepsChange,
+  mode,
+  onModeChange,
+  noteGroups,
+  onClearGroups,
+  selectedButtons,
+  onClearSelection,
+}: PadControlsProps) {
+  return (
+    <div className="flex flex-wrap gap-2 w-0 min-w-full">
+      <div className="flex items-center gap-1">
+        <span className="text-xs whitespace-nowrap">Steps: {steps}</span>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="h-7 w-7 p-0 text-xs"
+          onClick={() => onStepsChange(Math.max(steps - 1, 1))}
+        >
+          -
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="h-7 w-7 p-0 text-xs"
+          onClick={() => onStepsChange(Math.min(steps + 1, 16))}
+        >
+          +
+        </Button>
+      </div>
+      <div className="flex items-center gap-1">
+        <span className="text-xs whitespace-nowrap">Mode:</span>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="h-7 text-xs px-2"
+          onClick={() => onModeChange(mode === 'arp' ? 'chord' : 'arp')}
+        >
+          {mode === 'arp' ? 'Arp' : 'Chord'}
+        </Button>
+      </div>
+      {Object.keys(noteGroups).some(
+        (stepIdx) => noteGroups[parseInt(stepIdx)].length > 0
+      ) && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7 text-xs px-2 whitespace-nowrap"
+          onClick={onClearGroups}
+        >
+          Clear Groups
+        </Button>
+      )}
+      {selectedButtons.size > 0 && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7 text-xs px-2 whitespace-nowrap"
+          onClick={onClearSelection}
+        >
+          Clear Selection
+        </Button>
+      )}
+    </div>
+  );
+}
+
 interface AccordionControlsProps {
   triggerText: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   keyScaleOctaveProps?: KeyScaleOctaveControlsProps;
+  padControlsProps?: PadControlsProps;
 }
 
 export const AccordionControls: React.FC<AccordionControlsProps> = ({
   triggerText,
   children,
   keyScaleOctaveProps,
+  padControlsProps,
 }) => {
   return (
-    <Accordion type="single" collapsible>
-      <AccordionItem value="controls">
-        <AccordionTrigger className="text-xs font-mono py-2">
+    <Accordion type="single" collapsible className="w-full">
+      <AccordionItem value="controls" className="border-none">
+        <AccordionTrigger className="text-xs font-mono py-2 px-0">
           {triggerText}
         </AccordionTrigger>
         <AccordionContent className="overflow-hidden">
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2 w-0 min-w-full">
             {keyScaleOctaveProps && (
-              <KeyScaleOctaveControls {...keyScaleOctaveProps} />
+              <div className="w-0 min-w-full">
+                <KeyScaleOctaveControls {...keyScaleOctaveProps} />
+              </div>
             )}
-            {children}
+            {padControlsProps && (
+              <div className="w-0 min-w-full">
+                <PadControls {...padControlsProps} />
+              </div>
+            )}
+            {children && <div className="w-0 min-w-full">{children}</div>}
           </div>
         </AccordionContent>
       </AccordionItem>
