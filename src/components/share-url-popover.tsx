@@ -64,9 +64,7 @@ export function ShareUrlPopover() {
             <Button
               size="sm"
               onClick={handleCopyUrl}
-              className={`shrink-0 ${
-                isCopied ? 'bg-green-500 hover:bg-green-600' : ''
-              }`}
+              className={`shrink-0 ${isCopied ? 'bg-primary' : ''}`}
             >
               {isCopied ? (
                 <>

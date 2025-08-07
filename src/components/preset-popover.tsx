@@ -93,7 +93,7 @@ export function PresetPopover() {
           </div>
 
           {loadedPreset && (
-            <div className="flex items-center gap-2 p-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded text-sm">
+            <div className="flex items-center gap-2 p-2 bg-primary rounded text-sm">
               <Check className="w-4 h-4" />
               {loadedPreset}
             </div>
