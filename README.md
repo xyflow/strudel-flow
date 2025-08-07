@@ -1,6 +1,6 @@
 # Flow Machine
 
-A visual drum machine and pattern sequencer built with [Strudel.cc](https://strudel.cc), [React Flow](https://reactflow.dev), and styled using [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/). Create complex musical patterns by connecting instrument nodes to effect nodes in an intuitive drag-and-drop interface.
+A visual drum machine and pattern sequencer built with [Strudel.cc](https://strudel.cc), [React Flow](https://reactflow.dev), and styled using [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/). Create complex musical patterns by connecting instrument nodes to effect nodes with a drag-and-drop interface.
 
 ## Table of Contents
 
@@ -49,17 +49,6 @@ To get started, follow these steps:
 - **shadcn CLI**: The project uses the [shadcn CLI](https://ui.shadcn.com/docs/cli) to manage UI components. This tool builds on top of [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/) components, making it easy to add and customize UI elements.
 
 - **State Management with Zustand**: The application uses Zustand for state management, providing a simple and efficient way to manage the state of nodes, edges, and other workflow-related data.
-
-## Features
-
-- **Visual Node Editor**: Drag-and-drop interface for creating musical workflows
-- **Real-time Audio Generation**: Live pattern compilation and playback using Strudel
-- **Advanced Pattern Editing**: Step sequencers with modifiers, grouping, and visual feedback
-- **Global Playback Controls**: Spacebar for global pause/play, individual node controls
-- **Smart Edge Management**: Click-to-delete edges with visual feedback
-- **Theme System**: Multiple color themes with dark/light mode support
-- **Pattern Sharing**: Generate shareable URLs for your musical creations
-- **Live Pattern Preview**: Real-time Strudel code generation and display
 
 ## Node Types
 
@@ -137,11 +126,8 @@ Each step can have modifiers applied:
 ### Performance Controls
 
 - **Global Play/Pause**: Press spacebar to pause/resume all active patterns
-- **Smart Pause Behavior**: Individually paused nodes stay paused during global resume
 - **Group Controls**: Pause/resume connected node groups independently
-- **Individual Node Controls**: Play/pause buttons on each instrument node
 - **Live Pattern Editing**: Modify patterns while playing with real-time updates
-- **Edge Management**: Click the X button on edges to delete connections
 - **Pattern Preview**: View generated Strudel code for each node
 
 ### Keyboard Shortcuts
@@ -149,30 +135,6 @@ Each step can have modifiers applied:
 - **Spacebar**: Global play/pause toggle
 - **Shift + Click**: Multi-select grid cells for grouping (in Pad nodes)
 - **Right-click**: Context menu for pattern modifiers
-
-## Pattern Syntax
-
-The app generates [Strudel](https://strudel.cc) code in real-time. Here are some examples:
-
-```javascript
-// Basic drum pattern from Beat Machine
-$: sound('bd sd bd sd');
-
-// Melodic pattern with scale from Pad Node
-$: n('[0 2 4 7]').scale('C4:major');
-
-// Arpeggiated pattern
-$: n('0 1 2').scale('C4:major').stack(n('0 1 2 1').scale('C4:major'));
-
-// Effect chain with multiple processors
-$: sound('bd sd').gain(0.8).lpf(1000).room(0.5);
-
-// Complex pattern with time effects
-$: sound('bd sd').fast(2).palindrome().jux(rev);
-
-// Polyrhythmic patterns
-$: stack(sound('bd').every(4), sound('sd').every(3));
-```
 
 ## Development
 
@@ -206,7 +168,7 @@ src/
 
 ## Contact Us
 
-We’re here to help! If you have any questions, feedback, or just want to share your projects with us, feel free to reach out:
+We’re here to help! If you have any questions, feedback, instrument recommendations, or just want to share your project with us, feel free to reach out:
 
 - **Contact Form**: Use the contact form on our [website](https://xyflow.com/contact).
 - **Email**: Drop us an email at [info@xyflow.com](mailto:info@xyflow.com).
