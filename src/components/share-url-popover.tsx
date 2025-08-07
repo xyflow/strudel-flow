@@ -48,9 +48,9 @@ export function ShareUrlPopover() {
       <PopoverContent className="w-96" align="end">
         <div className="space-y-3">
           <div>
-            <h4 className="font-medium text-sm mb-2">Share Your Workflow</h4>
+            <h4 className="font-medium text-sm mb-2">Share Your Patterns</h4>
             <p className="text-xs text-muted-foreground mb-3">
-              Copy this URL to share your current workflow state with others.
+              Copy this URL to share your workflow with others.
             </p>
           </div>
 
