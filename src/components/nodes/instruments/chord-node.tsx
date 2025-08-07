@@ -149,7 +149,6 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
             chordComplexity,
             onChordComplexityChange: (complexity) =>
               updateNodeData(id, { chordComplexity: complexity }),
-            pressedKeys,
           }}
         />
       </div>
