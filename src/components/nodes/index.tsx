@@ -52,6 +52,7 @@ export type WorkflowNodeData = {
   steps?: number;
   mode?: 'arp' | 'chord';
   octave?: number;
+  octaveRange?: number;
   selectedKey?: string;
   selectedScaleType?: string;
   grid?: boolean[][];

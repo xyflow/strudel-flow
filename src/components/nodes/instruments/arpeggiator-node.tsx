@@ -82,7 +82,8 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
 
   // Use node data directly with defaults
   const selectedPattern = data.selectedPattern || '';
-  const octave = data.octave || 1;
+  const octaveRange = data.octaveRange || 1;
+  const octave = data.octave || 4;
   const selectedChordType = data.selectedChordType || 'major';
   const selectedKey = data.selectedKey || 'C';
 
@@ -113,7 +114,6 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
               updateNodeData(id, { selectedChordType: scale }),
             octave,
             onOctaveChange: (oct) => updateNodeData(id, { octave: oct }),
-            showOctave: false,
           }}
         >
           <div className="flex flex-col gap-2">
@@ -124,10 +124,14 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
               {OCTAVE_RANGES.map((preset) => (
                 <Button
                   key={preset.octaves}
-                  variant={octave === preset.octaves ? 'default' : 'outline'}
+                  variant={
+                    octaveRange === preset.octaves ? 'default' : 'outline'
+                  }
                   size="sm"
                   className="h-8 text-xs"
-                  onClick={() => updateNodeData(id, { octave: preset.octaves })}
+                  onClick={() =>
+                    updateNodeData(id, { octaveRange: preset.octaves })
+                  }
                 >
                   {preset.label}
                 </Button>
@@ -143,7 +147,8 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
 ArpeggiatorNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const data = node.data;
   const selectedPattern = data.selectedPattern || '';
-  const octave = data.octave || 1;
+  const octaveRange = data.octaveRange || 1;
+  const octave = data.octave || 4;
   const selectedChordType = data.selectedChordType || 'major';
   const selectedKey = data.selectedKey || 'C';
 
@@ -152,8 +157,11 @@ ArpeggiatorNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const patternData = ARP_PATTERNS.find((p) => p.id === selectedPattern);
   if (!patternData) return strudelString;
 
-  const finalPattern = expandPatternAcrossOctaves(patternData.pattern, octave);
-  const arpCall = `n("${finalPattern}").scale("${selectedKey}4:${selectedChordType}")`;
+  const finalPattern = expandPatternAcrossOctaves(
+    patternData.pattern,
+    octaveRange
+  );
+  const arpCall = `n("${finalPattern}").scale("${selectedKey}${octave}:${selectedChordType}")`;
 
   return strudelString ? `${strudelString}.stack(${arpCall})` : arpCall;
 };
