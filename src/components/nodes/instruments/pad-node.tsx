@@ -23,7 +23,7 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
   // Use node data directly with defaults
   const steps = data.steps || 5;
   const mode = data.mode || 'arp';
-  const octave = data.octave || 4;
+  const octave = data.octave || 2;
   const selectedKey = data.selectedKey || 'C';
   const selectedScaleType = data.selectedScaleType || 'major';
   const grid =
@@ -145,7 +145,6 @@ PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const data = node.data;
   const notes = [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`];
 
-  // Get state from node data
   const grid =
     data.grid ||
     Array(16)
@@ -153,10 +152,6 @@ PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
       .map(() => Array(8).fill(false));
   const buttonModifiers = data.buttonModifiers || {};
   const noteGroups = data.noteGroups || {};
-  const mode = data.mode || 'arp';
-  const selectedKey = data.selectedKey || 'C';
-  const octave = data.octave || 4;
-  const selectedScaleType = data.selectedScaleType || 'major';
 
   const generateStepPattern = (row: boolean[], stepIdx: number) => {
     // Individual notes
@@ -181,7 +176,7 @@ PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
     const allPatterns = [...individualNotes, ...groupPatterns];
     if (allPatterns.length === 0) return '';
 
-    const separator = mode === 'arp' ? ' ' : ', ';
+    const separator = (data.mode || 'arp') === 'arp' ? ' ' : ', ';
     return `[${allPatterns.join(separator)}]`;
   };
 
@@ -192,7 +187,9 @@ PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
     return strudelString;
   }
 
-  const scale = `${selectedKey}${octave}:${selectedScaleType}`;
+  const scale = `${data.selectedKey || 'C'}${data.octave || 2}:${
+    data.selectedScaleType || 'major'
+  }`;
   const calls = [`n("${pattern}")`, `scale("${scale}")`];
   const notePattern = calls.join('.');
 
