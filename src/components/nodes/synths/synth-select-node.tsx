@@ -10,7 +10,7 @@ import { WorkflowNodeProps, AppNode } from '..';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { SOUND_OPTIONS } from '@/data/sound-options';
 
-export function SampleSelect({ id, data }: WorkflowNodeProps) {
+export function SynthSelectNode({ id, data }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
   const sound = data.sound || '';
 
@@ -38,10 +38,9 @@ export function SampleSelect({ id, data }: WorkflowNodeProps) {
   );
 }
 
-SampleSelect.strudelOutput = (node: AppNode, strudelString: string) => {
-  const sound = node.data.sound;
-  if (!sound) return strudelString;
+SynthSelectNode.strudelOutput = (node: AppNode, strudelString: string) => {
+  if (!node.data.sound) return strudelString;
 
-  const soundCall = `sound("${sound}")`;
+  const soundCall = `sound("${node.data.sound}")`;
   return strudelString ? `${strudelString}.${soundCall}` : soundCall;
 };

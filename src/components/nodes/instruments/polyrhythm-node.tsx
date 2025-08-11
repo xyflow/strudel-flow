@@ -26,7 +26,6 @@ const RHYTHM_PRESETS = [
 export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Use node data directly with defaults - ensure sounds are always set
   const polyPattern1 = data.polyPattern1 || '';
   const polyPattern2 = data.polyPattern2 || '';
   const polyPattern3 = data.polyPattern3 || '';
@@ -58,13 +57,11 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
       const currentPattern = data[patternKey as keyof typeof data];
       const currentActive = data[activeKey as keyof typeof data];
 
-      // If clicking the same pattern, toggle its active state
       if (currentPattern === preset.pattern) {
         updateNodeData(id, {
           [activeKey]: !currentActive,
         });
       } else {
-        // Different pattern - set new pattern and activate
         updateNodeData(id, {
           [patternKey]: preset.pattern,
           [activeKey]: true,

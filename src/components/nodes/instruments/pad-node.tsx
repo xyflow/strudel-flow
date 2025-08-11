@@ -20,7 +20,6 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
   const [notes] = useState(generateNotes());
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Use node data directly with defaults
   const steps = data.steps || 5;
   const mode = data.mode || 'arp';
   const octave = data.octave || 2;
@@ -166,7 +165,6 @@ PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
       })
       .filter(Boolean);
 
-    // Group patterns
     const stepGroups = noteGroups[stepIdx] || [];
     const groupPatterns = stepGroups.map((group) => {
       const groupNoteValues = group.map((noteIdx) => notes[noteIdx]);

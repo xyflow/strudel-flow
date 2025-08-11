@@ -4,8 +4,8 @@ import { nanoid } from 'nanoid';
 import { iconMapping } from '@/data/icon-mapping';
 import { CellState } from './instruments/pad-utils';
 
-import { SampleSelect } from './synths/sample-select';
-import { DrumSoundsNode } from './synths/drum-sounds';
+import { SynthSelectNode } from './synths/synth-select-node';
+import { DrumSoundsNode } from './synths/drum-sounds-node';
 
 // Instruments
 import { PadNode } from './instruments/pad-node';
@@ -45,7 +45,6 @@ export type WorkflowNodeData = {
   icon?: keyof typeof iconMapping;
   sound?: string;
   notes?: string;
-  status?: 'loading' | 'success' | 'error' | 'initial';
   state?: 'running' | 'paused' | 'stopped';
 
   // Pad node specific data
@@ -106,7 +105,7 @@ export type WorkflowNodeData = {
   roomfade?: string;
   roomlp?: string;
   roomdim?: string;
-  // Complex effect node data
+
   maskPattern?: string;
   maskProbability?: string;
   maskPatternId?: string;
@@ -119,7 +118,6 @@ export type WorkflowNodeData = {
   latePattern?: string;
   lateOffsetId?: string;
   latePatternId?: string;
-  // Note: Simple effects like rev, palindrome don't need data storage
 };
 
 export type WorkflowNodeProps = NodeProps<Node<WorkflowNodeData>> & {
@@ -131,7 +129,6 @@ export type NodeConfig = {
   id: AppNodeType;
   title: string;
   category: 'Instruments' | 'Synths' | 'Audio Effects' | 'Time Effects';
-  status?: 'loading' | 'success' | 'error' | 'initial';
   sound?: string;
   notes?: string;
   icon: keyof typeof iconMapping;
@@ -174,14 +171,14 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     category: 'Instruments',
     icon: 'Code',
   },
-  'drum-sounds': {
-    id: 'drum-sounds',
+  'drum-sounds-node': {
+    id: 'drum-sounds-node',
     title: 'Drums',
     category: 'Synths',
     icon: 'Music',
   },
-  'sample-select': {
-    id: 'sample-select',
+  'synth-select-node': {
+    id: 'synth-select-node',
     title: 'Synths',
     category: 'Synths',
     icon: 'CheckCheck',
@@ -309,7 +306,7 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
 };
 
 export const nodeTypes = {
-  'sample-select': SampleSelect,
+  'synth-select-node': SynthSelectNode,
   'pad-node': PadNode,
   'arpeggiator-node': ArpeggiatorNode,
   'lpf-node': LpfNode,
@@ -319,7 +316,7 @@ export const nodeTypes = {
   'rev-node': RevNode,
   'jux-node': JuxNode,
   'phaser-node': PhaserNode,
-  'drum-sounds': DrumSoundsNode,
+  'drum-sounds-node': DrumSoundsNode,
   'chord-node': ChordNode,
   'custom-node': CustomNode,
   'polyrhythm-node': PolyrhythmNode,
@@ -356,7 +353,6 @@ export function createNodeByType({
     id: id ?? nanoid(),
     data: data ?? {
       title: node.title,
-      status: node.status,
       sound: node.sound,
       notes: node.notes,
       icon: node.icon,
@@ -382,7 +378,6 @@ export type AppNode =
   | Node<WorkflowNodeData, 'rev-node'>
   | Node<WorkflowNodeData, 'jux-node'>
   | Node<WorkflowNodeData, 'phaser-node'>
-  | Node<WorkflowNodeData, 'sample-select'>
   | Node<WorkflowNodeData, 'palindrome-node'>
   | Node<WorkflowNodeData, 'room-node'>
   | Node<WorkflowNodeData, 'postgain-node'>
@@ -392,7 +387,7 @@ export type AppNode =
   | Node<WorkflowNodeData, 'attack-node'>
   | Node<WorkflowNodeData, 'fast-node'>
   | Node<WorkflowNodeData, 'slow-node'>
-  | Node<WorkflowNodeData, 'drum-sounds'>
+  | Node<WorkflowNodeData, 'drum-sounds-node'>
   | Node<WorkflowNodeData, 'chord-node'>
   | Node<WorkflowNodeData, 'custom-node'>
   | Node<WorkflowNodeData, 'polyrhythm-node'>
@@ -400,6 +395,7 @@ export type AppNode =
   | Node<WorkflowNodeData, 'mask-node'>
   | Node<WorkflowNodeData, 'ply-node'>
   | Node<WorkflowNodeData, 'fm-node'>
+  | Node<WorkflowNodeData, 'synth-select-node'>
   | Node<WorkflowNodeData, 'late-node'>;
 
 export type AppNodeType = NonNullable<AppNode['type']>;

@@ -8,8 +8,8 @@ export const initialNodes: AppNode[] = [
     position: { x: 0, y: 0 },
   }),
   createNodeByType({
-    type: 'sample-select',
-    id: 'workflowNode_2',
+    type: 'synth-select-node',
+    id: 'synthSelectNode_1',
     position: { x: 0, y: 600 },
   }),
 ];
@@ -18,7 +18,7 @@ export const initialEdges: Edge[] = [
   {
     id: 'edge_1',
     source: 'padNode_1',
-    target: 'workflowNode_2',
+    target: 'synthSelectNode_1',
     type: 'default',
   },
 ];

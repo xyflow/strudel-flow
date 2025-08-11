@@ -13,7 +13,6 @@ import nodesConfig from '@/components/nodes/';
 import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
 import { iconMapping } from '@/data/icon-mapping';
 import { BaseNode } from '@/components/base-node';
-import { NodeStatusIndicator } from '@/components/node-status-indicator';
 import { useAppStore } from '@/store/app-context';
 import PatternPopup from '@/components/pattern-popup';
 import { useStrudelStore } from '@/store/strudel-store';
@@ -81,44 +80,42 @@ function WorkflowNode({
   const IconComponent = data?.icon ? iconMapping[data.icon] : undefined;
 
   return (
-    <NodeStatusIndicator status={data?.status}>
-      <BaseNode>
-        <BaseHandle position={Position.Top} type="target" />
-        <BaseHandle position={Position.Bottom} type="source" />
-        <NodeHeader>
-          <NodeHeaderIcon>
-            {IconComponent ? <IconComponent aria-label={data?.icon} /> : null}
-          </NodeHeaderIcon>
-          <NodeHeaderTitle>{data?.title}</NodeHeaderTitle>
-          <NodeHeaderActions>
-            {isInstrument && (
-              <NodeHeaderAction
-                onClick={isPaused ? onPlay : onPause}
-                label={isPaused ? 'Resume group' : 'Pause group'}
-                variant={isPaused ? 'default' : 'ghost'}
-              >
-                {isPaused ? <Play /> : <Pause />}
-              </NodeHeaderAction>
-            )}
+    <BaseNode>
+      <BaseHandle position={Position.Top} type="target" />
+      <BaseHandle position={Position.Bottom} type="source" />
+      <NodeHeader>
+        <NodeHeaderIcon>
+          {IconComponent ? <IconComponent aria-label={data?.icon} /> : null}
+        </NodeHeaderIcon>
+        <NodeHeaderTitle>{data?.title}</NodeHeaderTitle>
+        <NodeHeaderActions>
+          {isInstrument && (
             <NodeHeaderAction
-              label="Pattern Preview"
-              onClick={() => setShow(!show)}
+              onClick={isPaused ? onPlay : onPause}
+              label={isPaused ? 'Resume group' : 'Pause group'}
+              variant={isPaused ? 'default' : 'ghost'}
             >
-              <NotebookText />
+              {isPaused ? <Play /> : <Pause />}
             </NodeHeaderAction>
-            <NodeHeaderAction
-              onClick={onDelete}
-              variant="ghost"
-              label="Delete node"
-            >
-              <Trash />
-            </NodeHeaderAction>
-          </NodeHeaderActions>
-        </NodeHeader>
-        {children}
-        {show && <PatternPopup id={id} />}
-      </BaseNode>
-    </NodeStatusIndicator>
+          )}
+          <NodeHeaderAction
+            label="Pattern Preview"
+            onClick={() => setShow(!show)}
+          >
+            <NotebookText />
+          </NodeHeaderAction>
+          <NodeHeaderAction
+            onClick={onDelete}
+            variant="ghost"
+            label="Delete node"
+          >
+            <Trash />
+          </NodeHeaderAction>
+        </NodeHeaderActions>
+      </NodeHeader>
+      {children}
+      {show && <PatternPopup id={id} />}
+    </BaseNode>
   );
 }
 

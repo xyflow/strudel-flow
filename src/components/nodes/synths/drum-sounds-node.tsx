@@ -13,8 +13,7 @@ import { DRUM_OPTIONS } from '@/data/sound-options';
 export function DrumSoundsNode({ id, data }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Get current sound from node.data
-  const currentSound = data.sound || '';
+  const sound = data.sound || '';
 
   const handleValueChange = (value: string) => {
     updateNodeData(id, { sound: value });
@@ -23,7 +22,7 @@ export function DrumSoundsNode({ id, data }: WorkflowNodeProps) {
   return (
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-2 p-3">
-        <Select value={currentSound} onValueChange={handleValueChange}>
+        <Select value={sound} onValueChange={handleValueChange}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select Drum Sound" />
           </SelectTrigger>
@@ -41,9 +40,8 @@ export function DrumSoundsNode({ id, data }: WorkflowNodeProps) {
 }
 
 DrumSoundsNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const sound = node.data.sound;
-  if (!sound) return strudelString;
+  if (!node.data.sound) return strudelString;
 
-  const soundCall = `sound("${sound}")`;
+  const soundCall = `sound("${node.data.sound}")`;
   return strudelString ? `${strudelString}.${soundCall}` : soundCall;
 };
