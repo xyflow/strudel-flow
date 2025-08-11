@@ -43,7 +43,7 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
           <div className="flex aspect-square size-5 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
             <Command className="size-3" />
           </div>
-          <span className="truncate font-semibold">Flow Machine</span>
+          <span className="truncate font-semibold">Strudel Flow</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
