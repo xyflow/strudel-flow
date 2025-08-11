@@ -40,7 +40,7 @@ export function FastNode({ id, data }: WorkflowNodeProps) {
 
 FastNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const fast = node.data.fast ? parseFloat(node.data.fast) : 2;
-  if (fast === 2) return strudelString; // Skip if default value
+  if (fast === 2) return strudelString;
 
   const fastCall = `fast(${fast})`;
   return strudelString ? `${strudelString}.${fastCall}` : fastCall;

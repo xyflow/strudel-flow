@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 
-export function PatternPanelWithCopy({ isVisible }: { isVisible: boolean }) {
+export function PatternPanel({ isVisible }: { isVisible: boolean }) {
   const pattern = useStrudelStore((s) => s.pattern) || 'No pattern.';
   const [isCopied, setIsCopied] = useState(false);
 

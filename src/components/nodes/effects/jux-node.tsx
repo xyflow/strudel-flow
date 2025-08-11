@@ -55,7 +55,7 @@ export function JuxNode({ id, data }: WorkflowNodeProps) {
 
 JuxNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const jux = node.data.jux || 'rev';
-  if (jux === 'rev') return strudelString; // Skip if default value
+  if (jux === 'rev') return strudelString;
 
   const juxCall = `jux(${jux})`;
   return strudelString ? `${strudelString}.${juxCall}` : juxCall;

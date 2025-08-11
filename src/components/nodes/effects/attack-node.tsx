@@ -32,8 +32,7 @@ export function AttackNode({ id, data }: WorkflowNodeProps) {
 
 AttackNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const attack = parseFloat(node.data.attack || '0.01');
-  if (attack === 0.01) return strudelString; // Skip if default value
-
+  if (attack === 0.01) return strudelString;
   const attackCall = `attack("${attack}")`;
   return strudelString ? `${strudelString}.${attackCall}` : attackCall;
 };

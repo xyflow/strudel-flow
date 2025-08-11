@@ -32,7 +32,7 @@ export function SustainNode({ id, data }: WorkflowNodeProps) {
 
 SustainNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const sustain = parseFloat(node.data.sustain || '1');
-  if (sustain === 1) return strudelString; // Skip if default value
+  if (sustain === 1) return strudelString;
 
   const sustainCall = `sustain("${sustain}")`;
   return strudelString ? `${strudelString}.${sustainCall}` : sustainCall;

@@ -32,7 +32,6 @@ export function ShareUrlPopover() {
     }
   };
 
-  // Generate URL for display - this is just for preview
   const displayUrl = generateShareableUrl(nodes, edges, theme, colorMode);
 
   return (

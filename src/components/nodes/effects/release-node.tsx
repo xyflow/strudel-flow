@@ -32,7 +32,7 @@ export function ReleaseNode({ id, data }: WorkflowNodeProps) {
 
 ReleaseNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const release = parseFloat(node.data.release || '0.1');
-  if (release === 0.1) return strudelString; // Skip if default value
+  if (release === 0.1) return strudelString;
 
   const releaseCall = `release("${release}")`;
   return strudelString ? `${strudelString}.${releaseCall}` : releaseCall;

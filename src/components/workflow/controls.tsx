@@ -2,7 +2,7 @@ import { ZoomSlider } from '@/components/zoom-slider';
 import { Panel } from '@xyflow/react';
 import { useState } from 'react';
 import { NotebookText, Timer, Play, Pause, Menu, X } from 'lucide-react';
-import { PatternPanelWithCopy } from '@/components/pattern-panel';
+import { PatternPanel } from '@/components/pattern-panel';
 import { useGlobalPlayback } from '@/hooks/use-global-playback';
 import { CPM } from '@/components/cpm';
 import { ShareUrlPopover } from '@/components/share-url-popover';
@@ -102,7 +102,7 @@ export function WorkflowControls() {
         </Panel>
 
         <Panel position="bottom-right" className="flex flex-col gap-4">
-          <PatternPanelWithCopy isVisible={isPatternPanelVisible} />
+          <PatternPanel isVisible={isPatternPanelVisible} />
         </Panel>
       </>
     );
@@ -131,7 +131,7 @@ export function WorkflowControls() {
       </Panel>
 
       <Panel position="bottom-right" className="flex flex-col gap-4">
-        <PatternPanelWithCopy isVisible={isPatternPanelVisible} />
+        <PatternPanel isVisible={isPatternPanelVisible} />
       </Panel>
     </>
   );

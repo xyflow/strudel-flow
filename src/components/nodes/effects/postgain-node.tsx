@@ -32,7 +32,7 @@ export function PostGainNode({ id, data }: WorkflowNodeProps) {
 
 PostGainNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const postgain = parseFloat(node.data.postgain || '1');
-  if (postgain === 1) return strudelString; // Skip if default value
+  if (postgain === 1) return strudelString;
 
   const postgainCall = `postgain(${postgain})`;
   return strudelString ? `${strudelString}.${postgainCall}` : postgainCall;

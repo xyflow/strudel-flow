@@ -32,7 +32,7 @@ export function FmNode({ id, data }: WorkflowNodeProps) {
 
 FmNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const fm = parseFloat(node.data.fm || '0');
-  if (fm === 0) return strudelString; // Skip if default value
+  if (fm === 0) return strudelString;
 
   const fmCall = `fm(${fm})`;
   return strudelString ? `${strudelString}.${fmCall}` : fmCall;

@@ -65,7 +65,7 @@ export function LpfNode({ id, data }: WorkflowNodeProps) {
 
 LpfNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const lpf = node.data.lpf || '1000 1';
-  if (lpf === '1000 1') return strudelString; // Skip if default value
+  if (lpf === '1000 1') return strudelString;
 
   const lpfCall = `lpf("${lpf}")`;
   return strudelString ? `${strudelString}.${lpfCall}` : lpfCall;

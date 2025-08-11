@@ -40,7 +40,7 @@ export function SlowNode({ id, data }: WorkflowNodeProps) {
 
 SlowNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const slow = node.data.slow ? parseFloat(node.data.slow) : 0.5;
-  if (slow === 0.5) return strudelString; // Skip if default value
+  if (slow === 0.5) return strudelString;
 
   const slowCall = `slow(${slow})`;
   return strudelString ? `${strudelString}.${slowCall}` : slowCall;

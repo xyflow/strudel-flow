@@ -50,7 +50,7 @@ export function DistortNode({ id, data }: WorkflowNodeProps) {
 
 DistortNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const distort = node.data.distort || '0.5';
-  if (distort === '0.5') return strudelString; // Skip if default value
+  if (distort === '0.5') return strudelString;
 
   const distortCall = `distort(${distort})`;
   return strudelString ? `${strudelString}.${distortCall}` : distortCall;

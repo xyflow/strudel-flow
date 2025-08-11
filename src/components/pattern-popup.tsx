@@ -18,7 +18,6 @@ export default function PatternPopup({
   const nodes = useAppStore((state) => state.nodes);
   const [strudelPattern, setStrudelPattern] = useState('');
 
-  // Update pattern whenever the node's data changes
   useEffect(() => {
     const node = getNode(id);
     if (!node || !node.type) {

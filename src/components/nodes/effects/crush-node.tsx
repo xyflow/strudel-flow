@@ -32,7 +32,7 @@ export function CrushNode({ id, data }: WorkflowNodeProps) {
 
 CrushNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const crush = parseFloat(node.data.crush || '4');
-  if (crush === 4) return strudelString; // Skip if default value
+  if (crush === 4) return strudelString;
 
   const crushCall = `crush(${crush})`;
   return strudelString ? `${strudelString}.${crushCall}` : crushCall;

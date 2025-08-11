@@ -67,7 +67,8 @@ export function PanNode({ id, data }: WorkflowNodeProps) {
 
 PanNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const pan = node.data.pan ? parseFloat(node.data.pan) : 0.5;
-  if (pan === 0.5) return strudelString; // Skip if default value (center)
+  if (pan === 0.5) return strudelString;
+  PatternPanel(center);
 
   const panCall = `pan(${pan})`;
   return strudelString ? `${strudelString}.${panCall}` : panCall;

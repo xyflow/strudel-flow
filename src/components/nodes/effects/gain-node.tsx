@@ -44,7 +44,7 @@ export function GainNode({ id, data }: WorkflowNodeProps) {
 
 GainNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const gain = node.data.gain ? parseFloat(node.data.gain) : 1;
-  if (gain === 1) return strudelString; // Skip if default value
+  if (gain === 1) return strudelString;
 
   const gainCall = `gain(${gain})`;
   return strudelString ? `${strudelString}.${gainCall}` : gainCall;
