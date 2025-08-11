@@ -125,7 +125,7 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
                 <Button
                   key={preset.octaves}
                   variant={
-                    octaveRange === preset.octaves ? 'default' : 'outline'
+                    octaveRange === preset.octaves ? 'default' : 'secondary'
                   }
                   size="sm"
                   className="h-8 text-xs"

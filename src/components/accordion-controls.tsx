@@ -99,7 +99,7 @@ function KeyScaleOctaveControls({
       )}
       {showOctave && (
         <div className="flex items-center gap-1">
-          <span className="text-xs whitespace-nowrap">Oct: {octave}</span>
+          <span className="text-xs whitespace-nowrap">Octave: </span>
           <Button
             variant="secondary"
             size="sm"
@@ -108,6 +108,9 @@ function KeyScaleOctaveControls({
           >
             -
           </Button>
+          <span className="text-xs whitespace-nowrap border bg-background rounded px-2 py-1 min-w-[28px] text-center">
+            {octave}
+          </span>{' '}
           <Button
             variant="secondary"
             size="sm"
