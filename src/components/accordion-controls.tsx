@@ -138,7 +138,7 @@ function PadControls({
   return (
     <div className="flex flex-wrap gap-2 w-0 min-w-full">
       <div className="flex items-center gap-1">
-        <span className="text-xs whitespace-nowrap">Steps: {steps}</span>
+        <span className="text-xs whitespace-nowrap">Steps: </span>
         <Button
           variant="secondary"
           size="sm"
@@ -147,6 +147,9 @@ function PadControls({
         >
           -
         </Button>
+        <span className="text-xs whitespace-nowrap border bg-background rounded px-2 py-1 min-w-[28px] text-center">
+          {steps}
+        </span>
         <Button
           variant="secondary"
           size="sm"
