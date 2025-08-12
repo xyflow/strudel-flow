@@ -84,14 +84,59 @@ export function toggleCell(
   } else {
     const newGrid = grid.map((row) => [...row]);
     const wasOn = newGrid[stepIdx][noteIdx];
-    newGrid[stepIdx][noteIdx] = !wasOn;
 
-    if (wasOn && !newGrid[stepIdx][noteIdx]) {
+    // Check if this button is part of a group
+    const stepGroups = noteGroups[stepIdx] || [];
+    const groupIndex = stepGroups.findIndex((group) => group.includes(noteIdx));
+    const isInGroup = groupIndex >= 0;
+
+    // If button is in a group and currently on, clicking should turn it off and remove from group
+    if (isInGroup && wasOn) {
+      // Turn off the button
+      newGrid[stepIdx][noteIdx] = false;
+
+      // Remove this button from the group
+      const updatedGroup = stepGroups[groupIndex].filter(
+        (idx) => idx !== noteIdx
+      );
+      const newGroups = { ...noteGroups };
+
+      if (updatedGroup.length < 2) {
+        // If group has less than 2 members, remove the entire group
+        newGroups[stepIdx] = stepGroups.filter((_, idx) => idx !== groupIndex);
+        if (newGroups[stepIdx].length === 0) {
+          delete newGroups[stepIdx];
+        }
+      } else {
+        // Update the group with remaining members
+        newGroups[stepIdx] = stepGroups.map((group, idx) =>
+          idx === groupIndex ? updatedGroup : group
+        );
+      }
+
+      // Clear modifier and update state
       const newModifiers = { ...buttonModifiers };
       delete newModifiers[buttonKey];
-      updateNodeData(nodeId, { grid: newGrid, buttonModifiers: newModifiers });
+
+      updateNodeData(nodeId, {
+        grid: newGrid,
+        buttonModifiers: newModifiers,
+      });
+      setNoteGroups(newGroups);
     } else {
-      updateNodeData(nodeId, { grid: newGrid });
+      // Normal toggle behavior for non-grouped buttons or turning on
+      newGrid[stepIdx][noteIdx] = !wasOn;
+
+      if (wasOn && !newGrid[stepIdx][noteIdx]) {
+        const newModifiers = { ...buttonModifiers };
+        delete newModifiers[buttonKey];
+        updateNodeData(nodeId, {
+          grid: newGrid,
+          buttonModifiers: newModifiers,
+        });
+      } else {
+        updateNodeData(nodeId, { grid: newGrid });
+      }
     }
   }
 }
