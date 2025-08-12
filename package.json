@@ -1,7 +1,8 @@
 {
-  "name": "drum-machine",
+  "name": "strudel-flow",
   "version": "0.0.0",
   "type": "module",
+  "description": "A visual drum machine and pattern sequencer built with Strudel and React Flow.",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
