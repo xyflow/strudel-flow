@@ -112,8 +112,12 @@ function ThemeCard({
 }
 
 export function SettingsDialog() {
-  const state = useAppStore((state) => state);
-  useThemeCss(state.theme);
+  const theme = useAppStore((state) => state.theme);
+  const colorMode = useAppStore((state) => state.colorMode);
+  const setTheme = useAppStore((state) => state.setTheme);
+  const toggleDarkMode = useAppStore((state) => state.toggleDarkMode);
+
+  useThemeCss(theme);
 
   return (
     <Dialog>
@@ -136,7 +140,7 @@ export function SettingsDialog() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-primary/10">
-                {state.colorMode === 'dark' ? (
+                {colorMode === 'dark' ? (
                   <Moon className="w-4 h-4 text-primary" />
                 ) : (
                   <Sun className="w-4 h-4 text-primary" />
@@ -156,8 +160,8 @@ export function SettingsDialog() {
                   <span className="text-sm">Light</span>
                 </div>
                 <Switch
-                  checked={state.colorMode === 'dark'}
-                  onCheckedChange={state.toggleDarkMode}
+                  checked={colorMode === 'dark'}
+                  onCheckedChange={toggleDarkMode}
                 />
                 <div className="flex items-center gap-2">
                   <Moon className="w-4 h-4" />
@@ -182,12 +186,12 @@ export function SettingsDialog() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {themes.map((theme) => (
+              {themes.map((themeOption) => (
                 <ThemeCard
-                  key={theme.value}
-                  theme={theme}
-                  isSelected={state.theme === theme.value}
-                  onClick={() => state.setTheme(theme.value)}
+                  key={themeOption.value}
+                  theme={themeOption}
+                  isSelected={themeOption.value === theme}
+                  onClick={() => setTheme(themeOption.value)}
                 />
               ))}
             </div>
