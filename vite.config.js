@@ -14,5 +14,5 @@ export default defineConfig({
       ),
     },
   },
-  // base: 'https://flow-machine-xyflow.vercel.app/',
+  base: 'https://flow-machine-xyflow.vercel.app/',
 });
