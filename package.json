@@ -24,7 +24,7 @@
     "@radix-ui/react-switch": "^1.2.2",
     "@radix-ui/react-tooltip": "^1.2.4",
     "@strudel/web": "^1.2.3",
-    "@xyflow/react": "^12.8.2",
+    "@xyflow/react": "^12.8.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.456.0",
