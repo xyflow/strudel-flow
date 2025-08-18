@@ -129,6 +129,19 @@ export function AppInfoPopover() {
                 </a>
               </strong>
             </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Check out the source code on{' '}
+              <strong>
+                <a
+                  href="https://github.com/xyflow/strudel-flow"
+                  className="hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  GitHub
+                </a>
+              </strong>
+            </p>
           </div>
         </div>
       </PopoverContent>
