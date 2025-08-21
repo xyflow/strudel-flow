@@ -19,8 +19,8 @@ const themes = [
     color: 'oklch(0.8348 0.1302 160.9080)',
   },
   {
-    value: 'amber-minimal',
-    label: 'Amber Minimal',
+    value: 'sunset-horizon',
+    label: 'Sunset Horizon',
     color: 'oklch(0.7686 0.1647 70.0804)',
   },
   {

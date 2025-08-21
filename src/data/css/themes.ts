@@ -1,5 +1,5 @@
 // Import all theme CSS files as text
-import amberMinimalCss from './theme-amber-minimal.css?inline';
+import sunsetHorizonCss from './theme-sunset-horizon.css?inline';
 import boldTechCss from './theme-bold-tech.css?inline';
 import catppuccinCss from './theme-catppuccin.css?inline';
 import claymorphismCss from './theme-claymorphism.css?inline';
@@ -14,7 +14,7 @@ import supabaseCss from './theme-supabase.css?inline';
 
 // Map theme names to their CSS content
 export const themeStyles: Record<string, string> = {
-  'amber-minimal': amberMinimalCss,
+  'sunset-horizon': sunsetHorizonCss,
   'bold-tech': boldTechCss,
   catppuccin: catppuccinCss,
   claymorphism: claymorphismCss,

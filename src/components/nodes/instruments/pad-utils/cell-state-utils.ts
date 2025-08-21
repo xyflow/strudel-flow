@@ -101,5 +101,5 @@ export const getButtonClasses = (
     return `${base} ${groupColors[groupIndex % groupColors.length]}`;
   }
   if (isPressed) return `${base} bg-primary`;
-  return `${base} bg-muted hover:bg-popover-foreground/50`;
+  return `${base} bg-card-foreground/20 hover:bg-popover-foreground/50`;
 };
