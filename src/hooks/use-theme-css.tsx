@@ -1,40 +1,31 @@
 import { useEffect } from 'react';
+import { themeStyles } from '@/data/css/themes';
 
 export function useThemeCss(theme: string) {
   useEffect(() => {
     const id = 'theme-css';
-    let link = document.getElementById(id) as HTMLLinkElement | null;
+    let styleElement = document.getElementById(id) as HTMLStyleElement | null;
 
-    const loadNewTheme = () => {
-      if (!link) {
-        link = document.createElement('link');
-        link.id = id;
-        link.rel = 'stylesheet';
-        document.head.appendChild(link);
-      }
+    // Remove existing style element if it exists
+    if (styleElement) {
+      styleElement.remove();
+    }
 
-      const linkElement = link as HTMLLinkElement;
+    // Create new style element
+    styleElement = document.createElement('style');
+    styleElement.id = id;
+    styleElement.type = 'text/css';
 
-      const href = `${
-        import.meta.env.VITE_BASE_URL || ''
-      }/css/theme-${theme}.css`;
-      linkElement.href = href;
-
-      return new Promise<void>((resolve) => {
-        const handleLoad = () => {
-          linkElement.removeEventListener('load', handleLoad);
-          resolve();
-        };
-
-        if (linkElement.href === href && linkElement.sheet) {
-          resolve();
-        } else {
-          linkElement.addEventListener('load', handleLoad);
-          setTimeout(resolve, 100);
-        }
-      });
-    };
-
-    loadNewTheme();
+    // Get the theme CSS content
+    const themeCSS = themeStyles[theme];
+    if (themeCSS) {
+      styleElement.textContent = themeCSS;
+      document.head.appendChild(styleElement);
+    } else {
+      console.warn(
+        `Theme "${theme}" not found. Available themes:`,
+        Object.keys(themeStyles)
+      );
+    }
   }, [theme]);
 }
