@@ -2,6 +2,8 @@
 
 A visual drum machine and pattern sequencer built with [Strudel.cc](https://strudel.cc), [React Flow](https://reactflow.dev), and styled using [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/). Create complex musical patterns by connecting instrument nodes to effect nodes with a drag-and-drop interface.
 
+[Live Demo](https://xyflow.com/strudel-flow)
+
 ## Table of Contents
 
 - [Getting Started](#getting-started)
