@@ -18,11 +18,7 @@ export function useWorkflowRunner() {
   const edges = useAppStore((state) => state.edges);
   useEffect(() => {
     const newPattern = generateOutput(nodes, edges);
-
-    if (newPattern.trim() || nodes.length === 0) {
-      setPattern(newPattern);
-    }
-
+    setPattern(newPattern);
     // Defer hush/evaluate decisions to the boundary-aware effect below
   }, [nodes, edges, cpm, setPattern]);
 
@@ -105,17 +101,22 @@ export function useWorkflowRunner() {
   }, [getCycleDurationMs, runWorkflow, pattern]);
 
   useEffect(() => {
-    // When the generated pattern changes or cpm changes, update at boundary
-    if (!pattern) {
-      // Schedule hush at boundary if running
+    // When the generated pattern changes or cpm changes
+    const trimmed = pattern?.trim() ?? '';
+    if (!trimmed) {
+      // Immediately hush and clear timers if pattern is empty
+      if (boundaryTimerId.current !== null) {
+        window.clearTimeout(boundaryTimerId.current);
+        boundaryTimerId.current = null;
+      }
       pendingPatternRef.current = '';
-      scheduleEvaluationAtBoundary();
+      runWorkflow('');
       return;
     }
 
     pendingPatternRef.current = pattern;
     scheduleEvaluationAtBoundary();
-  }, [pattern, cpm, scheduleEvaluationAtBoundary]);
+  }, [pattern, cpm, scheduleEvaluationAtBoundary, runWorkflow]);
 
   return {
     runWorkflow,
