@@ -151,7 +151,6 @@ PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
       .map(() => Array(8).fill(false));
   const buttonModifiers = data.buttonModifiers || {};
   const noteGroups = data.noteGroups || {};
-  const totalSteps = typeof data.steps === 'number' ? data.steps : 5;
 
   const generateStepPattern = (row: boolean[], stepIdx: number) => {
     // Individual notes
@@ -173,15 +172,13 @@ PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
     });
 
     const allPatterns = [...individualNotes, ...groupPatterns];
-    if (allPatterns.length === 0) return '~';
+    if (allPatterns.length === 0) return '';
 
     const separator = (data.mode || 'arp') === 'arp' ? ' ' : ', ';
     return `[${allPatterns.join(separator)}]`;
   };
 
-  const stepPatterns = grid
-    .slice(0, Math.max(1, totalSteps))
-    .map(generateStepPattern);
+  const stepPatterns = grid.map(generateStepPattern).filter(Boolean);
   const pattern = stepPatterns.join(' ');
 
   if (!pattern || !pattern.trim() || /^[~\s]*$/.test(pattern.trim())) {
