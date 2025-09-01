@@ -5,12 +5,12 @@ import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath } from 'url';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       '@': path.resolve(fileURLToPath(new URL('.', import.meta.url)), 'src'),
     },
   },
-  base: 'https://flow-machine-xyflow.vercel.app/',
-});
+  base: mode === 'production' ? 'https://flow-machine-xyflow.vercel.app/' : '/',
+}));
