@@ -11,8 +11,6 @@ export function useWorkflowRunner() {
   const debounceTimerId = useRef<number | null>(null);
   const pattern = useStrudelStore((s) => s.pattern);
   const setPattern = useStrudelStore((s) => s.setPattern);
-  const cpm = useStrudelStore((s) => s.cpm);
-  const bpc = useStrudelStore((s) => s.bpc);
 
   const nodes = useAppStore((state) => state.nodes);
   const edges = useAppStore((state) => state.edges);
