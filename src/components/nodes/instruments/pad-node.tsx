@@ -203,7 +203,8 @@ PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
     return strudelString;
   }
 
-  const scale = `${data.selectedKey || 'C'}${data.octave || 2}:${
+  const octavePart = data.octave ? data.octave : '';
+  const scale = `${data.selectedKey || 'C'}${octavePart}:${
     data.selectedScaleType || 'major'
   }`;
   const calls = [`n("${pattern}")`, `scale("${scale}")`];
