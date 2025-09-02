@@ -4,8 +4,8 @@ import { nanoid } from 'nanoid';
 import { iconMapping } from '@/data/icon-mapping';
 import { CellState } from './instruments/pad-utils';
 
-import { SynthSelectNode } from './synths/synth-select-node';
-import { DrumSoundsNode } from './synths/drum-sounds-node';
+import { SampleSelectNode } from './samples/sample-select-node';
+import { DrumSoundsNode } from './samples/drum-sounds-node';
 
 // Instruments
 import { PadNode } from './instruments/pad-node';
@@ -127,7 +127,7 @@ export type WorkflowNodeProps = NodeProps<Node<WorkflowNodeData>> & {
 export type NodeConfig = {
   id: AppNodeType;
   title: string;
-  category: 'Instruments' | 'Synths' | 'Audio Effects' | 'Time Effects';
+  category: 'Instruments' | 'Samples' | 'Audio Effects' | 'Time Effects';
   sound?: string;
   notes?: string;
   icon: keyof typeof iconMapping;
@@ -173,13 +173,13 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
   'drum-sounds-node': {
     id: 'drum-sounds-node',
     title: 'Drums',
-    category: 'Synths',
+    category: 'Samples',
     icon: 'Music',
   },
-  'synth-select-node': {
-    id: 'synth-select-node',
-    title: 'Synths',
-    category: 'Synths',
+  'sample-select-node': {
+    id: 'sample-select-node',
+    title: 'Samples',
+    category: 'Samples',
     icon: 'CheckCheck',
   },
   'lpf-node': {
@@ -305,7 +305,7 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
 };
 
 export const nodeTypes = {
-  'synth-select-node': SynthSelectNode,
+  'sample-select-node': SampleSelectNode,
   'pad-node': PadNode,
   'arpeggiator-node': ArpeggiatorNode,
   'lpf-node': LpfNode,
@@ -394,7 +394,7 @@ export type AppNode =
   | Node<WorkflowNodeData, 'mask-node'>
   | Node<WorkflowNodeData, 'ply-node'>
   | Node<WorkflowNodeData, 'fm-node'>
-  | Node<WorkflowNodeData, 'synth-select-node'>
+  | Node<WorkflowNodeData, 'sample-select-node'>
   | Node<WorkflowNodeData, 'late-node'>;
 
 export type AppNodeType = NonNullable<AppNode['type']>;

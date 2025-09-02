@@ -53,7 +53,10 @@ export function generateShareableUrl(
   cpm: string // Add CPM parameter
 ): string {
   const url = new URL(window.location.href);
-  url.searchParams.set('state', serializeState(nodes, edges, theme, colorMode, cpm));
+  url.searchParams.set(
+    'state',
+    serializeState(nodes, edges, theme, colorMode, cpm)
+  );
   return url.toString();
 }
 
