@@ -17,7 +17,7 @@ export function ShareUrlPopover() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { nodes, edges, theme, colorMode } = useAppStore((state) => state);
-  const cpm = useStrudelStore((state) => state.cpm);
+  const { cpm, bpc } = useStrudelStore((state) => state);
 
   const handleCopyUrl = async () => {
     try {
@@ -26,7 +26,8 @@ export function ShareUrlPopover() {
         edges,
         theme,
         colorMode,
-        cpm
+        cpm,
+        bpc
       );
       await navigator.clipboard.writeText(shareableUrl);
       setIsCopied(true);
@@ -40,7 +41,14 @@ export function ShareUrlPopover() {
     }
   };
 
-  const displayUrl = generateShareableUrl(nodes, edges, theme, colorMode, cpm);
+  const displayUrl = generateShareableUrl(
+    nodes,
+    edges,
+    theme,
+    colorMode,
+    cpm,
+    bpc
+  );
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>

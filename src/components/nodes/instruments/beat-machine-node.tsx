@@ -58,8 +58,6 @@ function SequencerRow({
             on={isActive}
             isSelected={false}
             noteGroups={{}}
-            modifier={{ type: 'off' }}
-            handleModifierSelect={() => {}}
             toggleCell={() => onStepClick(rowIndex, step)}
             withContextMenu={false}
           />

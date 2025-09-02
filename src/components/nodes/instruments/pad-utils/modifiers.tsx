@@ -53,7 +53,7 @@ export function ModifierDropdown({
           className={`w-12 h-10 transition-all duration-150 rounded-md text-xs font-mono select-none ${
             currentState.type === 'off'
               ? 'bg-card-foreground/20 hover:bg-popover-foreground/50'
-              : 'bg-accent'
+              : 'bg-accent text-primary-foreground'
           }`}
         >
           {displayText}

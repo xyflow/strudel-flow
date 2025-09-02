@@ -15,6 +15,7 @@ export function useUrlStateLoader() {
     (state) => state
   );
   const setCpm = useStrudelStore((state) => state.setCpm);
+  const setBpc = useStrudelStore((state) => state.setBpc);
 
   useEffect(() => {
     const urlState = loadStateFromUrl();
@@ -26,6 +27,7 @@ export function useUrlStateLoader() {
         nodeCount: urlState.nodes.length,
         edgeCount: urlState.edges.length,
         cpm: urlState.cpm,
+        bpc: urlState.bpc,
       });
 
       // Restore theme settings FIRST to ensure CSS loads before nodes render
@@ -37,6 +39,9 @@ export function useUrlStateLoader() {
       }
       if (urlState.cpm) {
         setCpm(urlState.cpm);
+      }
+      if (urlState.bpc) {
+        setBpc(urlState.bpc);
       }
 
       // Small delay to ensure theme CSS loads on mobile before nodes render
@@ -54,5 +59,5 @@ export function useUrlStateLoader() {
         setEdges(urlState.edges);
       }, 50); // Small delay for mobile CSS loading
     }
-  }, [setNodes, setEdges, setTheme, setColorMode, setCpm]);
+  }, [setNodes, setEdges, setTheme, setColorMode, setCpm, setBpc]);
 }

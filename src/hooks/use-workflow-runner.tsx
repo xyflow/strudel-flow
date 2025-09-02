@@ -13,6 +13,7 @@ export function useWorkflowRunner() {
   const pattern = useStrudelStore((s) => s.pattern);
   const setPattern = useStrudelStore((s) => s.setPattern);
   const cpm = useStrudelStore((s) => s.cpm);
+  const bpc = useStrudelStore((s) => s.bpc);
 
   const nodes = useAppStore((state) => state.nodes);
   const edges = useAppStore((state) => state.edges);
@@ -20,7 +21,7 @@ export function useWorkflowRunner() {
     const newPattern = generateOutput(nodes, edges);
     setPattern(newPattern);
     // Defer hush/evaluate decisions to the boundary-aware effect below
-  }, [nodes, edges, cpm, setPattern]);
+  }, [nodes, edges, cpm, bpc, setPattern]);
 
   const getActivePattern = useCallback((p: string) => {
     return p
@@ -30,15 +31,21 @@ export function useWorkflowRunner() {
   }, []);
 
   const getCycleDurationMs = useCallback(() => {
-    const cyclesPerMinute = Number(cpm) || 60;
-    return 60000 / cyclesPerMinute;
-  }, [cpm]);
+    // Calculate cycle duration: each beat duration × beats per cycle
+    const bpm = Number(cpm) || 120;
+    const beatsPerCycle = Number(bpc) || 4;
+    // Each beat duration in ms, then multiply by beats per cycle
+    const beatDurationMs = 60000 / bpm;
+    return beatDurationMs * beatsPerCycle;
+  }, [cpm, bpc]);
 
   const runWorkflow = useCallback(
     (overridePattern?: string) => {
       const source = overridePattern ?? pattern;
       const activePattern = getActivePattern(source);
-      const hasContent = activePattern.replace(/setcpm\(\d+\)\s*/g, '').trim();
+      const hasContent = activePattern
+        .replace(/setcpm\([^)]+\)\s*/g, '')
+        .trim();
 
       if (!hasContent) {
         if (isRunning.current) {
@@ -116,7 +123,7 @@ export function useWorkflowRunner() {
 
     pendingPatternRef.current = pattern;
     scheduleEvaluationAtBoundary();
-  }, [pattern, cpm, scheduleEvaluationAtBoundary, runWorkflow]);
+  }, [pattern, cpm, bpc, scheduleEvaluationAtBoundary, runWorkflow]);
 
   return {
     runWorkflow,
