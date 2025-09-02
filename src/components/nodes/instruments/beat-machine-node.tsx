@@ -79,7 +79,6 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
     { instrument: 'hh', pattern: Array(8).fill(false) },
   ];
 
-
   const toggleStep = (rowIndex: number, step: number) => {
     const newRows = rows.map((row, rIndex) => {
       if (rIndex === rowIndex) {

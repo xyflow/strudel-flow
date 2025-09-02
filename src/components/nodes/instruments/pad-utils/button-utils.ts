@@ -1,4 +1,6 @@
-import { CellState } from './';
+/**
+ * Button utility functions
+ */
 
 /**
  * Check if a button is part of a group
@@ -48,7 +50,6 @@ export function toggleCell(
   stepIdx: number,
   noteIdx: number,
   grid: boolean[][],
-  buttonModifiers: Record<string, CellState>,
   noteGroups: Record<number, number[][]>,
   selectedButtons: Set<string>,
   updateNodeData: (nodeId: string, updates: Record<string, unknown>) => void,
@@ -114,66 +115,14 @@ export function toggleCell(
         );
       }
 
-      // Clear modifier and update state
-      const newModifiers = { ...buttonModifiers };
-      delete newModifiers[buttonKey];
-
-      updateNodeData(nodeId, {
-        grid: newGrid,
-        buttonModifiers: newModifiers,
-      });
+      // Update state (no more buttonModifiers)
+      updateNodeData(nodeId, { grid: newGrid });
       setNoteGroups(newGroups);
     } else {
       // Normal toggle behavior for non-grouped buttons or turning on
       newGrid[stepIdx][noteIdx] = !wasOn;
-
-      if (wasOn && !newGrid[stepIdx][noteIdx]) {
-        const newModifiers = { ...buttonModifiers };
-        delete newModifiers[buttonKey];
-        updateNodeData(nodeId, {
-          grid: newGrid,
-          buttonModifiers: newModifiers,
-        });
-      } else {
-        updateNodeData(nodeId, { grid: newGrid });
-      }
+      updateNodeData(nodeId, { grid: newGrid });
     }
-  }
-}
-
-export function getButtonModifier(
-  stepIdx: number,
-  noteIdx: number,
-  buttonModifiers: Record<string, CellState>
-): CellState {
-  return buttonModifiers[`${stepIdx}-${noteIdx}`] || { type: 'off' };
-}
-
-export function handleModifierSelect(
-  stepIdx: number,
-  noteIdx: number,
-  modifier: CellState,
-  grid: boolean[][],
-  buttonModifiers: Record<string, CellState>,
-  updateNodeData: (nodeId: string, updates: Record<string, unknown>) => void,
-  nodeId: string
-) {
-  const buttonKey = `${stepIdx}-${noteIdx}`;
-  const newModifiers = {
-    ...buttonModifiers,
-    [buttonKey]: modifier,
-  };
-
-  if (modifier.type !== 'off') {
-    const newGrid = grid.map((row) => [...row]);
-    if (!newGrid[stepIdx][noteIdx]) {
-      newGrid[stepIdx][noteIdx] = true;
-      updateNodeData(nodeId, { grid: newGrid, buttonModifiers: newModifiers });
-    } else {
-      updateNodeData(nodeId, { buttonModifiers: newModifiers });
-    }
-  } else {
-    updateNodeData(nodeId, { buttonModifiers: newModifiers });
   }
 }
 
@@ -184,3 +133,25 @@ export function isButtonSelected(
 ): boolean {
   return selectedButtons.has(`${stepIdx}-${noteIdx}`);
 }
+
+export const getButtonClasses = (
+  isSelected: boolean,
+  isInGroup: boolean,
+  groupIndex: number,
+  isPressed: boolean
+) => {
+  const base =
+    'transition-all duration-150 rounded-md text-xs font-mono select-none';
+  if (isSelected) return `${base} bg-accent-foreground`;
+  if (isInGroup) {
+    const groupColors = [
+      'bg-chart-5',
+      'bg-chart-2',
+      'bg-chart-3',
+      'bg-chart-4',
+    ];
+    return `${base} ${groupColors[groupIndex % groupColors.length]}`;
+  }
+  if (isPressed) return `${base} bg-primary`;
+  return `${base} bg-card-foreground/20 hover:bg-popover-foreground/50`;
+};

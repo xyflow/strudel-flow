@@ -55,6 +55,7 @@ export type WorkflowNodeData = {
   selectedScaleType?: string;
   grid?: boolean[][];
   buttonModifiers?: Record<string, CellState>;
+  columnModifiers?: Record<number, CellState>;
   selectedButtons?: string[];
   noteGroups?: Record<number, number[][]>;
 
