@@ -108,7 +108,7 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
                     : 'outline'
                 }
                 size="sm"
-                className="h-8 text-xs font-bold"
+                className="h-8 text-xs font-bold hover:text-muted-foreground"
                 onClick={() => handlePresetClick(preset, 1)}
               >
                 {preset.label}
