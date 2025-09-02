@@ -103,7 +103,7 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
   return (
     <WorkflowNode id={id} data={data} type={type}>
       <div className="flex flex-col gap-2 p-3 bg-card text-card-foreground rounded-md w-full max-w-full overflow-hidden">
-        <div className="flex gap-1 w-full">
+        <div className="flex gap-1 w-full nodrag">
           {Array.from({ length: steps }, (_, stepIdx) => (
             <div key={stepIdx} className="flex flex-col gap-1 items-center">
               {/* Column of pad buttons */}
