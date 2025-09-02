@@ -59,7 +59,6 @@ function SequencerRow({
             isSelected={false}
             noteGroups={{}}
             toggleCell={() => onStepClick(rowIndex, step)}
-            withContextMenu={false}
           />
         ))}
       </div>
