@@ -3,9 +3,8 @@
  */
 
 // Utilities
-export * from './modifier-utils';
 export * from './button-utils';
 
-// UI Components
+// UI Components and Types
 export * from './modifiers';
 export * from './pad-button';

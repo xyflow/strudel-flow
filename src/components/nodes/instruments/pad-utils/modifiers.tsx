@@ -4,45 +4,47 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import {
-  MODIFIER_OPTIONS,
-  getModifierDisplay,
-  getModifierValue,
-  parseModifierValue,
-  type CellState,
-} from './modifier-utils';
 
-/**
- * ModifierDropdown component props
- */
+// Simple type - just track what modifier is selected
+export type CellState = { type: 'off' } | { type: 'modifier'; value: string }; // value like "!2", "/3", "@4", "*2"
+
+// Simple options grouped by type
+const MODIFIER_GROUPS = {
+  Replicate: [
+    { value: '!2', label: '!2' },
+    { value: '!3', label: '!3' },
+    { value: '!4', label: '!4' },
+  ],
+  Slow: [
+    { value: '/2', label: '/2' },
+    { value: '/3', label: '/3' },
+    { value: '/4', label: '/4' },
+  ],
+  Elongate: [
+    { value: '@2', label: '@2' },
+    { value: '@3', label: '@3' },
+    { value: '@4', label: '@4' },
+  ],
+  Speed: [
+    { value: '*2', label: '*2' },
+    { value: '*3', label: '*3' },
+    { value: '*4', label: '*4' },
+  ],
+};
+
 export interface ModifierDropdownProps {
   currentState: CellState;
   onModifierSelect: (modifier: CellState) => void;
-  label?: string;
 }
 
-/**
- * ModifierDropdown component for selecting column modifiers
- */
 export function ModifierDropdown({
   currentState,
   onModifierSelect,
-  label = 'Modifiers',
 }: ModifierDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const displayText = getModifierDisplay(currentState);
-  const currentValue = getModifierValue(currentState);
 
-  const handleValueChange = (value: string) => {
-    const newModifier = parseModifierValue(value);
-    onModifierSelect(newModifier);
-    setIsOpen(false);
-  };
-
-  const handleClear = () => {
-    onModifierSelect({ type: 'off' });
-    setIsOpen(false);
-  };
+  const displayText =
+    currentState.type === 'modifier' ? currentState.value : '○';
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -54,40 +56,43 @@ export function ModifierDropdown({
               : 'bg-accent'
           }`}
         >
-          {displayText || '○'}
+          {displayText}
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-40 p-2" align="start">
-        <div className="space-y-2">
-          <div className="text-xs font-medium text-muted-foreground px-2">
-            {label}
-          </div>
-
-          {/* Clear option */}
+        <div className="space-y-1">
           <button
-            className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-muted transition-colors ${
+            className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-muted ${
               currentState.type === 'off' ? 'bg-muted font-medium' : ''
             }`}
-            onClick={handleClear}
+            onClick={() => {
+              onModifierSelect({ type: 'off' });
+              setIsOpen(false);
+            }}
           >
             None
           </button>
 
-          {/* Dynamic modifier options */}
-          {Object.entries(MODIFIER_OPTIONS).map(([type, options]) => (
-            <div key={type} className="border-t pt-2">
+          {Object.entries(MODIFIER_GROUPS).map(([groupName, modifiers]) => (
+            <div key={groupName} className="border-t pt-2">
               <div className="text-xs font-medium text-muted-foreground px-2 mb-1">
-                {type.charAt(0).toUpperCase() + type.slice(1)}
+                {groupName}
               </div>
-              {options.map((option) => (
+              {modifiers.map((mod) => (
                 <button
-                  key={option.value}
-                  className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-muted transition-colors ${
-                    currentValue === option.value ? 'bg-muted font-medium' : ''
+                  key={mod.value}
+                  className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-muted ${
+                    currentState.type === 'modifier' &&
+                    currentState.value === mod.value
+                      ? 'bg-muted font-medium'
+                      : ''
                   }`}
-                  onClick={() => handleValueChange(option.value)}
+                  onClick={() => {
+                    onModifierSelect({ type: 'modifier', value: mod.value });
+                    setIsOpen(false);
+                  }}
                 >
-                  {option.label}
+                  {mod.label}
                 </button>
               ))}
             </div>

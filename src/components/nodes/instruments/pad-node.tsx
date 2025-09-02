@@ -3,13 +3,19 @@ import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 
-import { applyColumnModifier, CellState } from './pad-utils/modifier-utils';
-import { ModifierDropdown } from './pad-utils/modifiers';
+import { CellState, ModifierDropdown } from './pad-utils/modifiers';
 import { toggleCell, isButtonSelected } from './pad-utils/button-utils';
 import { PadButton } from './pad-utils/pad-button';
 import { AccordionControls } from '@/components/accordion-controls';
 
 const generateNotes = () => [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`];
+
+/**
+ * Apply a column modifier to a Strudel pattern string - now super simple!
+ */
+function applyColumnModifier(pattern: string, modifier: CellState): string {
+  return modifier.type === 'modifier' ? `${pattern}${modifier.value}` : pattern;
+}
 
 function ColumnModifierButton({
   stepIdx,
@@ -24,7 +30,6 @@ function ColumnModifierButton({
     <ModifierDropdown
       currentState={modifier}
       onModifierSelect={(newModifier) => onModifierSelect(stepIdx, newModifier)}
-      label={`Step ${stepIdx + 1}`}
     />
   );
 }
