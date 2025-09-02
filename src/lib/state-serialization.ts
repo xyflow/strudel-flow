@@ -9,6 +9,7 @@ export interface SerializableState {
   edges: Edge[];
   theme: string;
   colorMode: ColorMode;
+  cpm: string; // Add CPM to serializable state
 }
 
 /**
@@ -18,9 +19,10 @@ export function serializeState(
   nodes: Node[],
   edges: Edge[],
   theme: string,
-  colorMode: ColorMode
+  colorMode: ColorMode,
+  cpm: string // Add CPM parameter
 ): string {
-  const state: SerializableState = { nodes, edges, theme, colorMode };
+  const state: SerializableState = { nodes, edges, theme, colorMode, cpm };
   return compressToBase64(JSON.stringify(state));
 }
 
@@ -47,10 +49,11 @@ export function generateShareableUrl(
   nodes: Node[],
   edges: Edge[],
   theme: string,
-  colorMode: ColorMode
+  colorMode: ColorMode,
+  cpm: string // Add CPM parameter
 ): string {
   const url = new URL(window.location.href);
-  url.searchParams.set('state', serializeState(nodes, edges, theme, colorMode));
+  url.searchParams.set('state', serializeState(nodes, edges, theme, colorMode, cpm));
   return url.toString();
 }
 

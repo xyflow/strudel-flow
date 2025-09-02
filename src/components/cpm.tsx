@@ -19,8 +19,8 @@ export function CPM() {
           <Slider
             value={[parseInt(globalCpm) || 60]}
             onValueChange={handleCpmChange}
-            min={40}
-            max={200}
+            min={1}
+            max={140}
             step={1}
             className="w-full"
           />

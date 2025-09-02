@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { useAppStore } from '@/store/app-context';
 import { loadStateFromUrl } from '@/lib/state-serialization';
 import { AppNode } from '@/components/nodes';
+import { useStrudelStore } from '@/store/strudel-store';
 
 /**
  * Hook to load state from URL parameters on app startup
@@ -13,6 +14,7 @@ export function useUrlStateLoader() {
   const { setNodes, setEdges, setTheme, setColorMode } = useAppStore(
     (state) => state
   );
+  const setCpm = useStrudelStore((state) => state.setCpm);
 
   useEffect(() => {
     const urlState = loadStateFromUrl();
@@ -23,6 +25,7 @@ export function useUrlStateLoader() {
         colorMode: urlState.colorMode,
         nodeCount: urlState.nodes.length,
         edgeCount: urlState.edges.length,
+        cpm: urlState.cpm,
       });
 
       // Restore theme settings FIRST to ensure CSS loads before nodes render
@@ -31,6 +34,9 @@ export function useUrlStateLoader() {
       }
       if (urlState.colorMode) {
         setColorMode(urlState.colorMode);
+      }
+      if (urlState.cpm) {
+        setCpm(urlState.cpm);
       }
 
       // Small delay to ensure theme CSS loads on mobile before nodes render
@@ -48,5 +54,5 @@ export function useUrlStateLoader() {
         setEdges(urlState.edges);
       }, 50); // Small delay for mobile CSS loading
     }
-  }, [setNodes, setEdges, setTheme, setColorMode]);
+  }, [setNodes, setEdges, setTheme, setColorMode, setCpm]);
 }
