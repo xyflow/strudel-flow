@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
 import { useAppStore } from '@/store/app-context';
 import { generateOutput } from '@/lib/strudel';
@@ -7,9 +7,8 @@ import { evaluate, hush } from '@strudel/web';
 
 export function useWorkflowRunner() {
   const isRunning = useRef(false);
-  const cycleStartMs = useRef<number | null>(null);
-  const boundaryTimerId = useRef<number | null>(null);
-  const pendingPatternRef = useRef<string | null>(null);
+  const lastEvaluatedPattern = useRef<string>('');
+  const debounceTimerId = useRef<number | null>(null);
   const pattern = useStrudelStore((s) => s.pattern);
   const setPattern = useStrudelStore((s) => s.setPattern);
   const cpm = useStrudelStore((s) => s.cpm);
@@ -17,11 +16,15 @@ export function useWorkflowRunner() {
 
   const nodes = useAppStore((state) => state.nodes);
   const edges = useAppStore((state) => state.edges);
+
+  // Memoize pattern generation to avoid unnecessary recalculations
+  const generatedPattern = useMemo(() => {
+    return generateOutput(nodes, edges);
+  }, [nodes, edges]);
+  // Update pattern when graph changes
   useEffect(() => {
-    const newPattern = generateOutput(nodes, edges);
-    setPattern(newPattern);
-    // Defer hush/evaluate decisions to the boundary-aware effect below
-  }, [nodes, edges, cpm, bpc, setPattern]);
+    setPattern(generatedPattern);
+  }, [generatedPattern, setPattern]);
 
   const getActivePattern = useCallback((p: string) => {
     return p
@@ -30,38 +33,50 @@ export function useWorkflowRunner() {
       .join('\n');
   }, []);
 
-  const getCycleDurationMs = useCallback(() => {
-    // Calculate cycle duration: each beat duration × beats per cycle
-    const bpm = Number(cpm) || 120;
-    const beatsPerCycle = Number(bpc) || 4;
-    // Each beat duration in ms, then multiply by beats per cycle
-    const beatDurationMs = 60000 / bpm;
-    return beatDurationMs * beatsPerCycle;
-  }, [cpm, bpc]);
+  // Smart pattern comparison - only evaluate if pattern actually changed
+  const shouldEvaluatePattern = useCallback(
+    (newPattern: string) => {
+      const activePattern = getActivePattern(newPattern);
+      const hasContent = activePattern
+        .replace(/setcpm\([^)]+\)\s*/g, '')
+        .trim();
 
-  const runWorkflow = useCallback(
-    (overridePattern?: string) => {
-      const source = overridePattern ?? pattern;
-      const activePattern = getActivePattern(source);
+      // Don't evaluate if no content
+      if (!hasContent) return false;
+
+      // Don't evaluate if pattern hasn't changed
+      if (activePattern === lastEvaluatedPattern.current) return false;
+
+      return true;
+    },
+    [getActivePattern]
+  );
+
+  const evaluatePattern = useCallback(
+    (patternToEvaluate: string) => {
+      const activePattern = getActivePattern(patternToEvaluate);
       const hasContent = activePattern
         .replace(/setcpm\([^)]+\)\s*/g, '')
         .trim();
 
       if (!hasContent) {
         if (isRunning.current) {
-          console.log(
-            'No active pattern to evaluate. Hushing at boundary or now if not running.'
-          );
+          console.log('No active pattern - hushing');
           hush();
           isRunning.current = false;
-          cycleStartMs.current = null;
         }
+        lastEvaluatedPattern.current = '';
         return;
       }
 
-      console.log('Running workflow with pattern:', activePattern);
+      // Skip if pattern hasn't actually changed
+      if (activePattern === lastEvaluatedPattern.current) {
+        return;
+      }
+
+      console.log('Evaluating new pattern:', activePattern);
       isRunning.current = true;
-      cycleStartMs.current = performance.now();
+      lastEvaluatedPattern.current = activePattern;
 
       try {
         evaluate(activePattern);
@@ -78,65 +93,69 @@ export function useWorkflowRunner() {
         }
       }
     },
-    [pattern, getActivePattern]
+    [getActivePattern]
   );
 
-  const scheduleEvaluationAtBoundary = useCallback(() => {
-    if (!isRunning.current) {
-      runWorkflow();
-      return;
-    }
-
-    const now = performance.now();
-    const start = cycleStartMs.current ?? now;
-    const duration = getCycleDurationMs();
-    const elapsed = now - start;
-    const cyclesElapsed = Math.ceil(elapsed / duration);
-    const nextBoundary = start + cyclesElapsed * duration;
-    const delay = Math.max(0, nextBoundary - now);
-
-    if (boundaryTimerId.current !== null) {
-      window.clearTimeout(boundaryTimerId.current);
-    }
-
-    boundaryTimerId.current = window.setTimeout(() => {
-      const next = pendingPatternRef.current;
-      pendingPatternRef.current = null;
-      boundaryTimerId.current = null;
-      runWorkflow(next ?? pattern);
-    }, delay);
-  }, [getCycleDurationMs, runWorkflow, pattern]);
-
-  useEffect(() => {
-    // When the generated pattern changes or cpm changes
-    const trimmed = pattern?.trim() ?? '';
-    if (!trimmed) {
-      // Immediately hush and clear timers if pattern is empty
-      if (boundaryTimerId.current !== null) {
-        window.clearTimeout(boundaryTimerId.current);
-        boundaryTimerId.current = null;
+  // Debounced evaluation to batch rapid changes
+  const debouncedEvaluate = useCallback(
+    (patternToEvaluate: string) => {
+      // Clear any existing debounce timer
+      if (debounceTimerId.current !== null) {
+        window.clearTimeout(debounceTimerId.current);
       }
-      pendingPatternRef.current = '';
-      runWorkflow('');
+
+      // For immediate changes (tempo, key changes), evaluate right away
+      const isImmediateChange =
+        patternToEvaluate.includes('setcpm(') ||
+        patternToEvaluate.includes('scale(');
+
+      if (isImmediateChange) {
+        evaluatePattern(patternToEvaluate);
+        return;
+      }
+
+      // For other changes, debounce to batch rapid UI interactions
+      debounceTimerId.current = window.setTimeout(() => {
+        evaluatePattern(patternToEvaluate);
+        debounceTimerId.current = null;
+      }, 50); // 50ms debounce for UI interactions
+    },
+    [evaluatePattern]
+  );
+
+  // Event-driven pattern evaluation - only when pattern actually changes
+  useEffect(() => {
+    if (!pattern || !pattern.trim()) {
+      // Clear timers and hush if pattern is empty
+      if (debounceTimerId.current !== null) {
+        window.clearTimeout(debounceTimerId.current);
+        debounceTimerId.current = null;
+      }
+      if (isRunning.current) {
+        hush();
+        isRunning.current = false;
+      }
+      lastEvaluatedPattern.current = '';
       return;
     }
 
-    pendingPatternRef.current = pattern;
-    scheduleEvaluationAtBoundary();
-  }, [pattern, cpm, bpc, scheduleEvaluationAtBoundary, runWorkflow]);
+    // Only evaluate if the pattern should actually change
+    if (shouldEvaluatePattern(pattern)) {
+      debouncedEvaluate(pattern);
+    }
+  }, [pattern, shouldEvaluatePattern, debouncedEvaluate]);
 
   return {
-    runWorkflow,
+    runWorkflow: () => debouncedEvaluate(pattern),
     stopWorkflow: () => {
       console.log('Stopping workflow...');
-      if (boundaryTimerId.current !== null) {
-        window.clearTimeout(boundaryTimerId.current);
-        boundaryTimerId.current = null;
+      if (debounceTimerId.current !== null) {
+        window.clearTimeout(debounceTimerId.current);
+        debounceTimerId.current = null;
       }
       isRunning.current = false;
+      lastEvaluatedPattern.current = '';
       hush();
-      cycleStartMs.current = null;
-      pendingPatternRef.current = null;
     },
     isRunning: () => isRunning.current,
   };

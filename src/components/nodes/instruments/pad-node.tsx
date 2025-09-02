@@ -40,7 +40,7 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
 
   const steps = data.steps || 5;
   const mode = data.mode || 'arp';
-  const octave = data.octave || 2;
+  const octave = data.octave || 3;
   const selectedKey = data.selectedKey || 'C';
   const selectedScaleType = data.selectedScaleType || 'major';
   const grid =
