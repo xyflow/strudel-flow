@@ -3,18 +3,36 @@ import { useAppStore } from '@/store/app-context';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 
-import {
-  applyRowModifier,
-  toggleCell,
-  getButtonModifier,
-  handleModifierSelect,
-  isButtonSelected,
-  CellState,
-} from './pad-utils';
+import { CellState, ModifierDropdown } from './pad-utils/modifiers';
+import { toggleCell, isButtonSelected } from './pad-utils/button-utils';
 import { PadButton } from './pad-utils/pad-button';
 import { AccordionControls } from '@/components/accordion-controls';
 
 const generateNotes = () => [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`];
+
+/**
+ * Apply a column modifier to a Strudel pattern string - now super simple!
+ */
+function applyColumnModifier(pattern: string, modifier: CellState): string {
+  return modifier.type === 'modifier' ? `${pattern}${modifier.value}` : pattern;
+}
+
+function ColumnModifierButton({
+  stepIdx,
+  modifier,
+  onModifierSelect,
+}: {
+  stepIdx: number;
+  modifier: CellState;
+  onModifierSelect: (stepIdx: number, modifier: CellState) => void;
+}) {
+  return (
+    <ModifierDropdown
+      currentState={modifier}
+      onModifierSelect={(newModifier) => onModifierSelect(stepIdx, newModifier)}
+    />
+  );
+}
 
 export function PadNode({ id, data, type }: WorkflowNodeProps) {
   const [notes] = useState(generateNotes());
@@ -22,7 +40,7 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
 
   const steps = data.steps || 5;
   const mode = data.mode || 'arp';
-  const octave = data.octave || 2;
+  const octave = data.octave || 3;
   const selectedKey = data.selectedKey || 'C';
   const selectedScaleType = data.selectedScaleType || 'major';
   const grid =
@@ -30,7 +48,7 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
     Array(16)
       .fill(null)
       .map(() => Array(8).fill(false));
-  const buttonModifiers = data.buttonModifiers || {};
+  const columnModifiers = data.columnModifiers || {};
   const selectedButtons = new Set(data.selectedButtons || []);
   const noteGroups = data.noteGroups || {};
 
@@ -60,7 +78,6 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
       stepIdx,
       noteIdx,
       grid,
-      buttonModifiers,
       noteGroups,
       selectedButtons,
       updateNodeData,
@@ -70,23 +87,15 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
       event
     );
 
-  const handleGetButtonModifier = (stepIdx: number, noteIdx: number) =>
-    getButtonModifier(stepIdx, noteIdx, buttonModifiers);
-
-  const handleModifierSelectCell = (
-    stepIdx: number,
-    noteIdx: number,
-    modifier: CellState
-  ) =>
-    handleModifierSelect(
-      stepIdx,
-      noteIdx,
-      modifier,
-      grid,
-      buttonModifiers,
-      updateNodeData,
-      id
-    );
+  const handleColumnModifierSelect = (stepIdx: number, modifier: CellState) => {
+    const newColumnModifiers = { ...columnModifiers };
+    if (modifier.type === 'off') {
+      delete newColumnModifiers[stepIdx];
+    } else {
+      newColumnModifiers[stepIdx] = modifier;
+    }
+    updateNodeData(id, { columnModifiers: newColumnModifiers });
+  };
 
   const handleIsButtonSelected = (stepIdx: number, noteIdx: number) =>
     isButtonSelected(stepIdx, noteIdx, selectedButtons);
@@ -94,10 +103,11 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
   return (
     <WorkflowNode id={id} data={data} type={type}>
       <div className="flex flex-col gap-2 p-3 bg-card text-card-foreground rounded-md w-full max-w-full overflow-hidden">
-        <div className="flex flex-col gap-1 w-full">
-          {notes.map((_, noteIdx) => (
-            <div key={noteIdx} className="flex gap-1 items-center">
-              {Array.from({ length: steps }, (_, stepIdx) => (
+        <div className="flex gap-1 w-full nodrag">
+          {Array.from({ length: steps }, (_, stepIdx) => (
+            <div key={stepIdx} className="flex flex-col gap-1 items-center">
+              {/* Column of pad buttons */}
+              {notes.map((_, noteIdx) => (
                 <PadButton
                   key={`${stepIdx}-${noteIdx}`}
                   stepIdx={stepIdx}
@@ -105,11 +115,15 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
                   on={grid[stepIdx]?.[noteIdx] || false}
                   isSelected={handleIsButtonSelected(stepIdx, noteIdx)}
                   noteGroups={noteGroups}
-                  modifier={handleGetButtonModifier(stepIdx, noteIdx)}
-                  handleModifierSelect={handleModifierSelectCell}
                   toggleCell={handleToggleCell}
                 />
               ))}
+              {/* Column modifier button at bottom */}
+              <ColumnModifierButton
+                stepIdx={stepIdx}
+                modifier={columnModifiers[stepIdx] || { type: 'off' }}
+                onModifierSelect={handleColumnModifierSelect}
+              />
             </div>
           ))}
         </div>
@@ -149,19 +163,15 @@ PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
     Array(16)
       .fill(null)
       .map(() => Array(8).fill(false));
-  const buttonModifiers = data.buttonModifiers || {};
+  const columnModifiers = data.columnModifiers || {};
   const noteGroups = data.noteGroups || {};
 
   const generateStepPattern = (row: boolean[], stepIdx: number) => {
-    // Individual notes
+    // Individual notes (no modifiers on individual notes anymore)
     const individualNotes = row
       .map((on, noteIdx) => {
         if (!on) return null;
-        const note = notes[noteIdx];
-        const modifier = buttonModifiers[`${stepIdx}-${noteIdx}`] || {
-          type: 'off',
-        };
-        return applyRowModifier(note, modifier);
+        return notes[noteIdx];
       })
       .filter(Boolean);
 
@@ -175,7 +185,15 @@ PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
     if (allPatterns.length === 0) return '';
 
     const separator = (data.mode || 'arp') === 'arp' ? ' ' : ', ';
-    return `[${allPatterns.join(separator)}]`;
+    const stepPattern = `[${allPatterns.join(separator)}]`;
+
+    // Apply column modifier to the entire step pattern
+    const columnModifier = columnModifiers[stepIdx];
+    if (columnModifier && columnModifier.type !== 'off') {
+      return applyColumnModifier(stepPattern, columnModifier);
+    }
+
+    return stepPattern;
   };
 
   const stepPatterns = grid.map(generateStepPattern).filter(Boolean);
@@ -185,7 +203,8 @@ PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
     return strudelString;
   }
 
-  const scale = `${data.selectedKey || 'C'}${data.octave || 2}:${
+  const octavePart = data.octave ? data.octave : '';
+  const scale = `${data.selectedKey || 'C'}${octavePart}:${
     data.selectedScaleType || 'major'
   }`;
   const calls = [`n("${pattern}")`, `scale("${scale}")`];

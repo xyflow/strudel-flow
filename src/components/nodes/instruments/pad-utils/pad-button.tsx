@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  ModifierContextMenu,
-  getButtonGroupIndex,
-  CellState,
-  getButtonClasses,
-  getCellStateDisplay,
-} from '.';
+import { getButtonGroupIndex, getButtonClasses } from './button-utils';
 
 interface PadButtonProps {
   stepIdx: number;
@@ -13,18 +7,11 @@ interface PadButtonProps {
   on: boolean;
   isSelected: boolean;
   noteGroups: Record<number, number[][]>;
-  modifier: CellState;
-  handleModifierSelect: (
-    stepIdx: number,
-    noteIdx: number,
-    modifier: CellState
-  ) => void;
   toggleCell: (
     stepIdx: number,
     noteIdx: number,
     event?: React.MouseEvent
   ) => void;
-  withContextMenu?: boolean;
 }
 
 export const PadButton: React.FC<PadButtonProps> = ({
@@ -33,15 +20,10 @@ export const PadButton: React.FC<PadButtonProps> = ({
   on,
   isSelected,
   noteGroups,
-  modifier,
-  handleModifierSelect,
   toggleCell,
-  withContextMenu = true,
 }) => {
   const groupIndex = getButtonGroupIndex(stepIdx, noteIdx, noteGroups);
   const isInGroup = groupIndex >= 0;
-  const hasModifier = modifier.type !== 'off';
-  const modifierText = getCellStateDisplay(modifier);
 
   const buttonClass = `${getButtonClasses(
     isSelected,
@@ -50,33 +32,13 @@ export const PadButton: React.FC<PadButtonProps> = ({
     on
   )} w-12 h-10`;
 
-  const button = (
+  return (
     <button
       className={buttonClass}
       onClick={(event) => toggleCell(stepIdx, noteIdx, event)}
-      title={
-        hasModifier
-          ? `Modified: ${modifier.type} - Right-click to change`
-          : 'Right-click for modifier options'
-      }
+      title={`Note ${noteIdx + 1}, Step ${stepIdx + 1}`}
     >
-      {modifierText}
+      {/* No modifier text - just a clean button */}
     </button>
   );
-
-  if (withContextMenu) {
-    return (
-      <ModifierContextMenu
-        currentState={modifier}
-        onModifierSelect={(newModifier) =>
-          handleModifierSelect(stepIdx, noteIdx, newModifier)
-        }
-        label="Note Modifiers"
-      >
-        {button}
-      </ModifierContextMenu>
-    );
-  }
-
-  return button;
 };

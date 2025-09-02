@@ -58,10 +58,7 @@ function SequencerRow({
             on={isActive}
             isSelected={false}
             noteGroups={{}}
-            modifier={{ type: 'off' }}
-            handleModifierSelect={() => {}}
             toggleCell={() => onStepClick(rowIndex, step)}
-            withContextMenu={false}
           />
         ))}
       </div>
@@ -78,7 +75,6 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
     { instrument: 'sd', pattern: Array(8).fill(false) },
     { instrument: 'hh', pattern: Array(8).fill(false) },
   ];
-
 
   const toggleStep = (rowIndex: number, step: number) => {
     const newRows = rows.map((row, rIndex) => {

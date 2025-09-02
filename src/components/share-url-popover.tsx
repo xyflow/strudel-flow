@@ -8,6 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppStore } from '@/store/app-context';
+import { useStrudelStore } from '@/store/strudel-store';
 
 import { generateShareableUrl } from '@/lib/state-serialization';
 
@@ -16,10 +17,18 @@ export function ShareUrlPopover() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { nodes, edges, theme, colorMode } = useAppStore((state) => state);
+  const { cpm, bpc } = useStrudelStore((state) => state);
 
   const handleCopyUrl = async () => {
     try {
-      const shareableUrl = generateShareableUrl(nodes, edges, theme, colorMode);
+      const shareableUrl = generateShareableUrl(
+        nodes,
+        edges,
+        theme,
+        colorMode,
+        cpm,
+        bpc
+      );
       await navigator.clipboard.writeText(shareableUrl);
       setIsCopied(true);
 
@@ -32,7 +41,14 @@ export function ShareUrlPopover() {
     }
   };
 
-  const displayUrl = generateShareableUrl(nodes, edges, theme, colorMode);
+  const displayUrl = generateShareableUrl(
+    nodes,
+    edges,
+    theme,
+    colorMode,
+    cpm,
+    bpc
+  );
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
