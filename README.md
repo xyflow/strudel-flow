@@ -63,7 +63,7 @@ To get started, follow these steps:
 - **Polyrhythm** - Multiple overlapping rhythmic patterns
 - **Custom Node** - Direct Strudel pattern input
 
-### 🎛️ Samples
+### 🎛️ Synths
 
 - **Drum Sounds** - Sample-based drum sound selection
 - **Sample Select** - Custom sample playback and selection
@@ -78,7 +78,7 @@ To get started, follow these steps:
 - **Phaser** - Sweeping phase modulation effect
 - **Crush** - Bit-crushing and sample rate reduction
 - **Jux** - Alternating left/right channel effects
-- **FM** - Frequency modulation sampleesis
+- **FM** - Frequency modulation synthesis
 - **Room** - Realistic acoustic space simulation with size, fade, and filtering controls
 
 ### ⏱️ Time Effects
@@ -144,16 +144,16 @@ Each step can have modifiers applied:
 
 ```
 src/
-├── components/          # Project components
+├── components/          # React components
 │   ├── nodes/          # Flow node components
-│   │   ├── instruments/ # Instrument nodes
-│   │   ├── effects/    # Effect nodes
-│   │   └── samples/     # Sample nodes
+│   │   ├── instruments/ # Instrument node implementations
+│   │   ├── effects/    # Effect node implementations
+│   │   └── synths/     # Synthesizer node implementations
 │   ├── ui/             # shadcn/ui components
 │   ├── workflow/       # Flow editor components
 │   └── edges/          # Custom edge components
 ├── data/               # Static data and configurations
-├── hooks/              # Custom hooks
+├── hooks/              # Custom React hooks
 ├── lib/                # Utility libraries and core logic
 ├── store/              # Zustand state management
 └── types/              # TypeScript type definitions

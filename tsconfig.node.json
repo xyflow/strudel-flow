@@ -2,7 +2,7 @@
   "compilerOptions": {
     "composite": true,
     "skipLibCheck": true,
-    "allowSampleeticDefaultImports": true
+    "allowSyntheticDefaultImports": true
   },
   "include": ["vite.config.ts"]
 }
