@@ -40,8 +40,15 @@ function isSoundSource(node: AppNode): boolean {
 /**
  * Generate complete Strudel output from nodes and edges
  */
-export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
-  const { cpm, bpc } = useStrudelStore.getState();
+export function generateOutput(
+  nodes: AppNode[],
+  edges: Edge[],
+  cpm?: string,
+  bpc?: string
+): string {
+  // Use passed values or fallback to store values
+  const currentCpm = cpm || useStrudelStore.getState().cpm;
+  const currentBpc = bpc || useStrudelStore.getState().bpc;
 
   const nodePatterns: Record<string, string> = {};
   for (const node of nodes) {
@@ -120,8 +127,8 @@ export function generateOutput(nodes: AppNode[], edges: Edge[]): string {
 
   // Always add setcpm if there's sound (like other node outputs)
   if (result) {
-    const bpm = parseInt(cpm) || 120;
-    const beatsPerCycle = parseInt(bpc) || 4;
+    const bpm = parseInt(currentCpm) || 120;
+    const beatsPerCycle = parseInt(currentBpc) || 4;
     return `setcpm(${bpm}/${beatsPerCycle})\n${result}`;
   }
 

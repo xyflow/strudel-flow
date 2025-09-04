@@ -11,14 +11,17 @@ export function useWorkflowRunner() {
   const debounceTimerId = useRef<number | null>(null);
   const pattern = useStrudelStore((s) => s.pattern);
   const setPattern = useStrudelStore((s) => s.setPattern);
+  const cpm = useStrudelStore((s) => s.cpm);
+  const bpc = useStrudelStore((s) => s.bpc);
 
   const nodes = useAppStore((state) => state.nodes);
   const edges = useAppStore((state) => state.edges);
 
   // Memoize pattern generation to avoid unnecessary recalculations
+  // Include cpm and bpc as dependencies so pattern regenerates when tempo changes
   const generatedPattern = useMemo(() => {
-    return generateOutput(nodes, edges);
-  }, [nodes, edges]);
+    return generateOutput(nodes, edges, cpm, bpc);
+  }, [nodes, edges, cpm, bpc]);
   // Update pattern when graph changes
   useEffect(() => {
     setPattern(generatedPattern);
