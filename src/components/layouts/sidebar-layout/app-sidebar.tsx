@@ -1,5 +1,11 @@
-import { useState, useCallback, ComponentProps, useRef } from 'react';
-import { Command, GripVertical, Plus } from 'lucide-react';
+import {
+  useState,
+  useCallback,
+  ComponentProps,
+  useRef,
+  ChangeEvent,
+} from 'react';
+import { Command, GripVertical, Plus, Save, Upload } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 
 import {
@@ -15,6 +21,7 @@ import {
   SidebarGroupLabel,
 } from '@/components/ui/sidebar';
 import { SettingsDialog } from '@/components/settings-dialog';
+import { SaveProjectDialog } from '@/components/save-project-dialog';
 import nodesConfig, {
   AppNode,
   createNodeByType,
@@ -25,8 +32,82 @@ import { iconMapping } from '@/data/icon-mapping';
 import { useAppStore } from '@/store/app-context';
 import { useShallow } from 'zustand/react/shallow';
 import { type AppStore } from '@/store/app-store';
+import {
+  saveStateToFile,
+  deserializeStateFromFile,
+} from '@/lib/state-serialization';
+import { useStrudelStore } from '@/store/strudel-store';
 
 export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    nodes,
+    edges,
+    theme,
+    colorMode,
+    setNodes,
+    setEdges,
+    setTheme,
+    setColorMode,
+  } = useAppStore(
+    useShallow((state) => ({
+      nodes: state.nodes,
+      edges: state.edges,
+      theme: state.theme,
+      colorMode: state.colorMode,
+      setNodes: state.setNodes,
+      setEdges: state.setEdges,
+      setTheme: state.setTheme,
+      setColorMode: state.setColorMode,
+    }))
+  );
+  const { cpm, bpc, setCpm, setBpc } = useStrudelStore(
+    useShallow((state) => ({
+      cpm: state.cpm,
+      bpc: state.bpc,
+      setCpm: state.setCpm,
+      setBpc: state.setBpc,
+    }))
+  );
+
+  const handleSave = (filename: string) => {
+    saveStateToFile(nodes, edges, theme, colorMode, cpm, bpc, filename);
+  };
+
+  const handleLoad = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        const state = deserializeStateFromFile(content);
+        if (state) {
+          const nodes = (state.nodes as AppNode[]).map((node) => ({
+            ...node,
+            data: {
+              ...node.data,
+              state: 'paused' as const,
+            },
+          }));
+          setNodes(nodes);
+          setEdges(state.edges);
+          setTheme(state.theme);
+          setColorMode(state.colorMode);
+          setCpm(state.cpm);
+          if (state.bpc) {
+            setBpc(state.bpc);
+          }
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   // Group nodes by category
   const nodesByCategory = Object.values(nodesConfig).reduce((acc, node) => {
     if (!acc[node.category]) {
@@ -65,6 +146,30 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem>
+                <SaveProjectDialog onSave={handleSave}>
+                  <SidebarMenuButton className="bg-card cursor-pointer">
+                    <Save />
+                    <span>Save</span>
+                  </SidebarMenuButton>
+                </SaveProjectDialog>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={triggerFileInput}
+                  className="bg-card cursor-pointer"
+                >
+                  <Upload />
+                  <span>Load</span>
+                </SidebarMenuButton>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleLoad}
+                  className="hidden"
+                  accept=".json"
+                />
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <SettingsDialog />
