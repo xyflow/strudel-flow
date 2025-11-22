@@ -71,8 +71,20 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
     }))
   );
 
-  const handleSave = (filename: string) => {
-    saveStateToFile(nodes, edges, theme, colorMode, cpm, bpc, filename);
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [saveFilename, setSaveFilename] = useState('strudel-flow-project.json');
+
+  const handleSave = () => {
+    saveStateToFile(
+      nodes,
+      edges,
+      theme,
+      colorMode,
+      cpm,
+      bpc,
+      saveFilename
+    );
+    setIsSaveDialogOpen(false);
   };
 
   const handleLoad = (event: ChangeEvent<HTMLInputElement>) => {
@@ -147,7 +159,13 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SaveProjectDialog onSave={handleSave}>
+                <SaveProjectDialog
+                  isOpen={isSaveDialogOpen}
+                  onOpenChange={setIsSaveDialogOpen}
+                  filename={saveFilename}
+                  onFilenameChange={setSaveFilename}
+                  onSave={handleSave}
+                >
                   <SidebarMenuButton className="bg-card cursor-pointer">
                     <Save />
                     <span>Save</span>

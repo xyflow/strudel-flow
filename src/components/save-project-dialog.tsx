@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Save } from 'lucide-react';
 
 import {
@@ -12,26 +11,33 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { SidebarMenuButton } from './ui/sidebar';
 
 interface SaveProjectDialogProps {
-  onSave: (filename: string) => void;
+  filename: string;
+  onFilenameChange: (filename: string) => void;
+  onSave: () => void;
   children: React.ReactNode;
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
 }
 
-export function SaveProjectDialog({ onSave, children }: SaveProjectDialogProps) {
-  const [filename, setFilename] = useState('strudel-flow-project.json');
-  const [isOpen, setIsOpen] = useState(false);
-
+export function SaveProjectDialog({
+  filename,
+  onFilenameChange,
+  onSave,
+  children,
+  isOpen,
+  onOpenChange,
+}: SaveProjectDialogProps) {
   const handleSave = () => {
     if (filename) {
-      onSave(filename);
-      setIsOpen(false);
+      onSave();
+      onOpenChange(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -44,7 +50,7 @@ export function SaveProjectDialog({ onSave, children }: SaveProjectDialogProps) 
           <Input
             id="filename"
             value={filename}
-            onChange={(e) => setFilename(e.target.value)}
+            onChange={(e) => onFilenameChange(e.target.value)}
             placeholder="strudel-flow-project.json"
           />
         </div>
