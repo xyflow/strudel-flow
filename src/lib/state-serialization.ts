@@ -45,6 +45,34 @@ export function deserializeState(compressed: string): SerializableState | null {
 }
 
 /**
+ * Serialize state to a JSON string for file saving
+ */
+export function serializeStateForFile(
+  nodes: Node[],
+  edges: Edge[],
+  theme: string,
+  colorMode: ColorMode,
+  cpm: string,
+  bpc?: string
+): string {
+  const state: SerializableState = { nodes, edges, theme, colorMode, cpm, bpc };
+  return JSON.stringify(state, null, 2);
+}
+
+/**
+ * Deserialize a JSON string from a file
+ */
+export function deserializeStateFromFile(jsonString: string): SerializableState | null {
+  try {
+    const state = JSON.parse(jsonString) as SerializableState;
+    return state;
+  } catch (error) {
+    console.error('Failed to deserialize state from file:', error);
+    return null;
+  }
+}
+
+/**
  * Generate a shareable URL with the current state
  */
 export function generateShareableUrl(
@@ -69,4 +97,35 @@ export function generateShareableUrl(
 export function loadStateFromUrl(): SerializableState | null {
   const stateParam = new URLSearchParams(window.location.search).get('state');
   return stateParam ? deserializeState(stateParam) : null;
+}
+
+/**
+ * Save state to a .json file
+ */
+export function saveStateToFile(
+  nodes: Node[],
+  edges: Edge[],
+  theme: string,
+  colorMode: ColorMode,
+  cpm: string,
+  bpc?: string,
+  filename: string = 'strudel-flow-project.json'
+): void {
+  const jsonString = serializeStateForFile(
+    nodes,
+    edges,
+    theme,
+    colorMode,
+    cpm,
+    bpc
+  );
+  const blob = new Blob([jsonString], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
