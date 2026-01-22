@@ -1,4 +1,3 @@
-// Strudel output for ADSR envelope
 ADSRNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const attack = parseFloat(node.data.attack || '0.1');
   const decay = parseFloat(node.data.decay || '0.1');
