@@ -36,10 +36,15 @@ import { ReleaseNode } from './effects/release-node';
 import { AttackNode } from './effects/attack-node';
 import { FastNode } from './effects/fast-node';
 import { SlowNode } from './effects/slow-node';
+import { ADSRNode } from './effects/adsr-node';
 
 /* WORKFLOW NODE DATA PROPS ------------------------------------------------------ */
 
 export type WorkflowNodeData = {
+  attack?: string;
+  decay?: string;
+  sustain?: string;
+  release?: string;
   title?: string;
   label?: string;
   icon?: keyof typeof iconMapping;
@@ -89,9 +94,6 @@ export type WorkflowNodeData = {
   pan?: string;
   fast?: string;
   slow?: string;
-  attack?: string;
-  release?: string;
-  sustain?: string;
   crush?: string;
   postgain?: string;
   fm?: string;
@@ -303,7 +305,21 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     category: 'Time Effects',
     icon: 'Clock',
   },
+  'adsr-node': {
+    id: 'adsr-node',
+    title: 'ADSR',
+    category: 'Time Effects',
+    icon: 'Activity',
+  },
+    'decay-node': {
+      id: 'decay-node',
+      title: 'Decay',
+      category: 'Time Effects',
+      icon: 'ArrowDown',
+    },
 };
+
+import { DecayNode } from './effects/decay-node';
 
 export const nodeTypes = {
   'synth-select-node': SynthSelectNode,
@@ -334,6 +350,8 @@ export const nodeTypes = {
   'ply-node': PlyNode,
   'fm-node': FmNode,
   'late-node': LateNode,
+  'adsr-node': ADSRNode,
+  'decay-node': DecayNode,
 };
 
 export function createNodeByType({
@@ -396,7 +414,9 @@ export type AppNode =
   | Node<WorkflowNodeData, 'ply-node'>
   | Node<WorkflowNodeData, 'fm-node'>
   | Node<WorkflowNodeData, 'synth-select-node'>
-  | Node<WorkflowNodeData, 'late-node'>;
+  | Node<WorkflowNodeData, 'late-node'>
+  | Node<WorkflowNodeData, 'adsr-node'>
+  | Node<WorkflowNodeData, 'decay-node'>;
 
 export type AppNodeType = NonNullable<AppNode['type']>;
 

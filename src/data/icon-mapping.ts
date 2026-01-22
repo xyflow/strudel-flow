@@ -29,6 +29,7 @@ import {
   EyeOff,
   Copy,
   Clock,
+  ArrowDown,
   // Import other icons as needed
 } from 'lucide-react';
 
@@ -66,5 +67,6 @@ export const iconMapping: Record<
   EyeOff: EyeOff,
   Copy: Copy,
   Clock: Clock,
+  ArrowDown: ArrowDown,
   // Add other mappings here
 };
