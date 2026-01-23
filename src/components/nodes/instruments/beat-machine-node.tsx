@@ -162,12 +162,34 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
     updateNodeData(id, { rows: newRows });
   };
 
+
   const clearAll = () => {
     const newRows = rows.map((row) => ({
       ...row,
       pattern: Array(16).fill(false),
       modifiers: {},
     }));
+    updateNodeData(id, { rows: newRows });
+  };
+
+
+  const addTrack = () => {
+    // Use latest rows from current closure
+    const newRows = [
+      ...rows,
+      {
+        instrument: DRUM_OPTIONS[0] || 'bd',
+        pattern: Array(16).fill(false),
+        modifiers: {},
+      },
+    ];
+    updateNodeData(id, { rows: newRows });
+  };
+
+  // Remove the last track (if more than one)
+  const removeTrack = () => {
+    if (rows.length <= 1) return;
+    const newRows = rows.slice(0, -1);
     updateNodeData(id, { rows: newRows });
   };
 
@@ -187,14 +209,33 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
           ))}
         </div>
         <div className="flex flex-wrap gap-2 items-center justify-between">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={clearAll}
-            className="text-xs"
-          >
-            Clear All
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearAll}
+              className="text-xs"
+            >
+              Clear All
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={addTrack}
+              className="text-xs"
+            >
+              + Add Track
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={removeTrack}
+              className="text-xs"
+              disabled={rows.length <= 1}
+            >
+              Remove Track
+            </Button>
+          </div>
         </div>
       </div>
     </WorkflowNode>
