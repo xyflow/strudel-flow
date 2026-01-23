@@ -85,6 +85,7 @@ export type WorkflowNodeData = {
 
   // Beat machine node data
   rows?: Array<{ instrument: string; pattern: boolean[] }>;
+    modifiersEnabled?: boolean;
 
   // Arpeggiator node data
   selectedPattern?: string;
