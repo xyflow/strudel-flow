@@ -7,6 +7,7 @@ import { PadButton } from './pad-utils/pad-button';
 import { useAppStore } from '@/store/app-context';
 import { WorkflowNodeProps, AppNode } from '..';
 import { DRUM_OPTIONS } from '@/data/sound-options';
+import { DRUM_CATEGORIES } from '@/data/sound-categories';
 
 interface BeatMachineRow {
   instrument: string;
@@ -58,10 +59,13 @@ function SequencerRow({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {DRUM_OPTIONS.map((sound) => (
-            <SelectItem key={sound} value={sound}>
-              {sound}
-            </SelectItem>
+          {DRUM_CATEGORIES.map((cat) => (
+            <div key={cat.label}>
+              <div className="px-2 py-1 text-xs text-muted-foreground font-semibold">{cat.label}</div>
+              {cat.options.map((sound) => (
+                <SelectItem key={sound} value={sound}>{sound}</SelectItem>
+              ))}
+            </div>
           ))}
         </SelectContent>
       </Select>
