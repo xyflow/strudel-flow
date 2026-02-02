@@ -86,9 +86,7 @@ To get started, follow these steps:
 - **Fast** - Speed multiplication (×2, ×3, ×4)
 - **Slow** - Speed division (÷2, ÷3, ÷4)
 - **Late** - Pattern delay and offset timing
-- **Attack** - Note attack time control
-- **Release** - Note release time control
-- **Sustain** - Note sustain level control
+- **ASDR** - Manages Attack, Release, Sustain and Decay controls
 - **Reverse** - Reverse pattern playback
 - **Palindrome** - Bidirectional pattern playback
 - **Mask** - Probabilistic pattern masking
@@ -99,7 +97,6 @@ To get started, follow these steps:
 ### Creating Patterns
 
 1. **Basic Pattern**:
-
    - Add a drum machine or pad node
    - Click buttons to activate steps
    - Adjust tempo with BPM control
