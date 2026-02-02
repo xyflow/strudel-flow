@@ -31,9 +31,6 @@ import { JuxNode } from './effects/jux-node';
 import { PhaserNode } from './effects/phaser-node';
 import { PostGainNode } from './effects/postgain-node';
 import { CrushNode } from './effects/crush-node';
-import { SustainNode } from './effects/sustain-node';
-import { ReleaseNode } from './effects/release-node';
-import { AttackNode } from './effects/attack-node';
 import { FastNode } from './effects/fast-node';
 import { SlowNode } from './effects/slow-node';
 import { ADSRNode } from './effects/adsr-node';
@@ -233,24 +230,6 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     icon: 'Rewind',
     category: 'Time Effects',
   },
-  'attack-node': {
-    id: 'attack-node',
-    title: 'Attack',
-    icon: 'Zap',
-    category: 'Time Effects',
-  },
-  'release-node': {
-    id: 'release-node',
-    title: 'Release',
-    icon: 'VolumeX',
-    category: 'Time Effects',
-  },
-  'sustain-node': {
-    id: 'sustain-node',
-    title: 'Sustain',
-    icon: 'Volume2',
-    category: 'Time Effects',
-  },
   'rev-node': {
     id: 'rev-node',
     title: 'Reverse',
@@ -311,15 +290,7 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     category: 'Time Effects',
     icon: 'Activity',
   },
-    'decay-node': {
-      id: 'decay-node',
-      title: 'Decay',
-      category: 'Time Effects',
-      icon: 'ArrowDown',
-    },
 };
-
-import { DecayNode } from './effects/decay-node';
 
 export const nodeTypes = {
   'synth-select-node': SynthSelectNode,
@@ -341,9 +312,6 @@ export const nodeTypes = {
   'room-node': RoomNode,
   'postgain-node': PostGainNode,
   'crush-node': CrushNode,
-  'sustain-node': SustainNode,
-  'release-node': ReleaseNode,
-  'attack-node': AttackNode,
   'fast-node': FastNode,
   'slow-node': SlowNode,
   'mask-node': MaskNode,
@@ -351,7 +319,6 @@ export const nodeTypes = {
   'fm-node': FmNode,
   'late-node': LateNode,
   'adsr-node': ADSRNode,
-  'decay-node': DecayNode,
 };
 
 export function createNodeByType({
@@ -400,9 +367,6 @@ export type AppNode =
   | Node<WorkflowNodeData, 'room-node'>
   | Node<WorkflowNodeData, 'postgain-node'>
   | Node<WorkflowNodeData, 'crush-node'>
-  | Node<WorkflowNodeData, 'sustain-node'>
-  | Node<WorkflowNodeData, 'release-node'>
-  | Node<WorkflowNodeData, 'attack-node'>
   | Node<WorkflowNodeData, 'fast-node'>
   | Node<WorkflowNodeData, 'slow-node'>
   | Node<WorkflowNodeData, 'drum-sounds-node'>
@@ -415,8 +379,7 @@ export type AppNode =
   | Node<WorkflowNodeData, 'fm-node'>
   | Node<WorkflowNodeData, 'synth-select-node'>
   | Node<WorkflowNodeData, 'late-node'>
-  | Node<WorkflowNodeData, 'adsr-node'>
-  | Node<WorkflowNodeData, 'decay-node'>;
+  | Node<WorkflowNodeData, 'adsr-node'>;
 
 export type AppNodeType = NonNullable<AppNode['type']>;
 
