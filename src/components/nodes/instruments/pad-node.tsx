@@ -196,8 +196,13 @@ PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
     return stepPattern;
   };
 
-  const stepPatterns = grid.map(generateStepPattern).filter(Boolean);
-  const pattern = stepPatterns.join(' ');
+  // Only use the first `steps` rows of the grid
+  const steps = data.steps || 5;
+  const stepPatternsWithEmpty = grid.slice(0, steps).map((row, stepIdx) => {
+    const step = generateStepPattern(row, stepIdx);
+    return step === '' ? '[~]' : step;
+  });
+  const pattern = stepPatternsWithEmpty.join(' ');
 
   if (!pattern || !pattern.trim() || /^[~\s]*$/.test(pattern.trim())) {
     return strudelString;
