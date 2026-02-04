@@ -21,7 +21,7 @@ export function SynthSelectNode({ id, data }: WorkflowNodeProps) {
   // Example synth categories (adjust as needed for your actual sounds)
   const synthCategories = [
     { label: 'Bass', options: ['bass', 'bass0', 'bass1', 'bass2', 'bass3', 'bassdm', 'bassfoo', 'jungbass', 'jvbass', 'moog'] },
-    { label: 'Leads', options: ['arp', 'arpy', 'lead', 'hoover', 'juno', 'saw', 'stab', 'simplesine', 'sine', 'pluck'] },
+    { label: 'Leads', options: ['tri','square','arp', 'arpy', 'lead', 'hoover', 'juno', 'saw', 'stab', 'simplesine', 'sine', 'pluck'] },
     { label: 'Pads', options: ['pad', 'padlong', 'space', 'newnotes', 'notes'] },
     { label: 'FX & Other', options: SOUND_OPTIONS.filter((s) => !['bass', 'bass0', 'bass1', 'bass2', 'bass3', 'bassdm', 'bassfoo', 'jungbass', 'jvbass', 'moog', 'arp', 'arpy', 'lead', 'hoover', 'juno', 'saw', 'stab', 'simplesine', 'sine', 'pluck', 'pad', 'padlong', 'space', 'newnotes', 'notes'].includes(s)) },
   ];
