@@ -18,6 +18,14 @@ export function SynthSelectNode({ id, data }: WorkflowNodeProps) {
     updateNodeData(id, { sound: value });
   };
 
+  // Example synth categories (adjust as needed for your actual sounds)
+  const synthCategories = [
+    { label: 'Bass', options: ['bass', 'bass0', 'bass1', 'bass2', 'bass3', 'bassdm', 'bassfoo', 'jungbass', 'jvbass', 'moog'] },
+    { label: 'Leads', options: ['tri','square','arp', 'arpy', 'lead', 'hoover', 'juno', 'saw', 'stab', 'simplesine', 'sine', 'pluck'] },
+    { label: 'Pads', options: ['pad', 'padlong', 'space', 'newnotes', 'notes'] },
+    { label: 'FX & Other', options: SOUND_OPTIONS.filter((s) => !['bass', 'bass0', 'bass1', 'bass2', 'bass3', 'bassdm', 'bassfoo', 'jungbass', 'jvbass', 'moog', 'arp', 'arpy', 'lead', 'hoover', 'juno', 'saw', 'stab', 'simplesine', 'sine', 'pluck', 'pad', 'padlong', 'space', 'newnotes', 'notes'].includes(s)) },
+  ];
+
   return (
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-2 p-3">
@@ -26,10 +34,13 @@ export function SynthSelectNode({ id, data }: WorkflowNodeProps) {
             <SelectValue placeholder="Select Sample" />
           </SelectTrigger>
           <SelectContent>
-            {SOUND_OPTIONS.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
+            {synthCategories.map((cat) => (
+              <div key={cat.label}>
+                <div className="px-2 py-1 text-xs text-muted-foreground font-semibold">{cat.label}</div>
+                {cat.options.map((option) => (
+                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                ))}
+              </div>
             ))}
           </SelectContent>
         </Select>
