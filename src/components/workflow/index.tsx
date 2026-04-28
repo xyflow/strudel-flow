@@ -2,7 +2,7 @@ import { Background, ReactFlow } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { nodeTypes } from '@/components/nodes';
-import { edgeTypes } from '@/components/edges';
+import deleteEdge from '@/components/delete-edge';
 import { useAppStore } from '@/store/app-context';
 import { WorkflowControls } from './controls';
 import { useDragAndDrop } from './useDragAndDrop';
@@ -12,7 +12,11 @@ import { useThemeCss } from '@/hooks/use-theme-css';
 
 export default function Workflow() {
   useUrlStateLoader();
-  useGlobalPlayback(); // Enable global spacebar pause/play
+  useGlobalPlayback();
+
+  const edgeTypes = {
+    default: deleteEdge,
+  };
 
   const {
     nodes,
@@ -35,7 +39,7 @@ export default function Workflow() {
       onConnect: state.onConnect,
       onNodeDragStart: state.onNodeDragStart,
       onNodeDragStop: state.onNodeDragStop,
-    }))
+    })),
   );
 
   // Load theme CSS at the app level - fixes mobile color loading
