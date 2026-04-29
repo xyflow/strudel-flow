@@ -153,7 +153,6 @@ src/
 ├── hooks/              # Custom React hooks
 ├── lib/                # Utility libraries and core logic
 ├── store/              # Zustand state management
-└── types/              # TypeScript type definitions
 ```
 
 ## Acknowledgments
