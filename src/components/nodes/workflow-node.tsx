@@ -13,7 +13,7 @@ import nodesConfig from '@/components/nodes/';
 import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
 import { iconMapping } from '@/data/icon-mapping';
 import { BaseNode } from '@/components/base-node';
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import PatternPopup from '@/components/pattern-popup';
 import { useStrudelStore } from '@/store/strudel-store';
 import { BaseHandle } from '@/components/base-handle';

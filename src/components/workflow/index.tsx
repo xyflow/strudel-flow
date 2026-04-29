@@ -3,7 +3,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { nodeTypes } from '@/components/nodes';
 import deleteEdge from '@/components/delete-edge';
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import { WorkflowControls } from './controls';
 import { useDragAndDrop } from '@/hooks/use-drag-and-drop';
 import { useUrlStateLoader } from '@/hooks/use-url-state';

@@ -1,4 +1,4 @@
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { Button } from '@/components/ui/button';

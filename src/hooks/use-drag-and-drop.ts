@@ -3,7 +3,7 @@ import { useReactFlow } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { AppNode, createNodeByType } from '@/components/nodes';
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import { AppStore } from '@/store/app-store';
 
 const selector = (state: AppStore) => ({

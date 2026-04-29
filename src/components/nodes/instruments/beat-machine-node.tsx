@@ -1,6 +1,6 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
 import { PadButton } from './pad-utils/pad-button';
 import { DRUM_OPTIONS } from '@/data/sound-options';

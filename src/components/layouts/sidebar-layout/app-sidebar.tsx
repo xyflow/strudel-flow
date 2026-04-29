@@ -29,7 +29,7 @@ import nodesConfig, {
 } from '@/components/nodes';
 import { cn } from '@/lib/utils';
 import { iconMapping } from '@/data/icon-mapping';
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import { useShallow } from 'zustand/react/shallow';
 import { type AppStore } from '@/store/app-store';
 import { downloadState, stateFromJson } from '@/lib/project-state';

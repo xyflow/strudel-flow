@@ -25,9 +25,6 @@ export type AppState = {
   connectionSites: Map<string, PotentialConnection>;
 };
 
-/**
- * You can potentially connect to an already existing edge or to a free handle of a node.
- */
 export type PotentialConnection = {
   id: string;
   position: XYPosition;
@@ -35,6 +32,7 @@ export type PotentialConnection = {
   source?: ConnectionHandle;
   target?: ConnectionHandle;
 };
+
 export type ConnectionHandle = {
   node: string;
   handle?: string | null;
@@ -63,116 +61,88 @@ export type AppActions = {
 
 export type AppStore = AppState & AppActions;
 
-export const defaultState: AppState = {
-  nodes: initialNodes,
-  edges: initialEdges,
-  colorMode: 'light',
-  theme: 'supabase',
-  draggedNodes: new Map(),
-  connectionSites: new Map(),
-};
+export const useAppStore = create<AppStore>()(
+  subscribeWithSelector((set, get) => ({
+    nodes: initialNodes,
+    edges: initialEdges,
+    colorMode: 'light',
+    theme: 'supabase',
+    draggedNodes: new Map(),
+    connectionSites: new Map(),
 
-export const createAppStore = (initialState: AppState = defaultState) => {
-  const store = create<AppStore>()(
-    subscribeWithSelector((set, get) => ({
-      ...initialState,
+    onNodesChange: async (changes) => {
+      set({ nodes: applyNodeChanges(changes, get().nodes) });
+    },
 
-      onNodesChange: async (changes) => {
-        const nextNodes = applyNodeChanges(changes, get().nodes);
-        set({ nodes: nextNodes });
-      },
+    setNodes: (nodes) => set({ nodes }),
 
-      setNodes: (nodes) => set({ nodes }),
+    addNode: (node) => set({ nodes: [...get().nodes, node] }),
 
-      addNode: (node) => {
-        const nextNodes = [...get().nodes, node];
-        set({ nodes: nextNodes });
-      },
+    removeNode: (nodeId) =>
+      set({ nodes: get().nodes.filter((node) => node.id !== nodeId) }),
 
-      removeNode: (nodeId) =>
-        set({ nodes: get().nodes.filter((node) => node.id !== nodeId) }),
+    addNodeByType: (type, position) => {
+      const newNode = createNodeByType({ type, position });
+      if (!newNode) return null;
+      get().addNode(newNode);
+      return newNode.id;
+    },
 
-      addNodeByType: (type, position) => {
-        const newNode = createNodeByType({ type, position });
+    getNodes: () => get().nodes,
 
-        if (!newNode) return null;
+    setEdges: (edges) => set({ edges }),
 
-        get().addNode(newNode);
+    getEdges: () => get().edges,
 
-        return newNode.id;
-      },
-      getNodes: () => get().nodes,
+    addEdge: (edge) => set({ edges: addEdge(edge, get().edges) }),
 
-      setEdges: (edges) => set({ edges }),
+    removeEdge: (edgeId) =>
+      set({ edges: get().edges.filter((edge) => edge.id !== edgeId) }),
 
-      getEdges: () => get().edges,
+    onEdgesChange: (changes) =>
+      set({ edges: applyEdgeChanges(changes, get().edges) }),
 
-      addEdge: (edge) => {
-        const nextEdges = addEdge(edge, get().edges);
-        set({ edges: nextEdges });
-      },
+    onConnect: (connection) => {
+      if (connection.source === connection.target) return;
+      const { source, target, sourceHandle, targetHandle } = connection;
+      get().addEdge({
+        id: `${source}-${target}`,
+        source,
+        target,
+        type: 'default',
+        ...(sourceHandle ? { sourceHandle } : {}),
+        ...(targetHandle ? { targetHandle } : {}),
+      });
+    },
 
-      removeEdge: (edgeId) => {
-        set({ edges: get().edges.filter((edge) => edge.id !== edgeId) });
-      },
+    setTheme: (theme) => set({ theme }),
 
-      onEdgesChange: (changes) => {
-        const nextEdges = applyEdgeChanges(changes, get().edges);
-        set({ edges: nextEdges });
-      },
+    toggleDarkMode: () =>
+      set((state) => ({
+        colorMode: state.colorMode === 'dark' ? 'light' : 'dark',
+      })),
 
-      onConnect: (connection) => {
-        // Prevent self-connecting nodes
-        if (connection.source === connection.target) {
-          return;
-        }
-        // Only include handles if they are not null/undefined
-        const { source, target, sourceHandle, targetHandle } = connection;
-        const newEdge: Edge = {
-          id: `${source}-${target}`,
-          source,
-          target,
-          type: 'default',
-          ...(sourceHandle ? { sourceHandle } : {}),
-          ...(targetHandle ? { targetHandle } : {}),
-        };
-        get().addEdge(newEdge);
-      },
-      setTheme: (theme) => set({ theme }),
-      toggleDarkMode: () =>
-        set((state) => ({
-          colorMode: state.colorMode === 'dark' ? 'light' : 'dark',
-        })),
-      setColorMode: (colorMode) => set({ colorMode }),
+    setColorMode: (colorMode) => set({ colorMode }),
 
-      onNodeDragStart: (_, __, nodes) => {
-        set({ draggedNodes: new Map(nodes.map((node) => [node.id, node])) });
-      },
-      onNodeDragStop: () => {
-        set({ draggedNodes: new Map() });
-      },
-      updateNodeData: (nodeId, updates) => {
-        set((state) => {
-          const updatedNodes = state.nodes.map((node) =>
-            node.id === nodeId
-              ? { ...node, data: { ...node.data, ...updates } }
-              : node
-          );
+    onNodeDragStart: (_, __, nodes) =>
+      set({ draggedNodes: new Map(nodes.map((node) => [node.id, node])) }),
 
-          return { nodes: updatedNodes };
-        });
-      },
-    }))
-  );
+    onNodeDragStop: () => set({ draggedNodes: new Map() }),
 
-  store.subscribe(
-    (state) => state.colorMode,
-    async (colorMode: ColorMode) => {
-      document
-        .querySelector('html')
-        ?.classList.toggle('dark', colorMode === 'dark');
-    }
-  );
+    updateNodeData: (nodeId, updates) =>
+      set((state) => ({
+        nodes: state.nodes.map((node) =>
+          node.id === nodeId
+            ? { ...node, data: { ...node.data, ...updates } }
+            : node
+        ),
+      })),
+  }))
+);
 
-  return store;
-};
+useAppStore.subscribe(
+  (state) => state.colorMode,
+  (colorMode: ColorMode) => {
+    document.querySelector('html')?.classList.toggle('dark', colorMode === 'dark');
+  }
+);

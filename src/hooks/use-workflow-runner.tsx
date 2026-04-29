@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import { generateOutput } from '@/lib/strudel';
 // @ts-expect-error - Missing type declarations for @strudel/web
 import { evaluate, hush } from '@strudel/web';

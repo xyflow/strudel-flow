@@ -2,7 +2,7 @@
  * Hook to load workflow state from URL parameters
  */
 import { useEffect } from 'react';
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import { loadFromUrl } from '@/lib/project-state';
 import { AppNode } from '@/components/nodes';
 import { useStrudelStore } from '@/store/strudel-store';
