@@ -90,8 +90,9 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
   };
 
   const handleInstrumentChange = (rowIndex: number, instrument: string) => {
-    const newRows = [...rows];
-    newRows[rowIndex].instrument = instrument;
+    const newRows = rows.map((row, i) =>
+      i === rowIndex ? { ...row, instrument } : row
+    );
     updateNodeData(id, { rows: newRows });
   };
 

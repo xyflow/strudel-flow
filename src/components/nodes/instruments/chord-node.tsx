@@ -176,10 +176,6 @@ ChordNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const notes = chords.join(' ');
   const scale = `${selectedKey}${octave}:${scaleType}`;
 
-  const calls = [];
-  calls.push(`n("${notes}")`);
-  if (scale) calls.push(`scale("${scale}")`);
-
-  const notePattern = calls.join('.');
+  const notePattern = `n("${notes}").scale("${scale}")`;
   return strudelString ? `${strudelString}.${notePattern}` : notePattern;
 };

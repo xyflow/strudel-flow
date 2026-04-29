@@ -3,107 +3,54 @@ import { WorkflowNodeProps, AppNode } from '..';
 import { useAppStore } from '@/store/app-store';
 import { Slider } from '@/components/ui/slider';
 
+const ROOM_PARAMS = [
+  { key: 'room', label: 'Room', min: 0, max: 1, step: 0.01, default: 0 },
+  { key: 'roomsize', label: 'Size', min: 0, max: 10, step: 0.1, default: 1 },
+  { key: 'roomfade', label: 'Fade', min: 0, max: 10, step: 0.1, default: 0.5 },
+  { key: 'roomlp', label: 'Lowpass', min: 0, max: 20000, step: 100, default: 10000 },
+  { key: 'roomdim', label: 'Dimension', min: 0, max: 20000, step: 100, default: 8000 },
+] as const;
+
 export function RoomNode({ id, data }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Extract values or set defaults
-  const room = data.room ? parseFloat(data.room) : 0;
-  const roomsize = data.roomsize ? parseFloat(data.roomsize) : 1;
-  const roomfade = data.roomfade ? parseFloat(data.roomfade) : 0.5;
-  const roomlp = data.roomlp ? parseFloat(data.roomlp) : 10000;
-  const roomdim = data.roomdim ? parseFloat(data.roomdim) : 8000;
-
-  // Handlers for each property
-  const handleSliderChange = (key: string, value: number[]) => {
-    updateNodeData(id, { [key]: value[0].toFixed(2) });
-  };
-
   return (
     <WorkflowNode id={id} data={data}>
-      <div className="flex flex-col gap-4 p-3">
-        <label className="text-sm font-medium">Room Value</label>
-        <Slider
-          value={[room]}
-          onValueChange={(value) => handleSliderChange('room', value)}
-          min={0}
-          max={1}
-          step={0.01}
-          className="w-full"
-        />
-        <div className="text-xs text-muted-foreground mt-1">
-          Current room: <strong>{room.toFixed(2)}</strong>
-        </div>
-
-        <label className="text-sm font-medium">Room Size</label>
-        <Slider
-          value={[roomsize]}
-          onValueChange={(value) => handleSliderChange('roomsize', value)}
-          min={0}
-          max={10}
-          step={0.1}
-          className="w-full"
-        />
-        <div className="text-xs text-muted-foreground mt-1">
-          Current room size: <strong>{roomsize.toFixed(1)}</strong>
-        </div>
-
-        <label className="text-sm font-medium">Room Fade</label>
-        <Slider
-          value={[roomfade]}
-          onValueChange={(value) => handleSliderChange('roomfade', value)}
-          min={0}
-          max={10}
-          step={0.1}
-          className="w-full"
-        />
-        <div className="text-xs text-muted-foreground mt-1">
-          Current room fade: <strong>{roomfade.toFixed(1)}</strong>
-        </div>
-
-        <label className="text-sm font-medium">Room Lowpass</label>
-        <Slider
-          value={[roomlp]}
-          onValueChange={(value) => handleSliderChange('roomlp', value)}
-          min={0}
-          max={20000}
-          step={100}
-          className="w-full"
-        />
-        <div className="text-xs text-muted-foreground mt-1">
-          Current room lowpass: <strong>{roomlp}</strong> Hz
-        </div>
-
-        <label className="text-sm font-medium">Room Dimension</label>
-        <Slider
-          value={[roomdim]}
-          onValueChange={(value) => handleSliderChange('roomdim', value)}
-          min={0}
-          max={20000}
-          step={100}
-          className="w-full"
-        />
-        <div className="text-xs text-muted-foreground mt-1">
-          Current room dimension: <strong>{roomdim}</strong> Hz
-        </div>
+      <div className="flex flex-col gap-4 p-3 min-w-80">
+        {ROOM_PARAMS.map(({ key, label, min, max, step, default: def }) => {
+          const value = data[key] ? parseFloat(data[key] as string) : def;
+          return (
+            <div key={key} className="flex flex-col gap-1">
+              <div className="flex justify-between">
+                <label className="text-sm font-medium">{label}</label>
+                <span className="text-xs text-muted-foreground">{value}</span>
+              </div>
+              <Slider
+                value={[value]}
+                onValueChange={([v]) => updateNodeData(id, { [key]: v.toFixed(2) })}
+                min={min}
+                max={max}
+                step={step}
+                className="w-full"
+              />
+            </div>
+          );
+        })}
       </div>
     </WorkflowNode>
   );
 }
 
 RoomNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const room = node.data.room;
-  const roomsize = node.data.roomsize;
-  const roomfade = node.data.roomfade;
-  const roomlp = node.data.roomlp;
-  const roomdim = node.data.roomdim;
+  const { data } = node;
 
-  const calls = [];
-
-  if (room) calls.push(`room("${room}")`);
-  if (roomsize) calls.push(`rsize(${roomsize})`);
-  if (roomfade) calls.push(`rfade(${roomfade})`);
-  if (roomlp) calls.push(`rlp(${roomlp})`);
-  if (roomdim) calls.push(`rdim(${roomdim})`);
+  const calls = [
+    data.room && `room("${data.room}")`,
+    data.roomsize && `rsize(${data.roomsize})`,
+    data.roomfade && `rfade(${data.roomfade})`,
+    data.roomlp && `rlp(${data.roomlp})`,
+    data.roomdim && `rdim(${data.roomdim})`,
+  ].filter(Boolean);
 
   if (calls.length === 0) return strudelString;
 
