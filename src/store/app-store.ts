@@ -7,13 +7,11 @@ import {
   ColorMode,
   OnConnect,
   OnEdgesChange,
-  OnNodeDrag,
   OnNodesChange,
-  XYPosition,
   Edge,
 } from '@xyflow/react';
 
-import { AppNode, AppNodeType, createNodeByType } from '@/components/nodes';
+import { AppNode } from '@/components/nodes';
 import { initialEdges, initialNodes } from '@/data/workflow-data';
 
 export type AppState = {
@@ -21,21 +19,6 @@ export type AppState = {
   edges: Edge[];
   colorMode: ColorMode;
   theme: string;
-  draggedNodes: Map<string, AppNode>;
-  connectionSites: Map<string, PotentialConnection>;
-};
-
-export type PotentialConnection = {
-  id: string;
-  position: XYPosition;
-  type?: 'source' | 'target';
-  source?: ConnectionHandle;
-  target?: ConnectionHandle;
-};
-
-export type ConnectionHandle = {
-  node: string;
-  handle?: string | null;
 };
 
 export type AppActions = {
@@ -45,18 +28,11 @@ export type AppActions = {
   setNodes: (nodes: AppNode[]) => void;
   addNode: (node: AppNode) => void;
   removeNode: (nodeId: string) => void;
-  addNodeByType: (type: AppNodeType, position: XYPosition) => null | string;
   updateNodeData: (nodeId: string, updates: Record<string, unknown>) => void;
-  getNodes: () => AppNode[];
   setEdges: (edges: Edge[]) => void;
-  getEdges: () => Edge[];
-  addEdge: (edge: Edge) => void;
-  removeEdge: (edgeId: string) => void;
   onConnect: OnConnect;
   setTheme: (theme: string) => void;
   onEdgesChange: OnEdgesChange<Edge>;
-  onNodeDragStart: OnNodeDrag<AppNode>;
-  onNodeDragStop: OnNodeDrag<AppNode>;
 };
 
 export type AppStore = AppState & AppActions;
@@ -67,8 +43,6 @@ export const useAppStore = create<AppStore>()(
     edges: initialEdges,
     colorMode: 'light',
     theme: 'supabase',
-    draggedNodes: new Map(),
-    connectionSites: new Map(),
 
     onNodesChange: async (changes) => {
       set({ nodes: applyNodeChanges(changes, get().nodes) });
@@ -81,23 +55,7 @@ export const useAppStore = create<AppStore>()(
     removeNode: (nodeId) =>
       set({ nodes: get().nodes.filter((node) => node.id !== nodeId) }),
 
-    addNodeByType: (type, position) => {
-      const newNode = createNodeByType({ type, position });
-      if (!newNode) return null;
-      get().addNode(newNode);
-      return newNode.id;
-    },
-
-    getNodes: () => get().nodes,
-
     setEdges: (edges) => set({ edges }),
-
-    getEdges: () => get().edges,
-
-    addEdge: (edge) => set({ edges: addEdge(edge, get().edges) }),
-
-    removeEdge: (edgeId) =>
-      set({ edges: get().edges.filter((edge) => edge.id !== edgeId) }),
 
     onEdgesChange: (changes) =>
       set({ edges: applyEdgeChanges(changes, get().edges) }),
@@ -105,13 +63,18 @@ export const useAppStore = create<AppStore>()(
     onConnect: (connection) => {
       if (connection.source === connection.target) return;
       const { source, target, sourceHandle, targetHandle } = connection;
-      get().addEdge({
-        id: `${source}-${target}`,
-        source,
-        target,
-        type: 'default',
-        ...(sourceHandle ? { sourceHandle } : {}),
-        ...(targetHandle ? { targetHandle } : {}),
+      set({
+        edges: addEdge(
+          {
+            id: `${source}-${target}`,
+            source,
+            target,
+            type: 'default',
+            ...(sourceHandle ? { sourceHandle } : {}),
+            ...(targetHandle ? { targetHandle } : {}),
+          },
+          get().edges
+        ),
       });
     },
 
@@ -123,11 +86,6 @@ export const useAppStore = create<AppStore>()(
       })),
 
     setColorMode: (colorMode) => set({ colorMode }),
-
-    onNodeDragStart: (_, __, nodes) =>
-      set({ draggedNodes: new Map(nodes.map((node) => [node.id, node])) }),
-
-    onNodeDragStop: () => set({ draggedNodes: new Map() }),
 
     updateNodeData: (nodeId, updates) =>
       set((state) => ({

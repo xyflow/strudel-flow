@@ -15,7 +15,6 @@ import { iconMapping } from '@/data/icon-mapping';
 import { BaseNode } from '@/components/base-node';
 import { useAppStore } from '@/store/app-store';
 import PatternPopup from '@/components/pattern-popup';
-import { useStrudelStore } from '@/store/strudel-store';
 import { BaseHandle } from '@/components/base-handle';
 import { Position } from '@xyflow/react';
 import { findConnectedComponents } from '@/lib/graph-utils';
@@ -31,8 +30,6 @@ function WorkflowNode({
   type?: AppNodeType;
   children?: React.ReactNode;
 }) {
-  useStrudelStore((s) => s.pattern);
-
   const { runWorkflow } = useWorkflowRunner();
   const [show, setShow] = useState(false);
 
