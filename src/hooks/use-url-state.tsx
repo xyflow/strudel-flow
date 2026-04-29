@@ -21,15 +21,6 @@ export function useUrlStateLoader() {
     const urlState = loadFromUrl();
 
     if (urlState) {
-      console.log('🔄 Loading state from URL:', {
-        theme: urlState.theme,
-        colorMode: urlState.colorMode,
-        nodeCount: urlState.nodes.length,
-        edgeCount: urlState.edges.length,
-        cpm: urlState.cpm,
-        bpc: urlState.bpc,
-      });
-
       // Restore theme settings FIRST to ensure CSS loads before nodes render
       if (urlState.theme) {
         setTheme(urlState.theme);

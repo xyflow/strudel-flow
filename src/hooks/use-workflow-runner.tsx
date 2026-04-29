@@ -17,12 +17,11 @@ export function useWorkflowRunner() {
   const nodes = useAppStore((state) => state.nodes);
   const edges = useAppStore((state) => state.edges);
 
-  // Memoize pattern generation to avoid unnecessary recalculations
-  // Include cpm and bpc as dependencies so pattern regenerates when tempo changes
-  const generatedPattern = useMemo(() => {
-    return generateOutput(nodes, edges, cpm, bpc);
-  }, [nodes, edges, cpm, bpc]);
-  // Update pattern when graph changes
+  const generatedPattern = useMemo(
+    () => generateOutput(nodes, edges, cpm, bpc),
+    [nodes, edges, cpm, bpc]
+  );
+
   useEffect(() => {
     setPattern(generatedPattern);
   }, [generatedPattern, setPattern]);
@@ -34,35 +33,13 @@ export function useWorkflowRunner() {
       .join('\n');
   }, []);
 
-  // Smart pattern comparison - only evaluate if pattern actually changed
-  const shouldEvaluatePattern = useCallback(
-    (newPattern: string) => {
-      const activePattern = getActivePattern(newPattern);
-      const hasContent = activePattern
-        .replace(/setcpm\([^)]+\)\s*/g, '')
-        .trim();
-
-      // Don't evaluate if no content
-      if (!hasContent) return false;
-
-      // Don't evaluate if pattern hasn't changed
-      if (activePattern === lastEvaluatedPattern.current) return false;
-
-      return true;
-    },
-    [getActivePattern]
-  );
-
   const evaluatePattern = useCallback(
     (patternToEvaluate: string) => {
       const activePattern = getActivePattern(patternToEvaluate);
-      const hasContent = activePattern
-        .replace(/setcpm\([^)]+\)\s*/g, '')
-        .trim();
+      const hasContent = activePattern.replace(/setcpm\([^)]+\)\s*/g, '').trim();
 
       if (!hasContent) {
         if (isRunning.current) {
-          console.log('No active pattern - hushing');
           hush();
           isRunning.current = false;
         }
@@ -70,12 +47,8 @@ export function useWorkflowRunner() {
         return;
       }
 
-      // Skip if pattern hasn't actually changed
-      if (activePattern === lastEvaluatedPattern.current) {
-        return;
-      }
+      if (activePattern === lastEvaluatedPattern.current) return;
 
-      console.log('Evaluating new pattern:', activePattern);
       isRunning.current = true;
       lastEvaluatedPattern.current = activePattern;
 
@@ -97,37 +70,28 @@ export function useWorkflowRunner() {
     [getActivePattern]
   );
 
-  // Debounced evaluation to batch rapid changes
   const debouncedEvaluate = useCallback(
     (patternToEvaluate: string) => {
-      // Clear any existing debounce timer
       if (debounceTimerId.current !== null) {
         window.clearTimeout(debounceTimerId.current);
       }
 
-      // For immediate changes (tempo, key changes), evaluate right away
-      const isImmediateChange =
-        patternToEvaluate.includes('setcpm(') ||
-        patternToEvaluate.includes('scale(');
-
-      if (isImmediateChange) {
+      // Tempo and scale changes evaluate immediately; everything else is debounced
+      if (patternToEvaluate.includes('setcpm(') || patternToEvaluate.includes('scale(')) {
         evaluatePattern(patternToEvaluate);
         return;
       }
 
-      // For other changes, debounce to batch rapid UI interactions
       debounceTimerId.current = window.setTimeout(() => {
         evaluatePattern(patternToEvaluate);
         debounceTimerId.current = null;
-      }, 50); // 50ms debounce for UI interactions
+      }, 50);
     },
     [evaluatePattern]
   );
 
-  // Event-driven pattern evaluation - only when pattern actually changes
   useEffect(() => {
-    if (!pattern || !pattern.trim()) {
-      // Clear timers and hush if pattern is empty
+    if (!pattern?.trim()) {
       if (debounceTimerId.current !== null) {
         window.clearTimeout(debounceTimerId.current);
         debounceTimerId.current = null;
@@ -140,16 +104,12 @@ export function useWorkflowRunner() {
       return;
     }
 
-    // Only evaluate if the pattern should actually change
-    if (shouldEvaluatePattern(pattern)) {
-      debouncedEvaluate(pattern);
-    }
-  }, [pattern, shouldEvaluatePattern, debouncedEvaluate]);
+    debouncedEvaluate(pattern);
+  }, [pattern, debouncedEvaluate]);
 
   return {
     runWorkflow: () => debouncedEvaluate(pattern),
     stopWorkflow: () => {
-      console.log('Stopping workflow...');
       if (debounceTimerId.current !== null) {
         window.clearTimeout(debounceTimerId.current);
         debounceTimerId.current = null;
