@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppStore } from '@/store/app-context';
 import { useStrudelStore } from '@/store/strudel-store';
-
-import { generateShareableUrl } from '@/lib/state-serialization';
+import { getShareUrl } from '@/lib/project-state';
 
 export function ShareUrlPopover() {
   const [isCopied, setIsCopied] = useState(false);
@@ -19,36 +18,17 @@ export function ShareUrlPopover() {
   const { nodes, edges, theme, colorMode } = useAppStore((state) => state);
   const { cpm, bpc } = useStrudelStore((state) => state);
 
+  const displayUrl = getShareUrl({ nodes, edges, theme, colorMode, cpm, bpc });
+
   const handleCopyUrl = async () => {
     try {
-      const shareableUrl = generateShareableUrl(
-        nodes,
-        edges,
-        theme,
-        colorMode,
-        cpm,
-        bpc
-      );
-      await navigator.clipboard.writeText(shareableUrl);
+      await navigator.clipboard.writeText(displayUrl);
       setIsCopied(true);
-
-      // Reset the copied state after 2 seconds
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
+      setTimeout(() => setIsCopied(false), 2000);
     } catch (error) {
       console.error('Failed to copy URL:', error);
     }
   };
-
-  const displayUrl = generateShareableUrl(
-    nodes,
-    edges,
-    theme,
-    colorMode,
-    cpm,
-    bpc
-  );
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>

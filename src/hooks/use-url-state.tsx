@@ -3,7 +3,7 @@
  */
 import { useEffect } from 'react';
 import { useAppStore } from '@/store/app-context';
-import { loadStateFromUrl } from '@/lib/state-serialization';
+import { loadFromUrl } from '@/lib/project-state';
 import { AppNode } from '@/components/nodes';
 import { useStrudelStore } from '@/store/strudel-store';
 
@@ -18,7 +18,7 @@ export function useUrlStateLoader() {
   const setBpc = useStrudelStore((state) => state.setBpc);
 
   useEffect(() => {
-    const urlState = loadStateFromUrl();
+    const urlState = loadFromUrl();
 
     if (urlState) {
       console.log('🔄 Loading state from URL:', {
