@@ -1,14 +1,14 @@
 import {
   Select,
   SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import { WorkflowNodeProps, AppNode } from '..';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { SOUND_OPTIONS } from '@/data/sound-options';
+import { SYNTH_CATEGORIES } from '@/data/sounds';
+import { CategorySelectItems } from '@/components/category-select-items';
 
 export function SynthSelectNode({ id, data }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
@@ -26,11 +26,7 @@ export function SynthSelectNode({ id, data }: WorkflowNodeProps) {
             <SelectValue placeholder="Select Sample" />
           </SelectTrigger>
           <SelectContent>
-            {SOUND_OPTIONS.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
-            ))}
+            <CategorySelectItems categories={SYNTH_CATEGORIES} />
           </SelectContent>
         </Select>
       </div>

@@ -13,7 +13,7 @@ export const useStrudelStore = create<StrudelStore>((set) => ({
   pattern: '',
   cpm: '120',
   bpc: '4',
-  setPattern: (pattern: string) => set({ pattern: pattern }),
-  setCpm: (cpm: string) => set({ cpm: cpm }),
-  setBpc: (bpc: string) => set({ bpc: bpc }),
+  setPattern: (pattern) => set({ pattern }),
+  setCpm: (cpm) => set({ cpm }),
+  setBpc: (bpc) => set({ bpc }),
 }));

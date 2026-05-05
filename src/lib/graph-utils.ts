@@ -1,13 +1,6 @@
-/**
- * Utilities for working with workflow graphs and node connections
- */
-
 import { Edge } from '@xyflow/react';
 import { AppNode } from '@/components/nodes';
 
-/**
- * Find connected components in the graph
- */
 export function findConnectedComponents(
   nodes: AppNode[],
   edges: Edge[]
@@ -28,10 +21,7 @@ export function findConnectedComponents(
   return components;
 }
 
-/**
- * Depth-first search to find connected nodes
- */
-export function dfs(
+function dfs(
   nodeId: string,
   visited: Set<string>,
   component: string[],

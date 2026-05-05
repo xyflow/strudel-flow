@@ -2,17 +2,21 @@ import { Background, ReactFlow } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { nodeTypes } from '@/components/nodes';
-import { edgeTypes } from '@/components/edges';
-import { useAppStore } from '@/store/app-context';
+import deleteEdge from '@/components/delete-edge';
+import { useAppStore } from '@/store/app-store';
 import { WorkflowControls } from './controls';
-import { useDragAndDrop } from './useDragAndDrop';
+import { useDragAndDrop } from '@/hooks/use-drag-and-drop';
 import { useUrlStateLoader } from '@/hooks/use-url-state';
 import { useGlobalPlayback } from '@/hooks/use-global-playback';
 import { useThemeCss } from '@/hooks/use-theme-css';
 
 export default function Workflow() {
   useUrlStateLoader();
-  useGlobalPlayback(); // Enable global spacebar pause/play
+  useGlobalPlayback();
+
+  const edgeTypes = {
+    default: deleteEdge,
+  };
 
   const {
     nodes,
@@ -22,8 +26,6 @@ export default function Workflow() {
     onNodesChange,
     onEdgesChange,
     onConnect,
-    onNodeDragStart,
-    onNodeDragStop,
   } = useAppStore(
     useShallow((state) => ({
       nodes: state.nodes,
@@ -33,9 +35,7 @@ export default function Workflow() {
       onNodesChange: state.onNodesChange,
       onEdgesChange: state.onEdgesChange,
       onConnect: state.onConnect,
-      onNodeDragStart: state.onNodeDragStart,
-      onNodeDragStop: state.onNodeDragStop,
-    }))
+    })),
   );
 
   // Load theme CSS at the app level - fixes mobile color loading
@@ -56,8 +56,6 @@ export default function Workflow() {
         onDragOver={onDragOver}
         onDrop={onDrop}
         nodeDragThreshold={30}
-        onNodeDragStart={onNodeDragStart}
-        onNodeDragStop={onNodeDragStop}
         colorMode={colorMode}
         fitView
       >

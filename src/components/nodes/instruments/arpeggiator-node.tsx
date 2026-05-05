@@ -1,6 +1,6 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import { AccordionControls } from '@/components/accordion-controls';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';

@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { KEY_OPTIONS, SCALE_TYPE_OPTIONS } from '@/data/sound-options';
+import { KEY_OPTIONS, SCALE_TYPE_OPTIONS } from '@/data/sounds';
 
 export interface KeyScaleOctaveControlsProps {
   selectedKey: string;
@@ -42,7 +42,7 @@ export interface PadControlsProps {
 export interface ChordControlsProps {
   chordComplexity: 'triad' | 'seventh' | 'ninth' | 'eleventh';
   onChordComplexityChange: (
-    complexity: 'triad' | 'seventh' | 'ninth' | 'eleventh'
+    complexity: 'triad' | 'seventh' | 'ninth' | 'eleventh',
   ) => void;
 }
 
@@ -87,7 +87,7 @@ function KeyScaleOctaveControls({
             <SelectContent>
               {SCALE_TYPE_OPTIONS.filter(
                 (scaleType) =>
-                  !allowedScales || allowedScales.includes(scaleType.value)
+                  !allowedScales || allowedScales.includes(scaleType.value),
               ).map((scaleType) => (
                 <SelectItem key={scaleType.value} value={scaleType.value}>
                   {scaleType.label}
@@ -171,7 +171,7 @@ function PadControls({
         </Button>
       </div>
       {Object.keys(noteGroups).some(
-        (stepIdx) => noteGroups[parseInt(stepIdx)].length > 0
+        (stepIdx) => noteGroups[parseInt(stepIdx)].length > 0,
       ) && (
         <Button
           variant="outline"
