@@ -29,13 +29,10 @@ import nodesConfig, {
 } from '@/components/nodes';
 import { cn } from '@/lib/utils';
 import { iconMapping } from '@/data/icon-mapping';
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import { useShallow } from 'zustand/react/shallow';
 import { type AppStore } from '@/store/app-store';
-import {
-  saveStateToFile,
-  deserializeStateFromFile,
-} from '@/lib/state-serialization';
+import { downloadState, stateFromJson } from '@/lib/project-state';
 import { useStrudelStore } from '@/store/strudel-store';
 
 export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
@@ -75,15 +72,7 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
   const [saveFilename, setSaveFilename] = useState('strudel-flow-project.json');
 
   const handleSave = () => {
-    saveStateToFile(
-      nodes,
-      edges,
-      theme,
-      colorMode,
-      cpm,
-      bpc,
-      saveFilename
-    );
+    downloadState({ nodes, edges, theme, colorMode, cpm, bpc }, saveFilename);
     setIsSaveDialogOpen(false);
   };
 
@@ -93,7 +82,7 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = e.target?.result as string;
-        const state = deserializeStateFromFile(content);
+        const state = stateFromJson(content);
         if (state) {
           const nodes = (state.nodes as AppNode[]).map((node) => ({
             ...node,

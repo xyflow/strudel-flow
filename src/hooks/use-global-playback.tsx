@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import { useWorkflowRunner } from './use-workflow-runner';
 // @ts-expect-error - Missing type declarations for @strudel/web
 import { hush } from '@strudel/web';

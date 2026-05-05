@@ -3,7 +3,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { nodeTypes } from '@/components/nodes';
 import deleteEdge from '@/components/delete-edge';
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import { WorkflowControls } from './controls';
 import { useDragAndDrop } from '@/hooks/use-drag-and-drop';
 import { useUrlStateLoader } from '@/hooks/use-url-state';
@@ -26,8 +26,6 @@ export default function Workflow() {
     onNodesChange,
     onEdgesChange,
     onConnect,
-    onNodeDragStart,
-    onNodeDragStop,
   } = useAppStore(
     useShallow((state) => ({
       nodes: state.nodes,
@@ -37,8 +35,6 @@ export default function Workflow() {
       onNodesChange: state.onNodesChange,
       onEdgesChange: state.onEdgesChange,
       onConnect: state.onConnect,
-      onNodeDragStart: state.onNodeDragStart,
-      onNodeDragStop: state.onNodeDragStop,
     })),
   );
 
@@ -60,8 +56,6 @@ export default function Workflow() {
         onDragOver={onDragOver}
         onDrop={onDrop}
         nodeDragThreshold={30}
-        onNodeDragStart={onNodeDragStart}
-        onNodeDragStop={onNodeDragStop}
         colorMode={colorMode}
         fitView
       >

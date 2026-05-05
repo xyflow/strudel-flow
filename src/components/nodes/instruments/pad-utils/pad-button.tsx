@@ -12,6 +12,7 @@ interface PadButtonProps {
     noteIdx: number,
     event?: React.MouseEvent
   ) => void;
+  className?: string;
 }
 
 export const PadButton: React.FC<PadButtonProps> = ({
@@ -21,6 +22,7 @@ export const PadButton: React.FC<PadButtonProps> = ({
   isSelected,
   noteGroups,
   toggleCell,
+  className = '',
 }) => {
   const groupIndex = getButtonGroupIndex(stepIdx, noteIdx, noteGroups);
   const isInGroup = groupIndex >= 0;
@@ -30,15 +32,13 @@ export const PadButton: React.FC<PadButtonProps> = ({
     isInGroup,
     groupIndex,
     on
-  )} w-12 h-10`;
+  )} w-12 h-10 ${className}`;
 
   return (
     <button
       className={buttonClass}
       onPointerDown={(event) => toggleCell(stepIdx, noteIdx, event)}
       title={`Note ${noteIdx + 1}, Step ${stepIdx + 1}`}
-    >
-      {/* No modifier text - just a clean button */}
-    </button>
+    />
   );
 };

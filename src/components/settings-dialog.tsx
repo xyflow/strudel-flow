@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import { useThemeCss } from '@/hooks/use-theme-css';
 
 // Theme configurations with colors and descriptions
