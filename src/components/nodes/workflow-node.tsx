@@ -13,9 +13,8 @@ import nodesConfig from '@/components/nodes/';
 import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
 import { iconMapping } from '@/data/icon-mapping';
 import { BaseNode } from '@/components/base-node';
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import PatternPopup from '@/components/pattern-popup';
-import { useStrudelStore } from '@/store/strudel-store';
 import { BaseHandle } from '@/components/base-handle';
 import { Position } from '@xyflow/react';
 import { findConnectedComponents } from '@/lib/graph-utils';
@@ -31,9 +30,7 @@ function WorkflowNode({
   type?: AppNodeType;
   children?: React.ReactNode;
 }) {
-  useStrudelStore((s) => s.pattern);
-
-  const { runWorkflow } = useWorkflowRunner();
+  const { forceEvaluate } = useWorkflowRunner();
   const [show, setShow] = useState(false);
 
   const { removeNode, edges, nodes, updateNodeData } = useAppStore(
@@ -63,15 +60,15 @@ function WorkflowNode({
     connectedNodeIds.forEach((nodeId) => {
       updateNodeData(nodeId, { state: 'running' });
     });
-    runWorkflow();
-  }, [runWorkflow, connectedNodeIds, updateNodeData]);
+    forceEvaluate();
+  }, [forceEvaluate, connectedNodeIds, updateNodeData]);
 
   const onPause = useCallback(() => {
-    // Pause this specific group
     connectedNodeIds.forEach((nodeId) => {
       updateNodeData(nodeId, { state: 'paused' });
     });
-  }, [connectedNodeIds, updateNodeData]);
+    forceEvaluate();
+  }, [forceEvaluate, connectedNodeIds, updateNodeData]);
 
   const onDelete = useCallback(() => {
     removeNode(id);

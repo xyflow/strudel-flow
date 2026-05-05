@@ -1,34 +1,54 @@
-export const DRUM_OPTIONS = [
-  'bd',
-  'sd',
-  'hh',
-  'cp',
-  'kicklinn',
-  'clubkick',
-  'hardkick',
-  'popkick',
-  'reverbkick',
-  'clak',
-  'click',
-  'drum',
-  'drumtraks',
-  'dr',
-  'dr2',
-  'dr55',
-  'dr_few',
-  'electro1',
-  'gretsch',
-  'hardcore',
-  'house',
-  'ifdrums',
-  'jungle',
-  'linnhats',
-  'realclaps',
-  'stomp',
-  'tabla',
-  'tabla2',
-  'tablex',
+export interface SoundCategory {
+  label: string;
+  options: string[];
+}
+
+// --- Drum Sounds ---
+
+export const DRUM_CATEGORIES: SoundCategory[] = [
+  {
+    label: 'Kicks',
+    options: [
+      'bd',
+      'kicklinn',
+      'clubkick',
+      'hardkick',
+      'popkick',
+      'reverbkick',
+    ],
+  },
+  {
+    label: 'Snares',
+    options: [
+      'sd',
+      'dr_few',
+      'drum',
+      'drumtraks',
+      'electro1',
+      'hardcore',
+      'house',
+      'ifdrums',
+      'jungle',
+      'gretsch',
+    ],
+  },
+  {
+    label: 'Hi-Hats',
+    options: ['hh', 'linnhats', 'dr', 'dr2', 'dr55'],
+  },
+  {
+    label: 'Claps',
+    options: ['cp', 'realclaps'],
+  },
+  {
+    label: 'Percussion',
+    options: ['clak', 'click', 'stomp', 'tabla', 'tabla2', 'tablex'],
+  },
 ];
+
+export const DRUM_OPTIONS = DRUM_CATEGORIES.flatMap((cat) => cat.options);
+
+// --- All Sounds ---
 
 export const SOUND_OPTIONS = [
   'ab',
@@ -184,6 +204,61 @@ export const SOUND_OPTIONS = [
   'sundance',
   'tacscan',
 ];
+
+// --- Synth / Sample Categories ---
+
+const _synthCategorized = [
+  {
+    label: 'Bass',
+    options: [
+      'bass',
+      'bass0',
+      'bass1',
+      'bass2',
+      'bass3',
+      'bassdm',
+      'bassfoo',
+      'jungbass',
+      'jvbass',
+      'moog',
+    ],
+  },
+  {
+    label: 'Leads',
+    options: [
+      'tri',
+      'square',
+      'arp',
+      'arpy',
+      'lead',
+      'hoover',
+      'juno',
+      'saw',
+      'stab',
+      'simplesine',
+      'sine',
+      'pluck',
+    ],
+  },
+  {
+    label: 'Pads',
+    options: ['pad', 'padlong', 'space', 'newnotes', 'notes'],
+  },
+];
+
+const _categorizedSynthSounds = new Set(
+  _synthCategorized.flatMap((cat) => cat.options),
+);
+
+export const SYNTH_CATEGORIES = [
+  ..._synthCategorized,
+  {
+    label: 'FX & Other',
+    options: SOUND_OPTIONS.filter((s) => !_categorizedSynthSounds.has(s)),
+  },
+];
+
+// --- Musical Options ---
 
 export const KEY_OPTIONS = [
   { value: 'C', label: 'C' },

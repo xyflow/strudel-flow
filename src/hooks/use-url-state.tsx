@@ -2,8 +2,8 @@
  * Hook to load workflow state from URL parameters
  */
 import { useEffect } from 'react';
-import { useAppStore } from '@/store/app-context';
-import { loadStateFromUrl } from '@/lib/state-serialization';
+import { useAppStore } from '@/store/app-store';
+import { loadFromUrl } from '@/lib/project-state';
 import { AppNode } from '@/components/nodes';
 import { useStrudelStore } from '@/store/strudel-store';
 
@@ -18,18 +18,9 @@ export function useUrlStateLoader() {
   const setBpc = useStrudelStore((state) => state.setBpc);
 
   useEffect(() => {
-    const urlState = loadStateFromUrl();
+    const urlState = loadFromUrl();
 
     if (urlState) {
-      console.log('🔄 Loading state from URL:', {
-        theme: urlState.theme,
-        colorMode: urlState.colorMode,
-        nodeCount: urlState.nodes.length,
-        edgeCount: urlState.edges.length,
-        cpm: urlState.cpm,
-        bpc: urlState.bpc,
-      });
-
       // Restore theme settings FIRST to ensure CSS loads before nodes render
       if (urlState.theme) {
         setTheme(urlState.theme);

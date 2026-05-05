@@ -1,97 +1,29 @@
-import { useAppStore } from '@/store/app-context';
+import { useAppStore } from '@/store/app-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { Button } from '@/components/ui/button';
 
 const MASK_PATTERNS = [
-  {
-    id: 'quarter',
-    label: '1/4',
-    pattern: '1 0 0 0',
-    description: 'Every 4th step',
-  },
+  { id: 'quarter', label: '1/4', pattern: '1 0 0 0', description: 'Every 4th step' },
   { id: 'half', label: '1/2', pattern: '1 0', description: 'Every 2nd step' },
-  {
-    id: 'alternate',
-    label: 'Alt',
-    pattern: '1 0 1 0',
-    description: 'Alternating',
-  },
-  {
-    id: 'syncopated',
-    label: 'Sync',
-    pattern: '0 1 0 1',
-    description: 'Off-beat',
-  },
-  {
-    id: 'triplet',
-    label: '3/4',
-    pattern: '1 1 1 0',
-    description: 'Triplet feel',
-  },
-  {
-    id: 'complex',
-    label: 'Comp',
-    pattern: '1 0 1 1 0 0 1 0',
-    description: 'Complex pattern',
-  },
+  { id: 'alternate', label: 'Alt', pattern: '1 0 1 0', description: 'Alternating' },
+  { id: 'syncopated', label: 'Sync', pattern: '0 1 0 1', description: 'Off-beat' },
+  { id: 'triplet', label: '3/4', pattern: '1 1 1 0', description: 'Triplet feel' },
+  { id: 'complex', label: 'Comp', pattern: '1 0 1 1 0 0 1 0', description: 'Complex pattern' },
 ];
 
 const PROBABILITY_OPTIONS = [
-  {
-    id: 'always',
-    label: 'Always',
-    probability: '1',
-    description: 'Always apply',
-  },
-  {
-    id: 'often',
-    label: 'Often',
-    probability: '0.8',
-    description: '80% chance',
-  },
-  {
-    id: 'sometimes',
-    label: 'Sometimes',
-    probability: '0.5',
-    description: '50% chance',
-  },
-  {
-    id: 'rarely',
-    label: 'Rarely',
-    probability: '0.2',
-    description: '20% chance',
-  },
+  { id: 'always', label: 'Always', probability: '1', description: 'Always apply' },
+  { id: 'often', label: 'Often', probability: '0.8', description: '80% chance' },
+  { id: 'sometimes', label: 'Sometimes', probability: '0.5', description: '50% chance' },
+  { id: 'rarely', label: 'Rarely', probability: '0.2', description: '20% chance' },
 ];
 
 export function MaskNode({ id, data }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Read current values from node.data
   const selectedPattern = data.maskPatternId || 'half';
   const selectedProbability = data.maskProbabilityId || 'always';
-
-  const handlePatternChange = (patternId: string) => {
-    const patternData = MASK_PATTERNS.find((p) => p.id === patternId);
-    if (patternData) {
-      updateNodeData(id, {
-        maskPatternId: patternId,
-        maskPattern: patternData.pattern,
-      });
-    }
-  };
-
-  const handleProbabilityChange = (probabilityId: string) => {
-    const probabilityData = PROBABILITY_OPTIONS.find(
-      (p) => p.id === probabilityId
-    );
-    if (probabilityData) {
-      updateNodeData(id, {
-        maskProbabilityId: probabilityId,
-        maskProbability: probabilityData.probability,
-      });
-    }
-  };
 
   return (
     <WorkflowNode id={id} data={data}>
@@ -104,7 +36,7 @@ export function MaskNode({ id, data }: WorkflowNodeProps) {
                 key={pattern.id}
                 variant={selectedPattern === pattern.id ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => handlePatternChange(pattern.id)}
+                onClick={() => updateNodeData(id, { maskPatternId: pattern.id })}
                 title={pattern.description}
               >
                 {pattern.label}
@@ -119,11 +51,9 @@ export function MaskNode({ id, data }: WorkflowNodeProps) {
             {PROBABILITY_OPTIONS.map((prob) => (
               <Button
                 key={prob.id}
-                variant={
-                  selectedProbability === prob.id ? 'default' : 'outline'
-                }
+                variant={selectedProbability === prob.id ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => handleProbabilityChange(prob.id)}
+                onClick={() => updateNodeData(id, { maskProbabilityId: prob.id })}
                 title={prob.description}
               >
                 {prob.label}
@@ -137,13 +67,17 @@ export function MaskNode({ id, data }: WorkflowNodeProps) {
 }
 
 MaskNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const pattern = node.data.maskPattern;
-  const probability = node.data.maskProbability;
+  const patternId = node.data.maskPatternId || 'half';
+  const probabilityId = node.data.maskProbabilityId || 'always';
 
-  if (!pattern) return strudelString;
+  const patternData = MASK_PATTERNS.find((p) => p.id === patternId);
+  const probabilityData = PROBABILITY_OPTIONS.find((p) => p.id === probabilityId);
 
-  let maskCall = `.mask("${pattern}")`;
-  if (probability && probability !== '1') {
+  if (!patternData) return strudelString;
+
+  const probability = probabilityData?.probability || '1';
+  let maskCall = `.mask("${patternData.pattern}")`;
+  if (probability !== '1') {
     maskCall = `.sometimes(${probability}, x => x${maskCall})`;
   }
   return strudelString + maskCall;

@@ -1,17 +1,17 @@
-/**
- * Strudel pattern generation and optimization
- */
-
 import { Edge } from '@xyflow/react';
 import { AppNode } from '@/components/nodes';
-import nodesConfig from '@/components/nodes';
-import { useStrudelStore } from '@/store/strudel-store';
-import { getNodeStrudelOutput } from './node-registry';
+import nodesConfig, { nodeTypes } from '@/components/nodes';
 import { findConnectedComponents } from './graph-utils';
 
-/**
- * Optimize consecutive .sound() calls by combining them recursively
- */
+type NodeWithStrudelOutput = {
+  strudelOutput?: (node: AppNode, strudelString: string) => string;
+};
+
+export function getNodeStrudelOutput(nodeType: string) {
+  const NodeComponent = nodeTypes[nodeType as keyof typeof nodeTypes] as NodeWithStrudelOutput;
+  return NodeComponent?.strudelOutput;
+}
+
 function optimizeSoundCalls(strudelString: string): string {
   let optimized = strudelString;
   let previousLength = 0;
@@ -29,27 +29,17 @@ function optimizeSoundCalls(strudelString: string): string {
 
   return optimized;
 }
-/**
- * Check if a node generates patterns (vs processes/modifies them)
- */
 function isSoundSource(node: AppNode): boolean {
   const category = nodesConfig[node.type]?.category;
   return category === 'Instruments';
 }
 
-/**
- * Generate complete Strudel output from nodes and edges
- */
 export function generateOutput(
   nodes: AppNode[],
   edges: Edge[],
-  cpm?: string,
-  bpc?: string
+  cpm: string,
+  bpc: string
 ): string {
-  // Use passed values or fallback to store values
-  const currentCpm = cpm || useStrudelStore.getState().cpm;
-  const currentBpc = bpc || useStrudelStore.getState().bpc;
-
   const nodePatterns: Record<string, string> = {};
   for (const node of nodes) {
     const strudelOutput = getNodeStrudelOutput(node.type);
@@ -127,8 +117,8 @@ export function generateOutput(
 
   // Always add setcpm if there's sound (like other node outputs)
   if (result) {
-    const bpm = parseInt(currentCpm) || 120;
-    const beatsPerCycle = parseInt(currentBpc) || 4;
+    const bpm = parseInt(cpm) || 120;
+    const beatsPerCycle = parseInt(bpc) || 4;
     return `setcpm(${bpm}/${beatsPerCycle})\n${result}`;
   }
 

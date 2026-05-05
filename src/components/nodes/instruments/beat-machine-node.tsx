@@ -1,13 +1,13 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { CellState, ModifierDropdown } from './pad-utils/modifiers';
 import WorkflowNode from '@/components/nodes/workflow-node';
+import { WorkflowNodeProps, AppNode } from '..';
+import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
 import { PadButton } from './pad-utils/pad-button';
-import { useAppStore } from '@/store/app-context';
-import { WorkflowNodeProps, AppNode } from '..';
-import { DRUM_OPTIONS } from '@/data/sound-options';
-import { DRUM_CATEGORIES } from '@/data/sound-categories';
+import { DRUM_CATEGORIES } from '@/data/sounds';
+import { CategorySelectItems } from '@/components/category-select-items';
 
 interface BeatMachineRow {
   instrument: string;
@@ -59,14 +59,7 @@ function SequencerRow({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {DRUM_CATEGORIES.map((cat) => (
-            <div key={cat.label}>
-              <div className="px-2 py-1 text-xs text-muted-foreground font-semibold">{cat.label}</div>
-              {cat.options.map((sound) => (
-                <SelectItem key={sound} value={sound}>{sound}</SelectItem>
-              ))}
-            </div>
-          ))}
+          <CategorySelectItems categories={DRUM_CATEGORIES} />
         </SelectContent>
       </Select>
       <div className="flex gap-1">
@@ -161,7 +154,7 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
     const newRows = [
       ...rows,
       {
-        instrument: DRUM_OPTIONS[0] || 'bd',
+        instrument: DRUM_CATEGORIES[0].options[0],
         pattern: Array(steps).fill(false),
         modifiers: {},
       },
@@ -183,7 +176,7 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
     const newRows = rows.map((row, rIndex) => {
       if (rIndex === rowIndex) {
         const newPattern = row.pattern.map((val, pIndex) =>
-          pIndex === step ? !val : val
+          pIndex === step ? !val : val,
         );
         return { ...row, pattern: newPattern };
       }
@@ -193,8 +186,9 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
   };
 
   const handleInstrumentChange = (rowIndex: number, instrument: string) => {
-    const newRows = [...rows];
-    newRows[rowIndex].instrument = instrument;
+    const newRows = rows.map((row, i) =>
+      i === rowIndex ? { ...row, instrument } : row,
+    );
     updateNodeData(id, { rows: newRows });
   };
 
@@ -329,11 +323,11 @@ BeatMachineNode.strudelOutput = (node: AppNode, strudelString: string) => {
   // If modifiers are disabled, ignore them in output
   const patterns = rows.map(
     (row) =>
-      `sound("${row.instrument}").struct("${patternToString(row.pattern, modifiersEnabled ? (typeof (row as any).modifiers === 'object' ? (row as any).modifiers : {}) : {})}")`
+      `sound("${row.instrument}").struct("${patternToString(row.pattern, modifiersEnabled ? (typeof (row as any).modifiers === 'object' ? (row as any).modifiers : {}) : {})}")`,
   );
 
   const validPatterns = patterns.filter(
-    (p) => !p.includes(Array(steps).fill('~').join(''))
+    (p) => !p.includes(Array(steps).fill('~').join('')),
   );
 
   if (validPatterns.length === 0) {
