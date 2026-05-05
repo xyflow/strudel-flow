@@ -3,14 +3,14 @@ import { WorkflowNodeProps, AppNode } from '..';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
 import { PadButton } from './pad-utils/pad-button';
-import { DRUM_OPTIONS } from '@/data/sound-options';
+import { DRUM_CATEGORIES } from '@/data/sounds';
 import {
   Select,
   SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { CategorySelectItems } from '@/components/category-select-items';
 
 interface BeatMachineRow {
   instrument: string;
@@ -42,11 +42,7 @@ function SequencerRow({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {DRUM_OPTIONS.map((sound) => (
-            <SelectItem key={sound} value={sound}>
-              {sound}
-            </SelectItem>
-          ))}
+          <CategorySelectItems categories={DRUM_CATEGORIES} />
         </SelectContent>
       </Select>
       <div className="flex gap-1">
@@ -80,7 +76,7 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
     const newRows = rows.map((row, rIndex) => {
       if (rIndex === rowIndex) {
         const newPattern = row.pattern.map((val, pIndex) =>
-          pIndex === step ? !val : val
+          pIndex === step ? !val : val,
         );
         return { ...row, pattern: newPattern };
       }
@@ -91,7 +87,7 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
 
   const handleInstrumentChange = (rowIndex: number, instrument: string) => {
     const newRows = rows.map((row, i) =>
-      i === rowIndex ? { ...row, instrument } : row
+      i === rowIndex ? { ...row, instrument } : row,
     );
     updateNodeData(id, { rows: newRows });
   };
@@ -143,11 +139,11 @@ BeatMachineNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const patterns = rows.map(
     (row) =>
-      `sound("${row.instrument}").struct("${patternToString(row.pattern)}")`
+      `sound("${row.instrument}").struct("${patternToString(row.pattern)}")`,
   );
 
   const validPatterns = patterns.filter(
-    (p) => !p.includes(Array(8).fill('~').join(''))
+    (p) => !p.includes(Array(8).fill('~').join('')),
   );
 
   if (validPatterns.length === 0) {

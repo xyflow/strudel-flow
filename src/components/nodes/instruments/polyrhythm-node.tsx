@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { DRUM_OPTIONS } from '@/data/sound-options';
+import { DRUM_CATEGORIES } from '@/data/sounds';
+import { CategorySelectItems } from '@/components/category-select-items';
 
 const RHYTHM_PRESETS = [
   { id: '3:2', label: '3:2', pattern: 'euclidean(3,8)' },
@@ -23,9 +23,27 @@ const RHYTHM_PRESETS = [
 ];
 
 const LAYERS = [
-  { num: 1, soundKey: 'polySound1', patternKey: 'polyPattern1', activeKey: 'pattern1Active', defaultSound: 'bd' },
-  { num: 2, soundKey: 'polySound2', patternKey: 'polyPattern2', activeKey: 'pattern2Active', defaultSound: 'sd' },
-  { num: 3, soundKey: 'polySound3', patternKey: 'polyPattern3', activeKey: 'pattern3Active', defaultSound: 'hh' },
+  {
+    num: 1,
+    soundKey: 'polySound1',
+    patternKey: 'polyPattern1',
+    activeKey: 'pattern1Active',
+    defaultSound: 'bd',
+  },
+  {
+    num: 2,
+    soundKey: 'polySound2',
+    patternKey: 'polyPattern2',
+    activeKey: 'pattern2Active',
+    defaultSound: 'sd',
+  },
+  {
+    num: 3,
+    soundKey: 'polySound3',
+    patternKey: 'polyPattern3',
+    activeKey: 'pattern3Active',
+    defaultSound: 'hh',
+  },
 ] as const;
 
 export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
@@ -49,14 +67,13 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
                   <SelectValue placeholder={defaultSound} />
                 </SelectTrigger>
                 <SelectContent>
-                  {DRUM_OPTIONS.map((s) => (
-                    <SelectItem key={s} value={s}>{s}</SelectItem>
-                  ))}
+                  <CategorySelectItems categories={DRUM_CATEGORIES} />
                 </SelectContent>
               </Select>
               <div className="grid grid-cols-4 gap-1">
                 {RHYTHM_PRESETS.map((preset) => {
-                  const isSelected = isActive && activePattern === preset.pattern;
+                  const isSelected =
+                    isActive && activePattern === preset.pattern;
                   return (
                     <Button
                       key={preset.id}
@@ -67,7 +84,10 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
                         if (activePattern === preset.pattern) {
                           updateNodeData(id, { [activeKey]: !isActive });
                         } else {
-                          updateNodeData(id, { [patternKey]: preset.pattern, [activeKey]: true });
+                          updateNodeData(id, {
+                            [patternKey]: preset.pattern,
+                            [activeKey]: true,
+                          });
                         }
                       }}
                     >
@@ -97,6 +117,9 @@ PolyrhythmNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   if (patterns.length === 0) return strudelString;
 
-  const stackPattern = patterns.length === 1 ? patterns[0] : `stack(${patterns.join(', ')})`;
-  return strudelString ? `${strudelString}.stack(${stackPattern})` : stackPattern;
+  const stackPattern =
+    patterns.length === 1 ? patterns[0] : `stack(${patterns.join(', ')})`;
+  return strudelString
+    ? `${strudelString}.stack(${stackPattern})`
+    : stackPattern;
 };
