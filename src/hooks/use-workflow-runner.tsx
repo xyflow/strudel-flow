@@ -19,7 +19,7 @@ export function useWorkflowRunner() {
 
   const generatedPattern = useMemo(
     () => generateOutput(nodes, edges, cpm, bpc),
-    [nodes, edges, cpm, bpc]
+    [nodes, edges, cpm, bpc],
   );
 
   useEffect(() => {
@@ -36,7 +36,9 @@ export function useWorkflowRunner() {
   const evaluatePattern = useCallback(
     (patternToEvaluate: string) => {
       const activePattern = getActivePattern(patternToEvaluate);
-      const hasContent = activePattern.replace(/setcpm\([^)]+\)\s*/g, '').trim();
+      const hasContent = activePattern
+        .replace(/setcpm\([^)]+\)\s*/g, '')
+        .trim();
 
       if (!hasContent) {
         if (isRunning.current) {
@@ -67,7 +69,7 @@ export function useWorkflowRunner() {
         }
       }
     },
-    [getActivePattern]
+    [getActivePattern],
   );
 
   const debouncedEvaluate = useCallback(
@@ -77,7 +79,10 @@ export function useWorkflowRunner() {
       }
 
       // Tempo and scale changes evaluate immediately; everything else is debounced
-      if (patternToEvaluate.includes('setcpm(') || patternToEvaluate.includes('scale(')) {
+      if (
+        patternToEvaluate.includes('setcpm(') ||
+        patternToEvaluate.includes('scale(')
+      ) {
         evaluatePattern(patternToEvaluate);
         return;
       }
@@ -87,7 +92,7 @@ export function useWorkflowRunner() {
         debounceTimerId.current = null;
       }, 50);
     },
-    [evaluatePattern]
+    [evaluatePattern],
   );
 
   useEffect(() => {
@@ -107,8 +112,21 @@ export function useWorkflowRunner() {
     debouncedEvaluate(pattern);
   }, [pattern, debouncedEvaluate]);
 
+  const forceEvaluate = useCallback(() => {
+    const { nodes: currentNodes, edges: currentEdges } = useAppStore.getState();
+    const { cpm: currentCpm, bpc: currentBpc } = useStrudelStore.getState();
+    const freshPattern = generateOutput(
+      currentNodes,
+      currentEdges,
+      currentCpm,
+      currentBpc,
+    );
+    evaluatePattern(freshPattern);
+  }, [evaluatePattern]);
+
   return {
     runWorkflow: () => debouncedEvaluate(pattern),
+    forceEvaluate,
     stopWorkflow: () => {
       if (debounceTimerId.current !== null) {
         window.clearTimeout(debounceTimerId.current);

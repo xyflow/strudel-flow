@@ -30,7 +30,7 @@ function WorkflowNode({
   type?: AppNodeType;
   children?: React.ReactNode;
 }) {
-  const { runWorkflow } = useWorkflowRunner();
+  const { forceEvaluate } = useWorkflowRunner();
   const [show, setShow] = useState(false);
 
   const { removeNode, edges, nodes, updateNodeData } = useAppStore(
@@ -60,15 +60,15 @@ function WorkflowNode({
     connectedNodeIds.forEach((nodeId) => {
       updateNodeData(nodeId, { state: 'running' });
     });
-    runWorkflow();
-  }, [runWorkflow, connectedNodeIds, updateNodeData]);
+    forceEvaluate();
+  }, [forceEvaluate, connectedNodeIds, updateNodeData]);
 
   const onPause = useCallback(() => {
-    // Pause this specific group
     connectedNodeIds.forEach((nodeId) => {
       updateNodeData(nodeId, { state: 'paused' });
     });
-  }, [connectedNodeIds, updateNodeData]);
+    forceEvaluate();
+  }, [forceEvaluate, connectedNodeIds, updateNodeData]);
 
   const onDelete = useCallback(() => {
     removeNode(id);
