@@ -113,12 +113,13 @@ export const getButtonClasses = (
   groupIndex: number,
   isPressed: boolean
 ) => {
-  const base = 'transition-all ease-out duration-150 rounded-md text-xs font-mono select-none';
+  const base =
+    'transition-colors ease-out duration-150 rounded-md text-xs font-mono select-none';
   if (isSelected) return `${base} bg-accent-foreground`;
   if (isInGroup) {
     const groupColors = ['bg-chart-5', 'bg-chart-2', 'bg-chart-3', 'bg-chart-4'];
     return `${base} ${groupColors[groupIndex % groupColors.length]}`;
   }
-  if (isPressed) return `${base} !duration-0 bg-primary`;
+  if (isPressed) return `${base} bg-primary`;
   return `${base} bg-card-foreground/20 hover:bg-popover-foreground/50`;
 };
