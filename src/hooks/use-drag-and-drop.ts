@@ -16,7 +16,7 @@ export function useDragAndDrop() {
   const onDrop: React.DragEventHandler = useCallback(
     (event) => {
       const nodeProps = JSON.parse(
-        event.dataTransfer.getData('application/reactflow')
+        event.dataTransfer.getData('application/reactflow'),
       );
 
       if (!nodeProps) return;
@@ -32,12 +32,12 @@ export function useDragAndDrop() {
       });
       addNode(newNode);
     },
-    [addNode, screenToFlowPosition]
+    [addNode, screenToFlowPosition],
   );
 
   const onDragOver: React.DragEventHandler = useCallback(
     (event) => event.preventDefault(),
-    []
+    [],
   );
 
   return useMemo(() => ({ onDrop, onDragOver }), [onDrop, onDragOver]);

@@ -1,20 +1,26 @@
-import { useStrudelStore } from '@/store/strudel-store';
 import { useShallow } from 'zustand/react/shallow';
-import { Slider } from '@/components/ui/slider';
 
-export function CPM() {
+import { Slider } from '@/components/ui/slider';
+import { useStrudelStore } from '@/store/strudel-store';
+
+export function CpmPanel() {
   const { cpm, bpc, setCpm, setBpc } = useStrudelStore(
-    useShallow((s) => ({ cpm: s.cpm, bpc: s.bpc, setCpm: s.setCpm, setBpc: s.setBpc }))
+    useShallow((s) => ({
+      cpm: s.cpm,
+      bpc: s.bpc,
+      setCpm: s.setCpm,
+      setBpc: s.setBpc,
+    })),
   );
 
   const bpm = parseInt(cpm) || 120;
   const beatsPerCycle = parseInt(bpc) || 4;
 
   return (
-    <div className="flex flex-col gap-4 p-6 bg-card rounded-lg border min-w-48">
+    <div className="flex min-w-48 flex-col gap-4 rounded-lg border bg-card p-4">
       <div className="flex flex-col gap-3">
         <div>
-          <label className="text-base font-medium text-card-foreground">
+          <label className="text-sm font-medium text-card-foreground">
             BPM: {bpm}
           </label>
           <Slider
@@ -28,7 +34,7 @@ export function CPM() {
         </div>
 
         <div>
-          <label className="text-base font-medium text-card-foreground pb-2">
+          <label className="text-sm font-medium text-card-foreground">
             BPC: {beatsPerCycle}
           </label>
           <Slider

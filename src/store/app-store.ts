@@ -11,7 +11,7 @@ import {
   Edge,
 } from '@xyflow/react';
 
-import { AppNode } from '@/components/nodes';
+import type { AppNode } from '@/components/nodes';
 import { initialEdges, initialNodes } from '@/data/workflow-data';
 
 export type AppState = {

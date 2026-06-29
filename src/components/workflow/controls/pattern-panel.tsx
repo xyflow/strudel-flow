@@ -1,14 +1,19 @@
-import { useStrudelStore } from '@/store/strudel-store';
-import { Copy } from 'lucide-react';
 import { useState } from 'react';
+import { Copy } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
 import {
   Popover,
-  PopoverTrigger,
   PopoverContent,
+  PopoverTrigger,
 } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
+import { useStrudelStore } from '@/store/strudel-store';
 
-export function PatternPanel({ isVisible }: { isVisible: boolean }) {
+type PatternPanelProps = {
+  isVisible: boolean;
+};
+
+export function PatternPanel({ isVisible }: PatternPanelProps) {
   const pattern = useStrudelStore((s) => s.pattern) || 'No pattern.';
   const [isCopied, setIsCopied] = useState(false);
 
@@ -21,13 +26,13 @@ export function PatternPanel({ isVisible }: { isVisible: boolean }) {
   };
 
   return (
-    <div className="flex flex-col bg-card p-4 shadow rounded-md border w-[40vw] min-w-[300px] max-w-[60vw] md:min-w-[400px]">
-      <div className="flex justify-between items-center mb-2">
+    <div className="flex w-[40vw] min-w-[300px] max-w-[60vw] flex-col rounded-lg border bg-card p-4 md:min-w-[400px]">
+      <div className="mb-2 flex items-center justify-between">
         <span className="text-sm font-medium">Generated Pattern</span>
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="sm" onClick={handleCopy}>
-              <Copy className="w-4 h-4" />
+              <Copy className="size-4" />
             </Button>
           </PopoverTrigger>
           {isCopied && (
@@ -41,7 +46,7 @@ export function PatternPanel({ isVisible }: { isVisible: boolean }) {
           )}
         </Popover>
       </div>
-      <pre className="text-xs font-mono bg-muted p-3 rounded overflow-auto max-h-[30vh] min-h-[15vh] whitespace-pre-wrap">
+      <pre className="max-h-[30vh] min-h-[15vh] overflow-auto whitespace-pre-wrap rounded bg-muted p-3 font-mono text-xs">
         {pattern}
       </pre>
     </div>

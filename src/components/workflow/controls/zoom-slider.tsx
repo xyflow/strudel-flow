@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 
 type ZoomSliderProps = Omit<PanelProps, 'children'>;
 
-function ZoomSlider({ className, ...props }: ZoomSliderProps) {
+export function ZoomSlider({ className, ...props }: ZoomSliderProps) {
   const { zoom } = useViewport();
   const { zoomTo, zoomIn, zoomOut, fitView } = useReactFlow();
 
@@ -22,14 +22,14 @@ function ZoomSlider({ className, ...props }: ZoomSliderProps) {
       minZoom: state.minZoom,
       maxZoom: state.maxZoom,
     }),
-    (a, b) => a.minZoom !== b.minZoom || a.maxZoom !== b.maxZoom
+    (a, b) => a.minZoom !== b.minZoom || a.maxZoom !== b.maxZoom,
   );
 
   return (
     <Panel
       className={cn(
-        'flex bg-primary-foreground text-foreground border rounded-md gap-1 p-1',
-        className
+        'flex gap-1 rounded-md border bg-primary-foreground p-1 text-foreground',
+        className,
       )}
       {...props}
     >
@@ -38,7 +38,7 @@ function ZoomSlider({ className, ...props }: ZoomSliderProps) {
         size="icon"
         onClick={() => zoomOut({ duration: 300 })}
       >
-        <Minus className="h-4 w-4" />
+        <Minus className="size-4" />
       </Button>
       <Slider
         className="w-[140px]"
@@ -53,7 +53,7 @@ function ZoomSlider({ className, ...props }: ZoomSliderProps) {
         size="icon"
         onClick={() => zoomIn({ duration: 300 })}
       >
-        <Plus className="h-4 w-4" />
+        <Plus className="size-4" />
       </Button>
       <Button
         className="min-w-20 tabular-nums"
@@ -67,12 +67,8 @@ function ZoomSlider({ className, ...props }: ZoomSliderProps) {
         size="icon"
         onClick={() => fitView({ duration: 300 })}
       >
-        <Maximize className="h-4 w-4" />
+        <Maximize className="size-4" />
       </Button>
     </Panel>
   );
 }
-
-ZoomSlider.displayName = 'ZoomSlider';
-
-export { ZoomSlider };

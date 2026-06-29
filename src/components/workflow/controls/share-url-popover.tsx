@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, Check, Copy } from 'lucide-react';
+
 import {
   Popover,
   PopoverContent,
@@ -10,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { useAppStore } from '@/store/app-store';
 import { useStrudelStore } from '@/store/strudel-store';
 import { getShareUrl } from '@/lib/project-state';
+
+import { ControlButton } from './control-button';
 
 export function ShareUrlPopover() {
   const [isCopied, setIsCopied] = useState(false);
@@ -33,18 +36,15 @@ export function ShareUrlPopover() {
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
-        <button
-          className="p-2 rounded bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition"
-          title="Share URL"
-        >
-          <Link className="w-5 h-5" />
-        </button>
+        <ControlButton title="Share URL">
+          <Link className="size-5" />
+        </ControlButton>
       </PopoverTrigger>
       <PopoverContent className="w-96" align="end">
         <div className="space-y-3">
           <div>
-            <h4 className="font-medium text-sm mb-2">Share Your Patterns</h4>
-            <p className="text-xs text-muted-foreground mb-3">
+            <h4 className="mb-2 text-sm font-medium">Share Your Patterns</h4>
+            <p className="mb-3 text-xs text-muted-foreground">
               Copy this URL to share your workflow with others.
             </p>
           </div>
@@ -53,7 +53,7 @@ export function ShareUrlPopover() {
             <Input
               value={displayUrl}
               readOnly
-              className="text-xs font-mono"
+              className="font-mono text-xs"
               onClick={(e) => e.currentTarget.select()}
             />
             <Button
@@ -63,12 +63,12 @@ export function ShareUrlPopover() {
             >
               {isCopied ? (
                 <>
-                  <Check className="w-4 h-4 mr-1" />
+                  <Check className="mr-1 size-4" />
                   Copied!
                 </>
               ) : (
                 <>
-                  <Copy className="w-4 h-4 mr-1" />
+                  <Copy className="mr-1 size-4" />
                   Copy
                 </>
               )}

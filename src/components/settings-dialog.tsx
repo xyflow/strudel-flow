@@ -111,7 +111,11 @@ function ThemeCard({
   );
 }
 
-export function SettingsDialog() {
+type SettingsDialogProps = {
+  children?: React.ReactNode;
+};
+
+export function SettingsDialog({ children }: SettingsDialogProps) {
   const theme = useAppStore((state) => state.theme);
   const colorMode = useAppStore((state) => state.colorMode);
   const setTheme = useAppStore((state) => state.setTheme);
@@ -122,10 +126,14 @@ export function SettingsDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <button className="flex items-center gap-2 w-full rounded-md p-2 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
-          <Settings2 className="w-4 h-4 shrink-0" />
-          <span>Settings</span>
-        </button>
+        {children ?? (
+          <button
+            className="rounded p-2 transition-colors bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground"
+            title="Settings"
+          >
+            <Settings2 className="size-5" />
+          </button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>

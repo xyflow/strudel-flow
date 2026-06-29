@@ -7,7 +7,7 @@ A visual drum machine and pattern sequencer built with [Strudel.cc](https://stru
 ## Table of Contents
 
 - [Getting Started](#getting-started)
-- [Tech Stack](#tech-stack)
+- [Stack](#tech-stack)
 - [Node Types](#node-types)
 - [Usage Guide](#usage-guide)
 - [Pattern Syntax](#pattern-syntax)
@@ -42,7 +42,7 @@ To get started, follow these steps:
    bun dev
    ```
 
-## Tech Stack
+## Stack
 
 - **Audio Engine**: [Strudel.cc](https://strudel.cc) - Web-based live coding environment
 

@@ -12,14 +12,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-interface SaveProjectDialogProps {
+type SaveProjectDialogProps = {
   filename: string;
   onFilenameChange: (filename: string) => void;
   onSave: () => void;
   children: React.ReactNode;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-}
+};
 
 export function SaveProjectDialog({
   filename,
@@ -56,7 +56,7 @@ export function SaveProjectDialog({
         </div>
         <DialogFooter>
           <Button onClick={handleSave}>
-            <Save className="w-4 h-4 mr-2" />
+            <Save className="mr-2 size-4" />
             Save
           </Button>
         </DialogFooter>
