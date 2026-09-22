@@ -26,12 +26,10 @@ export type AppState = {
 export type AppActions = {
   setColorMode: (colorMode: ColorMode) => void;
   onNodesChange: OnNodesChange<AppNode>;
-  setNodes: (nodes: AppNode[]) => void;
   addNode: (node: AppNode) => void;
   removeNode: (nodeId: string) => void;
   setGroupState: (nodeId: string, state: 'running' | 'paused') => void;
   updateNodeData: (nodeId: string, updates: Record<string, unknown>) => void;
-  setEdges: (edges: Edge[]) => void;
   onConnect: OnConnect;
   setTheme: (theme: string) => void;
   onEdgesChange: OnEdgesChange<Edge>;
@@ -63,11 +61,9 @@ export const useAppStore = create<AppStore>()(
     edges: initialEdges,
     ...initialAppearance,
 
-    onNodesChange: async (changes) => {
+    onNodesChange: (changes) => {
       set({ nodes: applyNodeChanges(changes, get().nodes) });
     },
-
-    setNodes: (nodes) => set({ nodes }),
 
     addNode: (node) => set({ nodes: [...get().nodes, node] }),
 
@@ -84,8 +80,6 @@ export const useAppStore = create<AppStore>()(
         ? { ...node, data: { ...node.data, state: playbackState } }
         : node) };
     }),
-
-    setEdges: (edges) => set({ edges }),
 
     onEdgesChange: (changes) =>
       set({ edges: applyEdgeChanges(changes, get().edges) }),

@@ -1,17 +1,18 @@
 import { Play, Pause } from 'lucide-react';
-import { useGlobalPlayback } from '@/hooks/use-global-playback';
+import { usePlaybackStore } from '@/store/playback-store';
 import { ControlButton } from './control-button';
 
 export function PlayPauseButton() {
-  const { isGloballyPaused, toggleGlobalPlayback } = useGlobalPlayback();
+  const isPlaying = usePlaybackStore(state => state.isPlaying);
+  const toggle = usePlaybackStore(state => state.toggle);
   return (
     <ControlButton
-      onClick={toggleGlobalPlayback}
-      title={isGloballyPaused ? 'Play (Space)' : 'Pause (Space)'}
-      aria-pressed={!isGloballyPaused}
+      onClick={toggle}
+      title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
+      aria-pressed={isPlaying}
       className="size-11 rounded-md bg-primary text-primary-foreground  hover:bg-primary/85 hover:text-primary-foreground"
     >
-      {isGloballyPaused ? <Play className="ml-0.5 size-4 fill-current" /> : <Pause className="size-4 fill-current" />}
+      {!isPlaying ? <Play className="ml-0.5 size-4 fill-current" /> : <Pause className="size-4 fill-current" />}
     </ControlButton>
   );
 }

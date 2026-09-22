@@ -1,8 +1,5 @@
-import { useState, useEffect } from 'react';
 import { getNodeStrudelOutput } from '@/lib/strudel';
-import { useReactFlow } from '@xyflow/react';
 import { useAppStore } from '@/store/app-store';
-import { AppNode } from '@/components/nodes';
 
 export default function PatternPopup({
   className = '',
@@ -13,37 +10,19 @@ export default function PatternPopup({
   id: string;
   rows?: number;
 }) {
-  const { getNode } = useReactFlow();
-  // Subscribe to nodes to trigger re-renders when node data changes
-  const nodes = useAppStore((state) => state.nodes);
-  const [strudelPattern, setStrudelPattern] = useState('');
-
-  useEffect(() => {
-    const node = getNode(id);
-    if (!node || !node.type) {
-      setStrudelPattern('');
-      return;
-    }
-
-    const strudelOutput = getNodeStrudelOutput(node.type);
-    if (strudelOutput) {
-      const pattern = strudelOutput(node as AppNode, '');
-      setStrudelPattern(pattern);
-    } else {
-      setStrudelPattern('');
-    }
-  }, [getNode, id, nodes]);
+  const node = useAppStore(state => state.nodes.find(node => node.id === id));
+  const strudelPattern = node ? getNodeStrudelOutput(node.type)?.(node, '') : '';
 
   return (
     <div
       className={`px-3 py-2 border-t bg-card text-card-foreground border-border w-0 min-w-full ${className}`}
     >
-      <label htmlFor="pre" className="text-xs font-mono">
+      <label htmlFor={`preview-${id}`} className="text-xs font-mono">
         Preview
       </label>
       <pre
         className="w-full p-2 border rounded font-mono text-xs mt-1 whitespace-pre-wrap bg-background text-foreground border-border w-0 min-w-full select-text"
-        id="pre"
+        id={`preview-${id}`}
         style={{
           minHeight: `${rows * 1.5}em`,
           wordBreak: 'break-all',

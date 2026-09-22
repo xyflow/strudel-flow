@@ -1,7 +1,7 @@
 import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { AccordionControls } from '@/components/accordion-controls';
-import { CellState, ModifierDropdown } from './pad-utils/modifiers';
+import { CellState, ModifierDropdown } from './modifiers';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { useAppStore } from '@/store/app-store';

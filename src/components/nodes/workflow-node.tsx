@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { NodeHeaderAction } from '@/components/node-header';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 function WorkflowNode({
@@ -64,11 +64,11 @@ function WorkflowNode({
         </h3>
         <div className="flex items-center gap-1">
           {isInstrument && (
-            <NodeHeaderAction
-              label={isPaused ? 'Unmute instrument' : 'Mute instrument'}
+            <Button variant="ghost"
+              aria-label={isPaused ? 'Unmute instrument' : 'Mute instrument'}
               onClick={() => setGroupState(id, isPaused ? 'running' : 'paused')}
               className={cn(
-                'size-7 rounded-md text-muted-foreground',
+                'nodrag size-7 rounded-md p-1 text-muted-foreground',
                 isPaused && 'text-primary',
               )}
             >
@@ -77,16 +77,16 @@ function WorkflowNode({
               ) : (
                 <Volume2 className="size-3.5" />
               )}
-            </NodeHeaderAction>
+            </Button>
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <NodeHeaderAction
-                label="Module options"
-                className="size-7 rounded-md text-muted-foreground"
+              <Button variant="ghost"
+                aria-label="Module options"
+                className="nodrag size-7 rounded-md p-1 text-muted-foreground"
               >
                 <Ellipsis />
-              </NodeHeaderAction>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="rounded-md">
               <DropdownMenuItem onSelect={() => setShowCode(!showCode)}>

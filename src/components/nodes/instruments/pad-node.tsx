@@ -5,9 +5,7 @@ import { getSchedulerNow } from '@/lib/strudel-clock';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 
-import { CellState, ModifierDropdown } from './pad-utils/modifiers';
-import { toggleCell, isButtonSelected } from './pad-utils/button-utils';
-import { PadButton } from './pad-utils/pad-button';
+import { CellState, ModifierDropdown } from './modifiers';
 import { AccordionControls } from '@/components/accordion-controls';
 
 const NOTES = ['0', '1', '2', '3', '4', '5', '6', '7'];
@@ -51,23 +49,45 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
   const selectedButtons = new Set(data.selectedButtons || []);
   const noteGroups = data.noteGroups || {};
 
-  const handleToggleCell = (
-    stepIdx: number,
-    noteIdx: number,
-    event?: React.MouseEvent,
-  ) =>
-    toggleCell(
-      stepIdx,
-      noteIdx,
-      grid,
-      noteGroups,
-      selectedButtons,
-      updateNodeData,
-      (groups) => updateNodeData(id, { noteGroups: groups }),
-      (buttons) => updateNodeData(id, { selectedButtons: Array.from(buttons) }),
-      id,
-      event,
-    );
+  const handleToggleCell = (stepIdx: number, noteIdx: number, event: React.MouseEvent) => {
+    if (event.shiftKey) {
+      const key = `${stepIdx}-${noteIdx}`;
+      const selected = new Set(selectedButtons);
+      if (selected.has(key)) selected.delete(key);
+      else selected.add(key);
+      const notes = [...selected]
+        .filter(key => key.startsWith(`${stepIdx}-`))
+        .map(key => Number(key.split('-')[1]))
+        .sort((a, b) => a - b);
+      if (notes.length < 2) {
+        updateNodeData(id, { selectedButtons: [...selected] });
+        return;
+      }
+      const groups = noteGroups[stepIdx] || [];
+      const exists = groups.some(group => group.length === notes.length && group.every((note, i) => note === notes[i]));
+      updateNodeData(id, {
+        noteGroups: { ...noteGroups, [stepIdx]: exists ? groups : [...groups, notes] },
+        selectedButtons: [...selected].filter(key => !key.startsWith(`${stepIdx}-`)),
+      });
+      return;
+    }
+
+    const nextGrid = grid.map(row => [...row]);
+    const wasOn = nextGrid[stepIdx][noteIdx];
+    nextGrid[stepIdx][noteIdx] = !wasOn;
+    const groups = noteGroups[stepIdx] || [];
+    const groupIndex = groups.findIndex(group => group.includes(noteIdx));
+    if (wasOn && groupIndex >= 0) {
+      const nextGroups = { ...noteGroups };
+      nextGroups[stepIdx] = groups
+        .map((group, index) => index === groupIndex ? group.filter(note => note !== noteIdx) : group)
+        .filter(group => group.length >= 2);
+      if (!nextGroups[stepIdx].length) delete nextGroups[stepIdx];
+      updateNodeData(id, { grid: nextGrid, noteGroups: nextGroups });
+    } else {
+      updateNodeData(id, { grid: nextGrid });
+    }
+  };
 
   const handleColumnModifierSelect = (stepIdx: number, modifier: CellState) => {
     const newColumnModifiers = { ...columnModifiers };
@@ -92,21 +112,17 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
                     : 'bg-card-foreground/20'
                 }`}
               />
-              {NOTES.map((_, noteIdx) => (
-                <PadButton
-                  key={`${stepIdx}-${noteIdx}`}
-                  stepIdx={stepIdx}
-                  noteIdx={noteIdx}
-                  on={grid[stepIdx]?.[noteIdx] || false}
-                  isSelected={isButtonSelected(
-                    stepIdx,
-                    noteIdx,
-                    selectedButtons,
-                  )}
-                  noteGroups={noteGroups}
-                  toggleCell={handleToggleCell}
-                />
-              ))}
+              {NOTES.map((_, noteIdx) => {
+                const groupIndex = (noteGroups[stepIdx] || []).findIndex(group => group.includes(noteIdx));
+                const on = grid[stepIdx]?.[noteIdx] || false;
+                return <button
+                  key={noteIdx}
+                  className={`${getButtonClasses(selectedButtons.has(`${stepIdx}-${noteIdx}`), groupIndex >= 0, groupIndex, on)} w-12 h-10`}
+                  onClick={event => handleToggleCell(stepIdx, noteIdx, event)}
+                  aria-pressed={on || groupIndex >= 0}
+                  title={`Note ${noteIdx + 1}, Step ${stepIdx + 1}`}
+                />;
+              })}
               <ModifierDropdown
                 currentState={columnModifiers[stepIdx] || { type: 'off' }}
                 onModifierSelect={(modifier) =>
@@ -197,4 +213,21 @@ PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
   return strudelString
     ? `${strudelString}.n("${pattern}").scale("${scale}")`
     : `n("${pattern}").scale("${scale}")`;
+};
+
+const getButtonClasses = (
+  isSelected: boolean,
+  isInGroup: boolean,
+  groupIndex: number,
+  isPressed: boolean
+) => {
+  const base =
+    'cursor-pointer border border-white/5  transition-[background-color,box-shadow,transform] ease-out duration-150 rounded-md text-xs font-mono select-none active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none';
+  if (isSelected) return `${base} bg-accent-foreground`;
+  if (isInGroup) {
+    const groupColors = ['bg-chart-5', 'bg-chart-2', 'bg-chart-3', 'bg-chart-4'];
+    return `${base} ${groupColors[groupIndex % groupColors.length]}`;
+  }
+  if (isPressed) return `${base} bg-primary `;
+  return `${base} bg-muted hover:bg-muted-foreground/30`;
 };

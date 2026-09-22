@@ -71,7 +71,7 @@ export function PresetPopover() {
           <button className="min-w-0 flex-1 truncate px-3 py-2 text-left text-xs hover:text-primary" onClick={() => { restore(patch.url); setName(patch.name); }}>{patch.name}</button>
           <Button variant="ghost" size="icon" aria-label={`Delete ${patch.name}`} onClick={() => persist(saved.filter(item => item.id !== patch.id))}><Trash2 className="size-3.5" /></Button>
         </div>)}</div>}
-        <div className="border-t pt-3"><PatternPanel isVisible /></div>
+        <div className="border-t pt-3"><PatternPanel /></div>
       </PopoverContent>
     </Popover>
   );

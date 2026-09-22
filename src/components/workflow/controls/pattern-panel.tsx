@@ -9,15 +9,9 @@ import {
 } from '@/components/ui/popover';
 import { useStrudelStore } from '@/store/strudel-store';
 
-type PatternPanelProps = {
-  isVisible: boolean;
-};
-
-export function PatternPanel({ isVisible }: PatternPanelProps) {
+export function PatternPanel() {
   const pattern = useStrudelStore((s) => s.pattern) || 'No pattern.';
   const [isCopied, setIsCopied] = useState(false);
-
-  if (!isVisible) return null;
 
   const handleCopy = async () => {
     try { await navigator.clipboard.writeText(pattern); } catch { return; }

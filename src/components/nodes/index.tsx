@@ -6,7 +6,7 @@ import { Node, NodeProps, XYPosition } from '@xyflow/react';
 import { nanoid } from 'nanoid';
 
 import { iconMapping } from '@/data/icon-mapping';
-import { CellState } from './instruments/pad-utils';
+import { CellState } from './instruments/modifiers';
 
 import { SynthSelectNode } from './synths/synth-select-node';
 import { DrumSoundsNode } from './synths/drum-sounds-node';
