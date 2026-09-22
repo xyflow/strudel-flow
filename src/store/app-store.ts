@@ -47,7 +47,8 @@ const initialAppearance: Pick<AppState, 'theme' | 'colorMode'> = {
 try {
   const saved = JSON.parse(localStorage.getItem(appearanceStorageKey) ?? 'null');
   if (saved && typeof saved === 'object') {
-    if (themeNames.includes(saved.theme)) initialAppearance.theme = saved.theme;
+    const savedTheme = typeof saved.theme === 'string' ? saved.theme.replace(/^tweakcn\//, '') : '';
+    if (themeNames.includes(savedTheme)) initialAppearance.theme = savedTheme;
     if (saved.colorMode === 'light' || saved.colorMode === 'dark' || saved.colorMode === 'system') {
       initialAppearance.colorMode = saved.colorMode;
     }

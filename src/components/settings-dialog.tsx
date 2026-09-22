@@ -9,69 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { useAppStore } from '@/store/app-store';
 
-// Theme configurations with colors and descriptions
-const themes = [
-  {
-    value: 'supabase',
-    label: 'Supabase',
-    color: 'oklch(0.8348 0.1302 160.9080)',
-  },
-  {
-    value: 'sunset-horizon',
-    label: 'Sunset Horizon',
-    color: 'oklch(0.7686 0.1647 70.0804)',
-  },
-  {
-    value: 'bold-tech',
-    label: 'Bold Tech',
-    color: 'oklch(0.6489 0.237 200)',
-  },
-  {
-    value: 'catppuccin',
-    label: 'Catppuccin',
-    color: 'oklch(0.7647 0.1596 267.8947)',
-  },
-  {
-    value: 'claymorphism',
-    label: 'Claymorphism',
-    color: 'oklch(0.8 0.15 25)',
-  },
-  {
-    value: 'cosmic-night',
-    label: 'Cosmic Night',
-    color: 'oklch(0.5417 0.179 288.0332)',
-  },
-  {
-    value: 'doom-64',
-    label: 'Doom 64',
-    color: 'oklch(0.4 0.2 0)',
-  },
-  {
-    value: 'mono',
-    label: 'Mono',
-    color: 'oklch(0.5 0 0)',
-  },
-  {
-    value: 'neo-brutalism',
-    label: 'Neo Brutalism',
-    color: 'oklch(0.6489 0.237 26.9728)',
-  },
-  {
-    value: 'pastel-dreams',
-    label: 'Pastel Dreams',
-    color: 'oklch(0.8 0.1 330)',
-  },
-  {
-    value: 'quantum-rose',
-    label: 'Quantum Rose',
-    color: 'oklch(0.6002 0.2414 0.1348)',
-  },
-  {
-    value: 'soft-pop',
-    label: 'Soft Pop',
-    color: 'oklch(0.7 0.15 280)',
-  },
-];
+import { themes } from '@/data/css/themes';
 
 function ThemeCard({
   theme,
