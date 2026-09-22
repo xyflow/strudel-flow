@@ -52,10 +52,11 @@ export function ModifierDropdown({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <button
-          className={`w-12 h-10 transition-all duration-150 rounded-md text-xs font-mono select-none ${
+          aria-label={currentState.type === 'off' ? 'Step variation' : `Step variation ${currentState.value}`}
+          className={`w-12 h-6 transition-colors duration-150 rounded-lg text-[10px] font-mono select-none ${
             currentState.type === 'off'
-              ? 'bg-card-foreground/20 hover:bg-popover-foreground/50'
-              : 'bg-accent text-primary-foreground'
+              ? 'text-muted-foreground/50 hover:bg-muted hover:text-foreground'
+              : 'bg-primary/15 text-primary'
           }`}
         >
           {displayText}

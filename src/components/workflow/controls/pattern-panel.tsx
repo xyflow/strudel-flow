@@ -19,19 +19,19 @@ export function PatternPanel({ isVisible }: PatternPanelProps) {
 
   if (!isVisible) return null;
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(pattern);
+  const handleCopy = async () => {
+    try { await navigator.clipboard.writeText(pattern); } catch { return; }
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
 
   return (
-    <div className="flex w-[40vw] min-w-[300px] max-w-[60vw] flex-col rounded-lg border bg-card p-4 md:min-w-[400px]">
+    <div className="flex w-full min-w-0 flex-col ">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm font-medium">Generated Pattern</span>
+        <span className="text-sm font-medium">Strudel code</span>
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm" onClick={handleCopy}>
+            <Button aria-label="Copy code" variant="ghost" size="sm" onClick={handleCopy}>
               <Copy className="size-4" />
             </Button>
           </PopoverTrigger>
@@ -46,7 +46,7 @@ export function PatternPanel({ isVisible }: PatternPanelProps) {
           )}
         </Popover>
       </div>
-      <pre className="max-h-[30vh] min-h-[15vh] overflow-auto whitespace-pre-wrap rounded bg-muted p-3 font-mono text-xs">
+      <pre className="max-h-[30vh] min-h-16 overflow-auto whitespace-pre-wrap rounded bg-muted p-3 font-mono text-xs">
         {pattern}
       </pre>
     </div>

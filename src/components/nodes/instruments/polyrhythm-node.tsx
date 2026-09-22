@@ -1,10 +1,11 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { useAppStore } from '@/store/app-store';
-import { Button } from '@/components/ui/button';
+
 import {
   Select,
   SelectContent,
+  SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -51,53 +52,35 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
 
   return (
     <WorkflowNode id={id} data={data} type={type}>
-      <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md w-80">
-        {LAYERS.map(({ soundKey, patternKey, activeKey, defaultSound }) => {
-          const sound = (data[soundKey] as string) || defaultSound;
-          const activePattern = (data[patternKey] as string) || '';
-          const isActive = (data[activeKey] as boolean) || false;
-
-          return (
-            <div key={soundKey} className="flex flex-col gap-2">
-              <Select
-                value={sound}
-                onValueChange={(s) => updateNodeData(id, { [soundKey]: s })}
-              >
-                <SelectTrigger size="sm" className="text-xs">
-                  <SelectValue placeholder={defaultSound} />
-                </SelectTrigger>
-                <SelectContent>
-                  <CategorySelectItems categories={DRUM_CATEGORIES} />
-                </SelectContent>
-              </Select>
-              <div className="grid grid-cols-4 gap-1">
-                {RHYTHM_PRESETS.map((preset) => {
-                  const isSelected =
-                    isActive && activePattern === preset.pattern;
-                  return (
-                    <Button
-                      key={preset.id}
-                      variant={isSelected ? 'default' : 'outline'}
-                      size="sm"
-                      className="h-8 text-xs font-bold hover:text-muted-foreground"
-                      onClick={() => {
-                        if (activePattern === preset.pattern) {
-                          updateNodeData(id, { [activeKey]: !isActive });
-                        } else {
-                          updateNodeData(id, {
-                            [patternKey]: preset.pattern,
-                            [activeKey]: true,
-                          });
-                        }
-                      }}
-                    >
-                      {preset.label}
-                    </Button>
-                  );
+      <div className="flex gap-3 px-4 pt-1 pb-4">
+        {LAYERS.map(({ num, soundKey, patternKey, activeKey, defaultSound }) => {
+          const pattern = data[patternKey] || RHYTHM_PRESETS[0].pattern;
+          const active = data[activeKey] ?? false;
+          const match = pattern.match(/euclidean\((\d+),(\d+)\)/);
+          const pulses = Number(match?.[1] ?? 3), steps = Number(match?.[2] ?? 8);
+          return <div key={soundKey} className="flex w-24 flex-col items-center gap-3">
+            <button aria-label={`${active ? 'Mute' : 'Enable'} rhythm ${num}`} aria-pressed={active}
+              onClick={() => updateNodeData(id, { [activeKey]: !active, [patternKey]: pattern })}
+              className="nodrag rounded-full transition hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-primary">
+              <svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true">
+                <circle cx="48" cy="48" r="31" className="fill-background/40 stroke-border" />
+                {Array.from({ length: steps }, (_, i) => {
+                  const angle = (i / steps) * Math.PI * 2 - Math.PI / 2;
+                  const hit = (i * pulses) % steps < pulses;
+                  return <circle key={i} cx={48 + Math.cos(angle) * 36} cy={48 + Math.sin(angle) * 36} r={3} className={active && hit ? 'fill-primary' : hit ? 'fill-muted-foreground' : 'fill-muted'} />;
                 })}
-              </div>
-            </div>
-          );
+                <text x="48" y="52" textAnchor="middle" className={active ? 'fill-primary text-xs font-mono' : 'fill-muted-foreground text-xs font-mono'}>{pulses}/{steps}</text>
+              </svg>
+            </button>
+            <Select value={data[soundKey] || defaultSound} onValueChange={value => updateNodeData(id, { [soundKey]: value })}>
+              <SelectTrigger aria-label={`Sound for rhythm ${num}`} className="h-8 w-full text-[10px]"><SelectValue /></SelectTrigger>
+              <SelectContent><CategorySelectItems categories={DRUM_CATEGORIES} /></SelectContent>
+            </Select>
+            <Select value={pattern} onValueChange={value => updateNodeData(id, { [patternKey]: value, [activeKey]: true })}>
+              <SelectTrigger aria-label={`Pattern for rhythm ${num}`} className="h-8 w-full text-[10px]"><SelectValue /></SelectTrigger>
+              <SelectContent>{RHYTHM_PRESETS.map(preset => <SelectItem key={preset.id} value={preset.pattern}>{preset.pattern.replace('euclidean(', '').replace(')', '').replace(',', ' / ')}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>;
         })}
       </div>
     </WorkflowNode>
@@ -111,7 +94,10 @@ PolyrhythmNode.strudelOutput = (node: AppNode, strudelString: string) => {
   for (const { soundKey, patternKey, activeKey, defaultSound } of LAYERS) {
     if (data[activeKey] && data[patternKey]) {
       const sound = (data[soundKey] as string) || defaultSound;
-      patterns.push(`sound("${sound}").struct("${data[patternKey]}")`);
+      const rhythm = data[patternKey]?.match(/^euclidean\((\d+),(\d+)\)$/);
+      patterns.push(rhythm
+        ? `sound(${JSON.stringify(sound)}).euclid(${rhythm[1]},${rhythm[2]})`
+        : `sound(${JSON.stringify(sound)}).struct(${JSON.stringify(data[patternKey])})`);
     }
   }
 

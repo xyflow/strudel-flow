@@ -13,6 +13,8 @@ import {
 
 import type { AppNode } from '@/components/nodes';
 import { initialEdges, initialNodes } from '@/data/workflow-data';
+import { themeNames } from '@/data/css/themes';
+import { findConnectedComponents } from '@/lib/graph-utils';
 
 export type AppState = {
   nodes: AppNode[];
@@ -22,12 +24,12 @@ export type AppState = {
 };
 
 export type AppActions = {
-  toggleDarkMode: () => void;
   setColorMode: (colorMode: ColorMode) => void;
   onNodesChange: OnNodesChange<AppNode>;
   setNodes: (nodes: AppNode[]) => void;
   addNode: (node: AppNode) => void;
   removeNode: (nodeId: string) => void;
+  setGroupState: (nodeId: string, state: 'running' | 'paused') => void;
   updateNodeData: (nodeId: string, updates: Record<string, unknown>) => void;
   setEdges: (edges: Edge[]) => void;
   onConnect: OnConnect;
@@ -37,12 +39,28 @@ export type AppActions = {
 
 export type AppStore = AppState & AppActions;
 
+const appearanceStorageKey = 'strudel-flow-appearance';
+const initialAppearance: Pick<AppState, 'theme' | 'colorMode'> = {
+  theme: 'supabase',
+  colorMode: 'system',
+};
+try {
+  const saved = JSON.parse(localStorage.getItem(appearanceStorageKey) ?? 'null');
+  if (saved && typeof saved === 'object') {
+    if (themeNames.includes(saved.theme)) initialAppearance.theme = saved.theme;
+    if (saved.colorMode === 'light' || saved.colorMode === 'dark' || saved.colorMode === 'system') {
+      initialAppearance.colorMode = saved.colorMode;
+    }
+  }
+} catch {
+  // Use the defaults when browser storage is unavailable or invalid.
+}
+
 export const useAppStore = create<AppStore>()(
   subscribeWithSelector((set, get) => ({
     nodes: initialNodes,
     edges: initialEdges,
-    colorMode: 'light',
-    theme: 'supabase',
+    ...initialAppearance,
 
     onNodesChange: async (changes) => {
       set({ nodes: applyNodeChanges(changes, get().nodes) });
@@ -53,7 +71,18 @@ export const useAppStore = create<AppStore>()(
     addNode: (node) => set({ nodes: [...get().nodes, node] }),
 
     removeNode: (nodeId) =>
-      set({ nodes: get().nodes.filter((node) => node.id !== nodeId) }),
+      set((state) => ({
+        nodes: state.nodes.filter((node) => node.id !== nodeId),
+        edges: state.edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+      })),
+
+    setGroupState: (nodeId, playbackState) => set((state) => {
+      const group = new Set(findConnectedComponents(state.nodes, state.edges)
+        .find((ids) => ids.includes(nodeId)) ?? [nodeId]);
+      return { nodes: state.nodes.map((node) => group.has(node.id)
+        ? { ...node, data: { ...node.data, state: playbackState } }
+        : node) };
+    }),
 
     setEdges: (edges) => set({ edges }),
 
@@ -80,11 +109,6 @@ export const useAppStore = create<AppStore>()(
 
     setTheme: (theme) => set({ theme }),
 
-    toggleDarkMode: () =>
-      set((state) => ({
-        colorMode: state.colorMode === 'dark' ? 'light' : 'dark',
-      })),
-
     setColorMode: (colorMode) => set({ colorMode }),
 
     updateNodeData: (nodeId, updates) =>
@@ -98,9 +122,27 @@ export const useAppStore = create<AppStore>()(
   }))
 );
 
+const systemAppearance = window.matchMedia('(prefers-color-scheme: dark)');
+function applyColorMode() {
+  const { colorMode } = useAppStore.getState();
+  document.documentElement.classList.toggle(
+    'dark', colorMode === 'dark' || (colorMode === 'system' && systemAppearance.matches),
+  );
+}
+useAppStore.subscribe((state) => state.colorMode, applyColorMode, { fireImmediately: true });
+systemAppearance.addEventListener('change', applyColorMode);
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => systemAppearance.removeEventListener('change', applyColorMode));
+}
+
 useAppStore.subscribe(
-  (state) => state.colorMode,
-  (colorMode: ColorMode) => {
-    document.querySelector('html')?.classList.toggle('dark', colorMode === 'dark');
-  }
+  (state) => [state.theme, state.colorMode] as const,
+  ([theme, colorMode]) => {
+    try {
+      localStorage.setItem(appearanceStorageKey, JSON.stringify({ theme, colorMode }));
+    } catch {
+      // Appearance changes still work when storage is disabled.
+    }
+  },
+  { equalityFn: (previous, next) => previous[0] === next[0] && previous[1] === next[1] },
 );

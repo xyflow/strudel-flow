@@ -7,9 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Switch } from '@/components/ui/switch';
 import { useAppStore } from '@/store/app-store';
-import { useThemeCss } from '@/hooks/use-theme-css';
 
 // Theme configurations with colors and descriptions
 const themes = [
@@ -88,18 +86,18 @@ function ThemeCard({
     <button
       onClick={onClick}
       className={`
-        relative p-3 rounded-lg border-2 transition-all duration-200 text-left
-        hover:shadow-md hover:scale-[1.02] group
+        relative p-3 rounded-md border-2 transition-all duration-200 text-left
+          group
         ${
           isSelected
-            ? 'border-primary bg-primary/5 shadow-sm'
+            ? 'border-primary bg-primary/5 '
             : 'border-border hover:border-primary/50'
         }
       `}
     >
       <div className="flex items-center gap-3">
         <div
-          className="w-8 h-8 rounded-full border-2 border-white shadow-sm flex-shrink-0"
+          className="w-8 h-8 rounded-full border-2 border-white  flex-shrink-0"
           style={{ backgroundColor: theme.color }}
         />
         <div className="flex-1 min-w-0">
@@ -119,9 +117,8 @@ export function SettingsDialog({ children }: SettingsDialogProps) {
   const theme = useAppStore((state) => state.theme);
   const colorMode = useAppStore((state) => state.colorMode);
   const setTheme = useAppStore((state) => state.setTheme);
-  const toggleDarkMode = useAppStore((state) => state.toggleDarkMode);
+  const setColorMode = useAppStore((state) => state.setColorMode);
 
-  useThemeCss(theme);
 
   return (
     <Dialog>
@@ -147,7 +144,7 @@ export function SettingsDialog({ children }: SettingsDialogProps) {
           {/* Dark Mode Section */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-md bg-primary/10">
                 {colorMode === 'dark' ? (
                   <Moon className="w-4 h-4 text-primary" />
                 ) : (
@@ -157,32 +154,25 @@ export function SettingsDialog({ children }: SettingsDialogProps) {
               <div>
                 <h3 className="font-semibold">Appearance</h3>
                 <p className="text-sm text-muted-foreground">
-                  Switch between light and dark modes
+                  Follow your system or choose a light or dark appearance
                 </p>
               </div>
             </div>
-            <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <Sun className="w-4 h-4" />
-                  <span className="text-sm">Light</span>
-                </div>
-                <Switch
-                  checked={colorMode === 'dark'}
-                  onCheckedChange={toggleDarkMode}
-                />
-                <div className="flex items-center gap-2">
-                  <Moon className="w-4 h-4" />
-                  <span className="text-sm">Dark</span>
-                </div>
-              </div>
+            <div role="group" aria-label="Color mode" className="flex gap-2">
+              {(['system', 'light', 'dark'] as const).map(mode => (
+                <button key={mode} type="button" aria-pressed={colorMode === mode}
+                  onClick={() => setColorMode(mode)}
+                  className="flex-1 rounded-md border px-3 py-2 text-sm capitalize hover:bg-muted aria-pressed:border-primary aria-pressed:bg-primary/10">
+                  {mode}
+                </button>
+              ))}
             </div>
           </div>
 
           {/* Theme Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-md bg-primary/10">
                 <Palette className="w-4 h-4 text-primary" />
               </div>
               <div>

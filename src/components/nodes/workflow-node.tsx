@@ -1,23 +1,21 @@
-import { useCallback, useState, useMemo } from 'react';
-import { Play, Pause, Trash, NotebookText } from 'lucide-react';
-
-import {
-  NodeHeaderTitle,
-  NodeHeader,
-  NodeHeaderActions,
-  NodeHeaderAction,
-  NodeHeaderIcon,
-} from '@/components/node-header';
+import { useState } from 'react';
+import { Code2, Ellipsis, Trash2, Volume2, VolumeX } from 'lucide-react';
+import { Position } from '@xyflow/react';
 import { WorkflowNodeData, AppNodeType } from '@/components/nodes/';
 import nodesConfig from '@/components/nodes/';
-import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
-import { iconMapping } from '@/data/icon-mapping';
 import { BaseNode } from '@/components/base-node';
 import { useAppStore } from '@/store/app-store';
+import { usePlaybackStore } from '@/store/playback-store';
 import PatternPopup from '@/components/pattern-popup';
 import { BaseHandle } from '@/components/base-handle';
-import { Position } from '@xyflow/react';
-import { findConnectedComponents } from '@/lib/graph-utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { NodeHeaderAction } from '@/components/node-header';
+import { cn } from '@/lib/utils';
 
 function WorkflowNode({
   id,
@@ -30,90 +28,85 @@ function WorkflowNode({
   type?: AppNodeType;
   children?: React.ReactNode;
 }) {
-  const { forceEvaluate } = useWorkflowRunner();
-  const [show, setShow] = useState(false);
-
-  const { removeNode, edges, nodes, updateNodeData } = useAppStore(
-    (state) => state
+  const [showCode, setShowCode] = useState(false);
+  const nodeType = useAppStore(
+    (state) => state.nodes.find((node) => node.id === id)?.type,
   );
-  const nodeState = useAppStore((state) => state.nodes.find((n) => n.id === id))
-    ?.data?.state;
-
-  const isPaused = nodeState === 'paused';
-
-  // Determine if this node is an instrument based on its type
-  const isInstrument = type
-    ? nodesConfig[type]?.category === 'Instruments'
-    : false;
-
-  // Find all connected nodes for this group using findConnectedComponents
-  const { connectedNodeIds } = useMemo(() => {
-    const allComponents = findConnectedComponents(nodes, edges);
-    const connectedComponent = allComponents.find((component) =>
-      component.includes(id)
-    ) || [id];
-    const nodeIds = new Set(connectedComponent);
-    return { connectedNodeIds: nodeIds };
-  }, [nodes, edges, id]);
-
-  const onPlay = useCallback(() => {
-    connectedNodeIds.forEach((nodeId) => {
-      updateNodeData(nodeId, { state: 'running' });
-    });
-    forceEvaluate();
-  }, [forceEvaluate, connectedNodeIds, updateNodeData]);
-
-  const onPause = useCallback(() => {
-    connectedNodeIds.forEach((nodeId) => {
-      updateNodeData(nodeId, { state: 'paused' });
-    });
-    forceEvaluate();
-  }, [forceEvaluate, connectedNodeIds, updateNodeData]);
-
-  const onDelete = useCallback(() => {
-    removeNode(id);
-  }, [id, removeNode]);
-
-  const IconComponent = data?.icon ? iconMapping[data.icon] : undefined;
+  const isPlaying = usePlaybackStore((state) => state.isPlaying);
+  const removeNode = useAppStore((state) => state.removeNode);
+  const setGroupState = useAppStore((state) => state.setGroupState);
+  const category = nodesConfig[type ?? nodeType ?? 'pad-node']?.category;
+  const isInstrument = category === 'Instruments';
+  const isPaused = data.state === 'paused';
 
   return (
     <BaseNode>
-      <BaseHandle position={Position.Top} type="target" />
-      <BaseHandle position={Position.Bottom} type="source" />
-      <NodeHeader>
-        <NodeHeaderIcon>
-          {IconComponent ? <IconComponent aria-label={data?.icon} /> : null}
-        </NodeHeaderIcon>
-        <NodeHeaderTitle>{data?.title}</NodeHeaderTitle>
-        <NodeHeaderActions>
+      <BaseHandle
+        position={Position.Left}
+        type="target"
+        aria-label="Patch input"
+      />
+      <BaseHandle
+        position={Position.Right}
+        type="source"
+        aria-label="Patch output"
+      />
+      <header className="flex items-center gap-3 px-3 pt-2 pb-4">
+        <span
+          aria-hidden
+          className={cn(
+            'size-1.5 rounded-full',
+            isPlaying && !isPaused ? 'bg-primary ' : 'bg-muted-foreground/30',
+          )}
+        />
+        <h3 className="flex-1 text-[11px] font-semibold tracking-[.16em] uppercase">
+          {data.title}
+        </h3>
+        <div className="flex items-center gap-1">
           {isInstrument && (
             <NodeHeaderAction
-              onClick={isPaused ? onPlay : onPause}
-              label={isPaused ? 'Resume group' : 'Pause group'}
-              variant={isPaused ? 'default' : 'ghost'}
+              label={isPaused ? 'Unmute instrument' : 'Mute instrument'}
+              onClick={() => setGroupState(id, isPaused ? 'running' : 'paused')}
+              className={cn(
+                'size-7 rounded-md text-muted-foreground',
+                isPaused && 'text-primary',
+              )}
             >
-              {isPaused ? <Play /> : <Pause />}
+              {isPaused ? (
+                <VolumeX className="size-3.5" />
+              ) : (
+                <Volume2 className="size-3.5" />
+              )}
             </NodeHeaderAction>
           )}
-          <NodeHeaderAction
-            label="Pattern Preview"
-            onClick={() => setShow(!show)}
-          >
-            <NotebookText />
-          </NodeHeaderAction>
-          <NodeHeaderAction
-            onClick={onDelete}
-            variant="ghost"
-            label="Delete node"
-          >
-            <Trash />
-          </NodeHeaderAction>
-        </NodeHeaderActions>
-      </NodeHeader>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <NodeHeaderAction
+                label="Module options"
+                className="size-7 rounded-md text-muted-foreground"
+              >
+                <Ellipsis />
+              </NodeHeaderAction>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="rounded-md">
+              <DropdownMenuItem onSelect={() => setShowCode(!showCode)}>
+                <Code2 />
+                {showCode ? 'Hide code' : 'View code'}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onSelect={() => removeNode(id)}
+              >
+                <Trash2 />
+                Remove
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </header>
       {children}
-      {show && <PatternPopup id={id} />}
+      {showCode && <PatternPopup id={id} />}
     </BaseNode>
   );
 }
-
 export default WorkflowNode;

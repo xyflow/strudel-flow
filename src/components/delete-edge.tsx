@@ -13,15 +13,16 @@ const DeleteEdge = memo((props: EdgeProps) => {
   };
 
   return (
-    <ButtonEdge {...props}>
-      <Button
+    <ButtonEdge {...props} style={{ ...props.style, stroke: 'var(--primary)', strokeWidth: 2, opacity: props.selected ? 1 : 0.4 }}>
+      {props.selected && <Button
+        aria-label="Disconnect modules"
         onClick={onDeleteEdge}
         size="icon"
         variant="secondary"
         className="h-8 w-8 rounded-full border hover:bg-muted transition-colors"
       >
         <X size={12} />
-      </Button>
+      </Button>}
     </ButtonEdge>
   );
 });

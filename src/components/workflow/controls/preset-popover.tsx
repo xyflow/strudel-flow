@@ -1,102 +1,76 @@
-import { useState } from 'react';
-import { Sparkles, Check } from 'lucide-react';
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { useRef, useState } from 'react';
+import { useReactFlow } from '@xyflow/react';
+import { Copy, Download, Folder, Trash2, Upload } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { capturePatch, applyPatch } from '@/lib/patch-state';
+import { downloadState, getShareUrl, loadFromUrl, stateFromJson } from '@/lib/project-state';
+import { PatternPanel } from './pattern-panel';
 
-import { ControlButton } from './control-button';
-
-const presets = [
-  {
-    name: '🎼 Funky Beat',
-    description: 'Preset by Abbey @ xyflow',
-    url: '?state=N4Igdg9gJgpgziAXAbVASykkAJARgYQBFcBZXAD1wgEUAnAKQC9cBXAGwAsAOLgQxAA0IKLwAu%2FRKFFpRbGFgBCMMQiFoAxhDBYA4rQwBmcgcEg440fMQgADrxZwYmIbQgB3BCnRhztFgFsYMFEsKFpTO1FLWm0UADNeNkcBUT8YAQSk9MzknPTUlny0lLSAXQBfAW9fAKCQ6zCAVkaIsWjY5DyMxOSCosLurMHe4ryKqpA0HwLA4KwYOXVUiABGVqiYGKROnv694ezdg5KBvorx2wg4GTQtJFByJAB2ACYVgDoAFi4DADYATi4nyeXH%2B%2FyeBiEAE8kAYDB8AY1fr8eFwAAy%2FFagz6VECiKE2KwgXDKUQAWn8v1EOjQcTYYDQMQA6oQAKpQLgsABK%2FlMInEnOksiJAAUIGwobQOFDeV61JpYkbeFDNqozBYiXYHByhDYQ1DjRAWGAoGtrLhnJdQ3mC1AXlgOPnHBEc5XCyZrBw%2BVmc4G2pswMWQDAWOo2BhlGAABSQrgASnW7RWAEElmgAG5WPqd0PdjYxGvWQfD0e8CefAQrF6zrM93dL6RrpB9XHZ67SO6SECPRCNNGfd7%2FRo%2FIinyfD%2BBj%2FNCSBkm8%2FzvGiXCNCC%2FzAQKXArLi%2BKElg2ahuGkYcP49LQPIQjMqy7JKqA3JQLysKfL8wqihK9SfAYXBygsMBLByypHKq6qamA2o8VkeqTAaYosG4bDkIwAByACiGhgIaCi%2FE61CiCu6ifOo3piBIUgyHIWDdtoMZviAJAQPeQjmGIab2I4ZZ2HGaLvL8LRPlcNxvg8%2FIse5LxAi8SIGC8AIrCsEGIE8wLuR5mIvE8TxoisgKNOhBIOWAhGMiRyhkdxlE8nyiAGHRDHipKSAvD%2B7EKtxKphPxWo6rsokYFgADS1DyQubAKI0snqCuAAqABaLxxAYC5oCQsnWXpvrvv6xnWKZpgaBZVk2Sm9lYY5ma2MeWBueFIBeS%2BtyxH5iAvHFKwIWCSJpa8SGQiAMJfmF7xvKhCGfGlKy%2FJ8LyZZh1gublxEgKRbJFVyJW0fRIAilVUp1bZHFcUqTVqhqrXCY4HUGoQjQAFYGAAjiu2AAJqBoQskvCQABi2CGk8slxAA1uTS0GXiRlEgutCEgTYgQOE5lxuNvA2KYdmWFgfhgLagmK9jirbu0oTuDlLAK1jDVQPgda0FAo1ZVg%2FhTFLmsm11MBfSAhAAMSmBASy8PeiCniAXviGu7rHmKVhg52V2%2BR%2BkHfC8sHfMlvxwk8mIQk80VQfHaKNOFdGNFikW1RlQgYUSvBizAEuiFL0NMgV8MUYj1GleVKNo0xNVcLKxucYqbVDHxBMa0TMAk7WjQAPI2AAkgpABq88cKNsnz2KAD6TokmSo32gLfrCyZvBlltcbGjYI5gDDStEqr6vakIYr6EqyDIBuXQf0cXTv1%2FuylAIOwhjf1GL%2FIBoCRiFH%2FoA3I4DDhDB%2FmAxBjgoGf3gSApBcCYEYJQbA44qCsEEMwTAHBGC8G4PwUQkhhCyGkIoQcKhRCaHULoWMABLDyEcOwWwzhzCeGUO4bQvhTD%2BHQMYewwRXDRHCOkeI5BAjeESIUYQhhMihEUJUbIsRfDSj%2F1hkRLA1IpZlkDj7KwH1WBRC0FZKAVo0BJnuPVPuTgnYu3dg7JxUBjTqESDAK2ENYZ22limGANhPD%2B00GwAIYBrG2Pse%2BYsUhrbWH8NAWJQSVyJEKFgAA9CYco%2BTI4%2BRujHP2HwU6AiQmiF4BgniRSip9SCBcnjvHgqCFYcJgS%2FCSmxUuSTjpQDrvlFkjdORURondRo%2FsO7VT9iCRxOMB7JCHgJISuoJidWsONGAgZZI82NAufq7oXgLjpuNeenxyZindCQLq%2B8VqH2sMaKEwQODJjgPmQsWBrhX02rGLAZtOI8wBeoHmitUwqwLPfC6hTXzFM%2FGSOE8cVgQgQmBKpSUwrRTAr%2BEEtU0SpwFBi%2F44MiRwGebyMk8o%2B6DNhg3cioykaICBpVTuTLwrzP7qPIQzVh6rParopwYdPCoDElgE0ZoLRWhtHaMAjoXRuk9GSNAcAnSNGwONKEaAeb0HdL48mLxCDiHUg%2FMw%2BZaDqCJOK80lprS2gdM6V0Hpox4grmHeokwVVqo1VqnVeqDVGuoCasuoQYAJHYCEce1g8BEFIBQKgdAmCsE4DwXgZIZ7UDJIGOAVMAAao04jz3tHAag%2BAFBuCeK8l42BFZmotVgaNxAyCUBoAwZg7BuB8FMOIWgbqsDpszdmvNBai0lrLRWuAVau19NgGGtgEb1kGgbbG5tCa23Jr4GSCSUkZIKSUipNSGktI6RrWyOtUaCCNrjS2xN7aU1dtdTAd1W7pJyUUuoZSql1KaW0rpXp%2FiZ32DndC%2FUYrTTWqlXa2VDqFUER6n1AaQ0RoTSmjNOaC0VwnvNZasDkrbUyrlY6z096e2Pu6r1fqg1hpjUmtNWa81Fp%2FqJAB8NwHRVtinrPBeS8V5r03tvXeZJsA6C6oKT4MAnj2hYJPCA9BWacHkgodQ2AjamtPUSDgHG57yUXsvVeG8t50l3sR3tUbhOifE5J6Tsn5OKeU1O%2F9obAPzpA6ZkT90LNSZk3JjgCmlM2DJLgSejR550wXBAY0CgoT%2BAXFCCAlBRpwBXAXTDZ6cBmfcxJzz1mfO2ZU92kzxIgshbCxFqLMW4u4AS0ltYjGQ2zuc2x1GmmuO6d4wZne9oAtFdC%2BFyL0XYvxcS8l2ytb1PNe09xvTfHDN71Lg%2B91gXgs9dK%2F1irVXht4mnY5ljkbXYU2prTBmTMWbs05tzPmZItk7L2QctgRyTlnIuVcm5KWiRk0pjTemjNmZsw5lzXm%2FM5skfdVd3Z%2BzDnHNOecy51zbm1YaNtoDu2NPTy0zpnj%2Bn%2BOddBzdiHD3ofPbh6prDE9UctYx9NjrxnSObO2WD2792odPdh%2FZpjiOI26N5DAQIBixA2BsEOdQUxTARKltYpjFdQVCHUDYL01hammFwDYXS1gazlCAA%3D',
-  },
-  {
-    name: '🏠 House Mix',
-    description: 'Classic House Beat',
-    url: '#',
-  },
-  {
-    name: '🥁 Breakbeat',
-    description: 'Drum & bass breakbeat pattern',
-    url: '#',
-  },
-  {
-    name: '🌙 Your Beat Here!',
-    description: 'Made something cool? Share it with us!',
-    url: '#',
-  },
-];
+type SavedPatch = { id: string; name: string; url: string };
+const storageKey = 'strudel-flow-patches-v1';
+function readPatches(): SavedPatch[] {
+  try {
+    const value: unknown = JSON.parse(localStorage.getItem(storageKey) ?? '[]');
+    return Array.isArray(value) ? value.filter((item): item is SavedPatch => item && typeof item.id === 'string' && typeof item.name === 'string' && typeof item.url === 'string') : [];
+  } catch { return []; }
+}
 
 export function PresetPopover() {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [loadedPreset, setLoadedPreset] = useState<string | null>(null);
-
-  const handlePresetLoad = (preset: (typeof presets)[0]) => {
-    if (preset.url === '#') {
-      setLoadedPreset(`${preset.name} - Coming Soon!`);
-      setTimeout(() => setLoadedPreset(null), 2000);
-      return;
-    }
-
-    window.location.href = preset.url;
-    setIsPopoverOpen(false);
+  const [saved, setSaved] = useState(readPatches);
+  const [name, setName] = useState('Untitled patch');
+  const [link, setLink] = useState('');
+  const [status, setStatus] = useState('');
+  const input = useRef<HTMLInputElement>(null);
+  const { fitView } = useReactFlow();
+  const persist = (next: SavedPatch[]) => {
+    try { localStorage.setItem(storageKey, JSON.stringify(next)); setSaved(next); return true; }
+    catch { setStatus('Browser storage is unavailable. Copy the link or download your patch.'); return false; }
   };
-
+  const restore = (url: string) => {
+    try {
+      const state = loadFromUrl(url);
+      if (!state || !applyPatch(state)) throw new Error();
+      setLink(url); setStatus('Patch loaded');
+      requestAnimationFrame(() => { void fitView({ padding: 0.3, maxZoom: 1 }); });
+    } catch { setStatus('Could not load this patch.'); }
+  };
+  const copy = async () => {
+    const url = getShareUrl(capturePatch()); setLink(url);
+    try { await navigator.clipboard.writeText(url); setStatus('Link copied'); }
+    catch { setStatus('Select and copy the link below.'); }
+  };
   return (
-    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <PopoverTrigger asChild>
-        <ControlButton title="Load Presets">
-          <Sparkles className="size-5" />
-        </ControlButton>
-      </PopoverTrigger>
-      <PopoverContent className="w-80" align="end">
-        <div className="space-y-3">
-          <div>
-            <h4 className="mb-1 text-sm font-medium">🎵 Presets</h4>
-            <p className="mb-3 text-xs text-muted-foreground">
-              Here are some example patterns to get started or spark
-              inspiration!
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            {presets.map((preset) => (
-              <div
-                key={preset.name}
-                className="flex items-center justify-between rounded border p-2 transition-colors hover:bg-muted/50"
-              >
-                <div className="flex-1">
-                  <div className="text-sm font-medium">{preset.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {preset.description}
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  variant={preset.url === '#' ? 'ghost' : 'default'}
-                  className="ml-2 h-8"
-                  onClick={() => handlePresetLoad(preset)}
-                  disabled={preset.url === '#'}
-                >
-                  {preset.url === '#' ? 'Soon' : 'Load'}
-                </Button>
-              </div>
-            ))}
-          </div>
-
-          {loadedPreset && (
-            <div className="flex items-center gap-2 rounded bg-primary p-2 text-sm">
-              <Check className="size-4" />
-              {loadedPreset}
-            </div>
-          )}
+    <Popover onOpenChange={(open) => { if (open) { setSaved(readPatches()); setLink(getShareUrl(capturePatch())); setStatus(''); } }}>
+      <PopoverTrigger asChild><Button variant="outline" className="h-11 gap-2 rounded-md bg-card px-3 sm:px-4" aria-label="Patches"><Folder className="size-4" /><span className="hidden sm:inline">Patches</span></Button></PopoverTrigger>
+      <PopoverContent align="end" className="nowheel max-h-[calc(100dvh-100px)] w-[min(420px,calc(100vw-24px))] overflow-y-auto rounded-lg p-4">
+        <h3 className="mb-4 text-sm font-medium">Your patches</h3>
+        <form className="flex gap-2" onSubmit={(event) => {
+          event.preventDefault(); const url = getShareUrl(capturePatch()); setLink(url);
+          if (persist([{ id: crypto.randomUUID(), name: name.trim() || 'Untitled patch', url }, ...saved])) setStatus('Saved in this browser. The link contains the whole patch.');
+        }}>
+          <input aria-label="Patch name" maxLength={80} value={name} onChange={event => setName(event.target.value)} className="min-w-0 flex-1 rounded-md border bg-muted/30 px-3 text-sm outline-none focus:ring-2 focus:ring-ring" />
+          <Button type="submit">Save link</Button>
+        </form>
+        <div className="my-3 flex gap-1">
+          <Button variant="secondary" size="sm" onClick={copy}><Copy className="size-3.5" />Copy link</Button>
+          <Button variant="ghost" size="sm" onClick={() => downloadState(capturePatch(), `${name.trim() || 'patch'}.json`)}><Download className="size-3.5" />Export</Button>
+          <Button variant="ghost" size="sm" onClick={() => input.current?.click()}><Upload className="size-3.5" />Import</Button>
+          <input ref={input} type="file" accept=".json" className="hidden" onChange={async event => {
+            const file = event.target.files?.[0]; event.target.value = ''; if (!file) return;
+            try { const state = stateFromJson(await file.text()); if (!state || !applyPatch(state)) throw new Error();
+              setName(file.name.replace(/\.json$/i, '')); setLink(getShareUrl(capturePatch())); setStatus('Patch imported');
+              requestAnimationFrame(() => { void fitView({ padding: 0.3, maxZoom: 1 }); });
+            } catch { setStatus('Could not read this patch file.'); }
+          }} />
         </div>
+        <input aria-label="Shareable patch link" value={link} readOnly onFocus={event => event.target.select()} className="w-full rounded-md border bg-background/50 px-2 py-2 font-mono text-[10px] text-muted-foreground" />
+        <p role="status" className="my-2 min-h-4 text-[11px] text-muted-foreground">{status || 'Save a snapshot here, or copy its link to share.'}</p>
+        {saved.length > 0 && <div className="mb-4 max-h-36 space-y-1 overflow-y-auto">{saved.map(patch => <div key={patch.id} className="group flex items-center rounded-md bg-muted/40">
+          <button className="min-w-0 flex-1 truncate px-3 py-2 text-left text-xs hover:text-primary" onClick={() => { restore(patch.url); setName(patch.name); }}>{patch.name}</button>
+          <Button variant="ghost" size="icon" aria-label={`Delete ${patch.name}`} onClick={() => persist(saved.filter(item => item.id !== patch.id))}><Trash2 className="size-3.5" /></Button>
+        </div>)}</div>}
+        <div className="border-t pt-3"><PatternPanel isVisible /></div>
       </PopoverContent>
     </Popover>
   );

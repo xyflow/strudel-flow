@@ -1,109 +1,72 @@
-import { useState } from 'react';
 import { Panel } from '@xyflow/react';
-import { Menu, X, NotebookText, Timer } from 'lucide-react';
-
-import { useIsMobile } from '@/hooks/use-mobile';
-
+import logo from '@/assets/logo.svg?raw';
+import { Palette, X } from 'lucide-react';
+import { SettingsDialog } from '@/components/settings-dialog';
+import { AppInfoPopover } from './app-info-popover';
 import { ControlButton } from './control-button';
+import { usePlaybackStore } from '@/store/playback-store';
+import { useStrudelStore } from '@/store/strudel-store';
 import { PlayPauseButton } from './play-pause-button';
-import { CpmPanel } from './cpm-panel';
-import { PatternPanel } from './pattern-panel';
 import { ZoomSlider } from './zoom-slider';
 import { PresetPopover } from './preset-popover';
-import { ShareUrlPopover } from './share-url-popover';
-import { AppInfoPopover } from './app-info-popover';
-import { ProjectControls } from './project-controls';
-
-function ControlToolbar({
-  onTogglePatternPanel,
-  onToggleCpmPanel,
-}: {
-  onTogglePatternPanel: () => void;
-  onToggleCpmPanel: () => void;
-}) {
-  return (
-    <>
-      <PlayPauseButton />
-
-      <ControlButton
-        onClick={onTogglePatternPanel}
-        title="Toggle Pattern Panel"
-      >
-        <NotebookText className="size-5" />
-      </ControlButton>
-
-      <ControlButton onClick={onToggleCpmPanel} title="Toggle CPM Panel">
-        <Timer className="size-5" />
-      </ControlButton>
-
-      <PresetPopover />
-      <ShareUrlPopover />
-      <AppInfoPopover />
-      <ProjectControls />
-    </>
-  );
-}
 
 export function WorkflowControls() {
-  const [isPatternPanelVisible, setPatternPanelVisible] = useState(false);
-  const [isCpmPanelVisible, setCpmPanelVisible] = useState(false);
-  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const isMobile = useIsMobile();
-
-  if (isMobile) {
-    return (
-      <>
-        <Panel position="top-right" className="flex flex-col items-end gap-2">
-          <ControlButton
-            variant="menu"
-            onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
-            title="Toggle Controls Menu"
-          >
-            {isMobileMenuOpen ? (
-              <X className="size-5" />
-            ) : (
-              <Menu className="size-5" />
-            )}
-          </ControlButton>
-
-          {isMobileMenuOpen && (
-            <div className="flex flex-col gap-2 rounded-lg border bg-card p-2 shadow-lg">
-              <ControlToolbar
-                onTogglePatternPanel={() =>
-                  setPatternPanelVisible((prev) => !prev)
-                }
-                onToggleCpmPanel={() => setCpmPanelVisible((prev) => !prev)}
-              />
-            </div>
-          )}
-
-          {isCpmPanelVisible && <CpmPanel />}
-        </Panel>
-
-        <Panel position="bottom-right" className="flex flex-col gap-4">
-          <PatternPanel isVisible={isPatternPanelVisible} />
-        </Panel>
-      </>
-    );
-  }
+  const cpm = useStrudelStore((state) => state.cpm);
+  const setCpm = useStrudelStore((state) => state.setCpm);
+  const bpc = useStrudelStore((state) => state.bpc);
+  const setBpc = useStrudelStore((state) => state.setBpc);
+  const error = usePlaybackStore((state) => state.error);
+  const setError = usePlaybackStore((state) => state.setError);
 
   return (
     <>
-      <ZoomSlider position="bottom-right" className="bg-card" />
-
-      <Panel position="top-right" className="flex flex-col items-end gap-4">
-        <ControlToolbar
-          onTogglePatternPanel={() =>
-            setPatternPanelVisible((prev) => !prev)
-          }
-          onToggleCpmPanel={() => setCpmPanelVisible((prev) => !prev)}
-        />
-
-        {isCpmPanelVisible && <CpmPanel />}
+      <Panel position="top-left" className="m-4! flex h-12 items-center gap-2.5 sm:m-6!">
+        <a href="https://xyflow.com" target="_blank" rel="noopener noreferrer" aria-label="xyflow website"
+          className="rounded-lg transition-opacity hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+          <span aria-hidden="true" className="block size-10 text-foreground" dangerouslySetInnerHTML={{ __html: logo }} />
+        </a>
       </Panel>
 
-      <Panel position="bottom-right" className="flex flex-col gap-4">
-        <PatternPanel isVisible={isPatternPanelVisible} />
+      <Panel position="top-center" className="m-4! flex h-14 items-center gap-2 rounded-md border border-border/70 bg-card/95 py-1.5 pr-3 pl-1.5   sm:m-6!">
+        <PlayPauseButton />
+        <div className="flex items-baseline gap-1.5">
+          <input
+            type="number"
+            aria-label="Tempo in beats per minute"
+            title="Tempo"
+            min={1}
+            max={200}
+            value={cpm}
+            onChange={(event) => {
+              const value = event.target.valueAsNumber;
+              if (Number.isFinite(value)) setCpm(String(Math.min(200, Math.max(1, value))));
+            }}
+            className="nodrag w-12 bg-transparent text-right font-mono text-xl tabular-nums outline-none focus-visible:rounded focus-visible:ring-2 focus-visible:ring-ring [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          />
+          <span className="text-[9px] font-medium tracking-widest text-muted-foreground">BPM</span>
+        </div>
+        <div className="flex items-baseline gap-1.5 border-l border-border pl-3">
+          <input id="beats-per-cycle" aria-label="Beats per cycle" title="Beats per cycle" type="number" min={1} max={16} value={bpc}
+            onChange={event => { const value = event.target.valueAsNumber; if (Number.isFinite(value)) setBpc(String(Math.min(16, Math.max(1, value)))); }}
+            className="nodrag w-6 bg-transparent text-center font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
+          <span title="Beats per cycle" className="text-[9px] tracking-widest text-muted-foreground">B/C</span>
+        </div>
+      </Panel>
+
+      <Panel position="top-right" className="m-4! flex h-14 items-center sm:m-6!"><PresetPopover /></Panel>
+
+      {error && (
+        <Panel position="top-center" className="mt-24! flex max-w-[min(420px,90vw)] items-start gap-3 rounded-md border border-destructive/40 bg-card p-3 text-xs" role="alert">
+          <span>Couldn’t play this patch. {error}</span>
+          <button aria-label="Dismiss playback error" onClick={() => setError(null)}><X className="size-4" /></button>
+        </Panel>
+      )}
+      <ZoomSlider position="bottom-left" />
+      <Panel position="bottom-right" className="m-4! flex gap-1 rounded-md border border-border/60 bg-card p-1 sm:m-6!">
+        <SettingsDialog>
+          <ControlButton title="Appearance settings"><Palette className="size-4" /></ControlButton>
+        </SettingsDialog>
+        <AppInfoPopover />
       </Panel>
     </>
   );

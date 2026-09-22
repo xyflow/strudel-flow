@@ -3,6 +3,7 @@ import { Save, Upload, Settings2 } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { SettingsDialog } from '@/components/settings-dialog';
+import { usePlaybackStore } from '@/store/playback-store';
 import { AppNode } from '@/components/nodes';
 import { useAppStore } from '@/store/app-store';
 import { useStrudelStore } from '@/store/strudel-store';
@@ -60,14 +61,8 @@ export function ProjectControls() {
         const content = e.target?.result as string;
         const state = stateFromJson(content);
         if (state) {
-          const loadedNodes = (state.nodes as AppNode[]).map((node) => ({
-            ...node,
-            data: {
-              ...node.data,
-              state: 'paused' as const,
-            },
-          }));
-          setNodes(loadedNodes);
+          usePlaybackStore.getState().pause();
+          setNodes(state.nodes as AppNode[]);
           setEdges(state.edges);
           setTheme(state.theme);
           setColorMode(state.colorMode);

@@ -49,7 +49,7 @@ function ArpeggioVisualizer({
   const numCols = pattern.length;
 
   return (
-    <div className="flex items-center justify-center w-full h-12 p-2 bg-muted/50 rounded-md border border-border/50">
+    <div className="flex items-center justify-center w-full h-12 p-2">
       <div className="flex gap-1.5">
         {Array.from({ length: numCols }).map((_, colIndex) => (
           <div key={colIndex} className="flex flex-col-reverse gap-1">
@@ -89,20 +89,21 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
 
   return (
     <WorkflowNode id={id} data={data} type={type}>
-      <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md w-80">
+      <div className="flex flex-col gap-4 px-4 pt-1 pb-3 w-72">
         <div className="grid grid-cols-3 gap-2">
           {ARP_PATTERNS.map((p) => (
-            <div
+            <button
               key={p.id}
-              className="flex flex-col items-center gap-2 cursor-pointer"
+              aria-pressed={selectedPattern === p.id}
+              className="nodrag flex flex-col items-center gap-2 rounded-md border border-border bg-background/40 p-2 transition hover:border-primary/50 aria-pressed:border-primary/60 aria-pressed:bg-primary/10"
               onClick={() => updateNodeData(id, { selectedPattern: p.id })}
             >
               <ArpeggioVisualizer
                 pattern={p.pattern}
                 isActive={selectedPattern === p.id}
               />
-              <span className="text-xs font-mono">{p.label}</span>
-            </div>
+              <span className="text-[9px] tracking-wide text-muted-foreground">{p.label}</span>
+            </button>
           ))}
         </div>
         <AccordionControls

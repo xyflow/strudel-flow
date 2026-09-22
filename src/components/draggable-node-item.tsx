@@ -63,7 +63,7 @@ export function DraggableNodeItem({
   return (
     <div
       className={cn(
-        'relative flex aspect-square w-[4.5rem] flex-col items-center justify-center gap-1 rounded-lg border-2 bg-card p-2 text-center active:scale-[.99] cursor-grab active:cursor-grabbing hover:bg-accent/50 transition-colors sm:w-20',
+        'relative flex aspect-square w-[4.5rem] flex-col items-center justify-center gap-1 rounded-md border-2 bg-card p-2 text-center active:scale-[.99] cursor-grab active:cursor-grabbing hover:bg-accent/50 transition-colors sm:w-20',
         isDragging ? 'border-green-500' : 'border-border',
         className,
       )}
@@ -83,7 +83,7 @@ export function DraggableNodeItem({
       {isDragging && (
         <span
           role="presentation"
-          className="absolute -top-2 -right-2 rounded-md border-2 border-green-500 bg-card"
+          className="absolute -top-2 -right-2 rounded-lg border-2 border-green-500 bg-card"
         >
           <Plus className="size-3.5" />
         </span>

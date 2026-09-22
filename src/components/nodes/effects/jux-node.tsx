@@ -9,10 +9,10 @@ export function JuxNode({ id, data }: WorkflowNodeProps) {
 
   // Available jux effects
   const effects = [
-    { name: 'Reverse', value: 'rev', description: 'Reverse right channel' },
-    { name: 'Press', value: 'press', description: 'Compress right channel' },
-    { name: 'Crush', value: 'crush', description: 'Bitcrush right channel' },
-    { name: 'Delay', value: 'delay', description: 'Delay right channel' },
+    { name: 'rev', value: 'rev', description: 'Reverse right channel' },
+    { name: 'press', value: 'press', description: 'Compress right channel' },
+    { name: 'crush', value: 'crush', description: 'Bitcrush right channel' },
+    { name: 'delay', value: 'delay', description: 'Delay right channel' },
   ];
 
   // Handler for effect changes
@@ -22,18 +22,8 @@ export function JuxNode({ id, data }: WorkflowNodeProps) {
 
   return (
     <WorkflowNode id={id} data={data}>
-      <div className="flex flex-col gap-3 p-4 bg-card text-card-foreground rounded-md min-w-80">
-        {/* Title and description */}
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Jux</h3>
-          <p className="text-xs text-muted-foreground">
-            Apply effect to right channel
-          </p>
-        </div>
-
-        {/* Effect selection */}
+      <div className="flex flex-col gap-3 p-4 bg-card text-card-foreground rounded-lg w-64">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Effect:</label>
           <div className="grid grid-cols-2 gap-1">
             {effects.map((eff) => (
               <Button
@@ -55,8 +45,10 @@ export function JuxNode({ id, data }: WorkflowNodeProps) {
 
 JuxNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const jux = node.data.jux || 'rev';
-  if (jux === 'rev') return strudelString;
+  if (!node.data.jux) return strudelString;
 
-  const juxCall = `jux(${jux})`;
+  const transform = { rev: 'rev()', press: 'press()', crush: 'crush(4)', delay: 'delay(0.5)' }[jux];
+  if (!transform) return strudelString;
+  const juxCall = `jux(x => x.${transform})`;
   return strudelString ? `${strudelString}.${juxCall}` : juxCall;
 };

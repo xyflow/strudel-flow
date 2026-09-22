@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { usePlaybackStore } from '@/store/playback-store';
 import { useAppStore } from '@/store/app-store';
 import { getSchedulerNow } from '@/lib/strudel-clock';
 import WorkflowNode from '@/components/nodes/workflow-node';
@@ -19,9 +20,14 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
   const [activeStep, setActiveStep] = useState(-1);
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
+  const isPlaying = usePlaybackStore((state) => state.isPlaying);
   const steps = data.steps || 5;
 
   useEffect(() => {
+    if (!isPlaying || data.state === 'paused') {
+      setActiveStep(-1);
+      return;
+    }
     let rafId: number;
     const tick = () => {
       const now = getSchedulerNow();
@@ -30,7 +36,7 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
     };
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [steps]);
+  }, [steps, isPlaying, data.state]);
 
   const mode = data.mode || 'arp';
   const octave = data.octave || 3;
@@ -75,7 +81,7 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
 
   return (
     <WorkflowNode id={id} data={data} type={type}>
-      <div className="flex flex-col gap-2 p-3 bg-card text-card-foreground rounded-md w-full max-w-full overflow-hidden">
+      <div className="flex flex-col gap-2 p-3 bg-card text-card-foreground rounded-lg w-full max-w-full overflow-hidden">
         <div className="flex gap-1 w-full nodrag">
           {Array.from({ length: steps }, (_, stepIdx) => (
             <div key={stepIdx} className="flex flex-col gap-1 items-center">

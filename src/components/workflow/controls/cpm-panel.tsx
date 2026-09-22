@@ -17,7 +17,7 @@ export function CpmPanel() {
   const beatsPerCycle = parseInt(bpc) || 4;
 
   return (
-    <div className="flex min-w-48 flex-col gap-4 rounded-lg border bg-card p-4">
+    <div className="flex min-w-48 flex-col gap-4 rounded-md border bg-card p-4">
       <div className="flex flex-col gap-3">
         <div>
           <label className="text-sm font-medium text-card-foreground">

@@ -73,21 +73,22 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
 
   return (
     <WorkflowNode id={id} data={data} type={type}>
-      <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md w-full">
+      <div className="flex flex-col gap-3 px-4 pt-1 pb-3 w-80">
         <div className="relative">
-          <div className="flex gap-0.5">
+          <div className="flex gap-1.5">
             {currentScaleDegrees.map((scaleDegree, index) => {
               const isPressed = pressedKeysSet.has(index);
               return (
                 <button
                   key={index}
+                  aria-pressed={isPressed}
                   className={`
-                    w-8 h-16 border border-border rounded-b-md transition-all duration-150
+                    nodrag flex-1 h-28 border border-border rounded-b-sm rounded-t-md transition-all duration-150
                     text-xs font-mono font-bold flex flex-col items-center justify-end pb-2
                     ${
                       isPressed
-                        ? 'bg-primary text-primary-foreground border-primary shadow-inner'
-                        : 'bg-background text-foreground hover:bg-muted shadow-sm hover:shadow-md'
+                        ? 'bg-primary text-primary-foreground border-primary '
+                        : 'bg-background text-foreground hover:bg-muted  '
                     }
                     ${
                       scaleDegree.quality === 'major'
@@ -114,20 +115,6 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
                 </button>
               );
             })}
-          </div>
-        </div>
-        <div className="text-xs text-muted-foreground flex gap-4">
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-primary/30 rounded"></div>
-            <span>Major</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-accent/30 rounded"></div>
-            <span>Minor</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-destructive/30 rounded"></div>
-            <span>Diminished</span>
           </div>
         </div>
         <AccordionControls
@@ -169,7 +156,7 @@ ChordNode.strudelOutput = (node: AppNode, strudelString: string) => {
   if (pressedKeys.length === 0) return strudelString;
 
   // Process chords inline (same logic as before)
-  const chords = pressedKeys
+  const chords = [...pressedKeys]
     .sort((a, b) => a - b)
     .map((scaleStep) => getChordNotes(scaleStep, chordComplexity));
 

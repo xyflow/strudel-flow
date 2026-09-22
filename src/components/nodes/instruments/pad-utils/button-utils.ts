@@ -114,12 +114,12 @@ export const getButtonClasses = (
   isPressed: boolean
 ) => {
   const base =
-    'transition-colors ease-out duration-150 rounded-md text-xs font-mono select-none';
+    'cursor-pointer border border-white/5  transition-[background-color,box-shadow,transform] ease-out duration-150 rounded-md text-xs font-mono select-none active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none';
   if (isSelected) return `${base} bg-accent-foreground`;
   if (isInGroup) {
     const groupColors = ['bg-chart-5', 'bg-chart-2', 'bg-chart-3', 'bg-chart-4'];
     return `${base} ${groupColors[groupIndex % groupColors.length]}`;
   }
-  if (isPressed) return `${base} bg-primary`;
-  return `${base} bg-card-foreground/20 hover:bg-popover-foreground/50`;
+  if (isPressed) return `${base} bg-primary `;
+  return `${base} bg-muted hover:bg-muted-foreground/30`;
 };

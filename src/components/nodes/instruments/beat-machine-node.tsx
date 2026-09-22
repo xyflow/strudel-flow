@@ -1,5 +1,6 @@
 import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { AccordionControls } from '@/components/accordion-controls';
 import { CellState, ModifierDropdown } from './pad-utils/modifiers';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
@@ -55,7 +56,7 @@ function SequencerRow({
         value={row.instrument}
         onValueChange={(instrument) => onInstrumentChange(rowIndex, instrument)}
       >
-        <SelectTrigger className="w-24 h-7 text-xs">
+        <SelectTrigger className="w-24 shrink-0 h-8 text-xs">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -69,10 +70,11 @@ function SequencerRow({
           return (
             <div
               key={step}
-              className={`flex flex-col items-center gap-0.5 ${highlight ? 'bg-card-foreground/10 rounded-sm' : ''}`}
+              className={`flex flex-col items-center gap-0.5 ${highlight ? 'bg-card-foreground/10 rounded-md' : ''}`}
             >
               <PadButton
                 stepIdx={step}
+                className="!size-7 !rounded-lg"
                 noteIdx={rowIndex}
                 on={isActive}
                 isSelected={false}
@@ -125,7 +127,7 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
     return {
       ...row,
       pattern: Array.isArray(row.pattern) && row.pattern.length === steps ? row.pattern : Array(steps).fill(false),
-      modifiers: typeof (row as any).modifiers === 'object' ? (row as any).modifiers : {},
+      modifiers: row.modifiers ?? {},
     };
   });
 
@@ -196,7 +198,7 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
     const newRows = rows.map((row, rIndex) => {
       const modifiers = row.modifiers || {};
       if (rIndex === rowIndex) {
-        const newModifiers = { ...modifiers };
+        const newModifiers: Record<number, CellState> = { ...modifiers };
         if (modifier.type === 'off') {
           delete newModifiers[stepIdx];
         } else {
@@ -220,9 +222,9 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
 
   return (
     <WorkflowNode id={id} data={data} type={type}>
-      <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md min-w-96">
+      <div className="flex flex-col gap-3 px-4 pt-1 pb-3 w-[min(660px,85vw)]">
         {/* Sequencer rows */}
-        <div className="flex flex-col gap-2 p-3 rounded border">
+        <div className="nowheel flex flex-col gap-3 overflow-x-auto rounded-md bg-background/40 p-3">
           {rows.map((row, index) => (
             <SequencerRow
               key={index}
@@ -235,7 +237,7 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
             />
           ))}
         </div>
-        <div className="flex flex-wrap gap-4 items-center justify-between mt-2">
+        <AccordionControls><div className="flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -304,7 +306,7 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
               />
             </div>
           </div>
-        </div>
+        </div></AccordionControls>
       </div>
     </WorkflowNode>
   );
@@ -321,14 +323,12 @@ BeatMachineNode.strudelOutput = (node: AppNode, strudelString: string) => {
   ];
 
   // If modifiers are disabled, ignore them in output
-  const patterns = rows.map(
+  const patterns = rows.filter(row => row.pattern.some(Boolean)).map(
     (row) =>
-      `sound("${row.instrument}").struct("${patternToString(row.pattern, modifiersEnabled ? (typeof (row as any).modifiers === 'object' ? (row as any).modifiers : {}) : {})}")`,
+      `sound("${row.instrument}").struct("${patternToString(row.pattern, modifiersEnabled ? (row.modifiers ?? {}) : {})}")`,
   );
 
-  const validPatterns = patterns.filter(
-    (p) => !p.includes(Array(steps).fill('~').join('')),
-  );
+  const validPatterns = patterns;
 
   if (validPatterns.length === 0) {
     return strudelString;

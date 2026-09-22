@@ -40,12 +40,12 @@ export function ShareUrlPopover() {
           <Link className="size-5" />
         </ControlButton>
       </PopoverTrigger>
-      <PopoverContent className="w-96" align="end">
+      <PopoverContent className="w-[min(384px,calc(100vw-32px))] rounded-lg" align="end">
         <div className="space-y-3">
           <div>
-            <h4 className="mb-2 text-sm font-medium">Share Your Patterns</h4>
+            <h4 className="mb-2 text-sm font-medium">Share patch</h4>
             <p className="mb-3 text-xs text-muted-foreground">
-              Copy this URL to share your workflow with others.
+              Anyone with this link can open your patch.
             </p>
           </div>
 

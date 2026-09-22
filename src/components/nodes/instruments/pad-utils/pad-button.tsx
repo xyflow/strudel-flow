@@ -37,7 +37,8 @@ export const PadButton: React.FC<PadButtonProps> = ({
   return (
     <button
       className={buttonClass}
-      onPointerDown={(event) => toggleCell(stepIdx, noteIdx, event)}
+      onClick={(event) => toggleCell(stepIdx, noteIdx, event)}
+      aria-pressed={on || isInGroup}
       title={`Note ${noteIdx + 1}, Step ${stepIdx + 1}`}
     />
   );

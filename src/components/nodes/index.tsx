@@ -1,3 +1,7 @@
+import { LevelNode } from './effects/level-node';
+import { TextureNode } from './effects/texture-node';
+import { TimeNode } from './effects/time-node';
+import { RhythmNode } from './effects/rhythm-node';
 import { Node, NodeProps, XYPosition } from '@xyflow/react';
 import { nanoid } from 'nanoid';
 
@@ -16,28 +20,20 @@ import { PolyrhythmNode } from './instruments/polyrhythm-node';
 import { BeatMachineNode } from './instruments/beat-machine-node';
 
 // Effects
-import { MaskNode } from './effects/mask-node';
-import { PlyNode } from './effects/ply-node';
-import { FmNode } from './effects/fm-node';
-import { LateNode } from './effects/late-node';
-import { PalindromeNode } from './effects/palindrome-node';
 import { RoomNode } from './effects/room-node';
 import { LpfNode } from './effects/lpf-node';
-import { DistortNode } from './effects/distort-node';
-import { GainNode } from './effects/gain-node';
-import { PanNode } from './effects/pan-node';
-import { RevNode } from './effects/rev-node';
 import { JuxNode } from './effects/jux-node';
 import { PhaserNode } from './effects/phaser-node';
-import { PostGainNode } from './effects/postgain-node';
-import { CrushNode } from './effects/crush-node';
-import { FastNode } from './effects/fast-node';
-import { SlowNode } from './effects/slow-node';
 import { ADSRNode } from './effects/adsr-node';
 
 /* WORKFLOW NODE DATA PROPS ------------------------------------------------------ */
 
 export type WorkflowNodeData = {
+  rate?: string;
+  direction?: 'forward' | 'reverse' | 'pingpong';
+  gate?: string;
+  repeats?: string;
+  chance?: string;
   attack?: string;
   decay?: string;
   sustain?: string;
@@ -81,7 +77,7 @@ export type WorkflowNodeData = {
   pressedKeys?: number[];
 
   // Beat machine node data
-  rows?: Array<{ instrument: string; pattern: boolean[] }>;
+  rows?: Array<{ instrument: string; pattern: boolean[]; modifiers?: Record<number, CellState> }>;
     modifiersEnabled?: boolean;
 
   // Arpeggiator node data
@@ -90,8 +86,6 @@ export type WorkflowNodeData = {
 
   gain?: string;
   pan?: string;
-  fast?: string;
-  slow?: string;
   crush?: string;
   postgain?: string;
   fm?: string;
@@ -106,18 +100,7 @@ export type WorkflowNodeData = {
   roomlp?: string;
   roomdim?: string;
 
-  maskPattern?: string;
-  maskProbability?: string;
-  maskPatternId?: string;
-  maskProbabilityId?: string;
-  plyMultiplier?: string;
-  plyProbability?: string;
-  plyMultiplierId?: string;
-  plyProbabilityId?: string;
   lateOffset?: string;
-  latePattern?: string;
-  lateOffsetId?: string;
-  latePatternId?: string;
 };
 
 export type WorkflowNodeProps = NodeProps<Node<WorkflowNodeData>> & {
@@ -135,6 +118,10 @@ export type NodeConfig = {
 };
 
 const nodesConfig: Record<AppNodeType, NodeConfig> = {
+  'rhythm-node': { id: 'rhythm-node', title: 'Rhythm', category: 'Time Effects', icon: 'Grid3x3' },
+  'time-node': { id: 'time-node', title: 'Time', category: 'Time Effects', icon: 'Clock' },
+  'texture-node': { id: 'texture-node', title: 'Texture', category: 'Audio Effects', icon: 'Zap' },
+  'level-node': { id: 'level-node', title: 'Level', category: 'Audio Effects', icon: 'Volume2' },
   'pad-node': {
     id: 'pad-node',
     title: 'Pad',
@@ -167,7 +154,7 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
   },
   'custom-node': {
     id: 'custom-node',
-    title: 'Custom Code',
+    title: 'Code',
     category: 'Instruments',
     icon: 'Code',
   },
@@ -179,33 +166,15 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
   },
   'synth-select-node': {
     id: 'synth-select-node',
-    title: 'Synths',
+    title: 'Voice',
     category: 'Synths',
     icon: 'CheckCheck',
   },
   'lpf-node': {
     id: 'lpf-node',
-    title: 'LPF',
+    title: 'Filter',
     category: 'Audio Effects',
     icon: 'Filter',
-  },
-  'distort-node': {
-    id: 'distort-node',
-    title: 'Distortion',
-    category: 'Audio Effects',
-    icon: 'Zap',
-  },
-  'gain-node': {
-    id: 'gain-node',
-    title: 'Gain',
-    category: 'Audio Effects',
-    icon: 'Volume2',
-  },
-  'pan-node': {
-    id: 'pan-node',
-    title: 'Pan',
-    category: 'Audio Effects',
-    icon: 'Move',
   },
   'phaser-node': {
     id: 'phaser-node',
@@ -215,93 +184,33 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
   },
   'room-node': {
     id: 'room-node',
-    title: 'Room',
+    title: 'Space',
     category: 'Audio Effects',
-    icon: 'CheckCheck',
-  },
-  'fast-node': {
-    id: 'fast-node',
-    title: 'Fast',
-    icon: 'FastForward',
-    category: 'Time Effects',
-  },
-  'slow-node': {
-    id: 'slow-node',
-    title: 'Slow',
-    icon: 'Rewind',
-    category: 'Time Effects',
-  },
-  'rev-node': {
-    id: 'rev-node',
-    title: 'Reverse',
-    category: 'Time Effects',
-    icon: 'Radio',
-  },
-  'palindrome-node': {
-    id: 'palindrome-node',
-    title: 'Palindrome',
-    category: 'Time Effects',
     icon: 'CheckCheck',
   },
   'jux-node': {
     id: 'jux-node',
-    title: 'Jux',
+    title: 'Stereo',
     category: 'Audio Effects',
     icon: 'Split',
   },
-  'crush-node': {
-    id: 'crush-node',
-    title: 'Crush',
-    icon: 'Hash',
-    category: 'Audio Effects',
-  },
-  'postgain-node': {
-    id: 'postgain-node',
-    title: 'PostGain',
-    category: 'Audio Effects',
-    icon: 'Volume2',
-  },
-  'mask-node': {
-    id: 'mask-node',
-    title: 'Mask',
-    category: 'Time Effects',
-    icon: 'EyeOff',
-  },
-  'ply-node': {
-    id: 'ply-node',
-    title: 'Ply',
-    category: 'Time Effects',
-    icon: 'Copy',
-  },
-  'fm-node': {
-    id: 'fm-node',
-    title: 'FM',
-    category: 'Audio Effects',
-    icon: 'Radio',
-  },
-  'late-node': {
-    id: 'late-node',
-    title: 'Late',
-    category: 'Time Effects',
-    icon: 'Clock',
-  },
   'adsr-node': {
     id: 'adsr-node',
-    title: 'ADSR',
-    category: 'Time Effects',
+    title: 'Envelope',
+    category: 'Audio Effects',
     icon: 'Activity',
   },
 };
 
 export const nodeTypes = {
+  'rhythm-node': RhythmNode,
+  'time-node': TimeNode,
+  'texture-node': TextureNode,
+  'level-node': LevelNode,
   'synth-select-node': SynthSelectNode,
   'pad-node': PadNode,
   'arpeggiator-node': ArpeggiatorNode,
   'lpf-node': LpfNode,
-  'distort-node': DistortNode,
-  'gain-node': GainNode,
-  'pan-node': PanNode,
-  'rev-node': RevNode,
   'jux-node': JuxNode,
   'phaser-node': PhaserNode,
   'drum-sounds-node': DrumSoundsNode,
@@ -309,16 +218,7 @@ export const nodeTypes = {
   'custom-node': CustomNode,
   'polyrhythm-node': PolyrhythmNode,
   'beat-machine-node': BeatMachineNode,
-  'palindrome-node': PalindromeNode,
   'room-node': RoomNode,
-  'postgain-node': PostGainNode,
-  'crush-node': CrushNode,
-  'fast-node': FastNode,
-  'slow-node': SlowNode,
-  'mask-node': MaskNode,
-  'ply-node': PlyNode,
-  'fm-node': FmNode,
-  'late-node': LateNode,
   'adsr-node': ADSRNode,
 };
 
@@ -355,31 +255,22 @@ export function createNodeByType({
 }
 
 export type AppNode =
+  | Node<WorkflowNodeData, 'rhythm-node'>
+  | Node<WorkflowNodeData, 'time-node'>
+  | Node<WorkflowNodeData, 'texture-node'>
+  | Node<WorkflowNodeData, 'level-node'>
   | Node<WorkflowNodeData, 'pad-node'>
   | Node<WorkflowNodeData, 'arpeggiator-node'>
   | Node<WorkflowNodeData, 'lpf-node'>
-  | Node<WorkflowNodeData, 'distort-node'>
-  | Node<WorkflowNodeData, 'gain-node'>
-  | Node<WorkflowNodeData, 'pan-node'>
-  | Node<WorkflowNodeData, 'rev-node'>
   | Node<WorkflowNodeData, 'jux-node'>
   | Node<WorkflowNodeData, 'phaser-node'>
-  | Node<WorkflowNodeData, 'palindrome-node'>
   | Node<WorkflowNodeData, 'room-node'>
-  | Node<WorkflowNodeData, 'postgain-node'>
-  | Node<WorkflowNodeData, 'crush-node'>
-  | Node<WorkflowNodeData, 'fast-node'>
-  | Node<WorkflowNodeData, 'slow-node'>
   | Node<WorkflowNodeData, 'drum-sounds-node'>
   | Node<WorkflowNodeData, 'chord-node'>
   | Node<WorkflowNodeData, 'custom-node'>
   | Node<WorkflowNodeData, 'polyrhythm-node'>
   | Node<WorkflowNodeData, 'beat-machine-node'>
-  | Node<WorkflowNodeData, 'mask-node'>
-  | Node<WorkflowNodeData, 'ply-node'>
-  | Node<WorkflowNodeData, 'fm-node'>
   | Node<WorkflowNodeData, 'synth-select-node'>
-  | Node<WorkflowNodeData, 'late-node'>
   | Node<WorkflowNodeData, 'adsr-node'>;
 
 export type AppNodeType = NonNullable<AppNode['type']>;

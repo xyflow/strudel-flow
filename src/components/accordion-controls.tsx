@@ -244,8 +244,10 @@ export const AccordionControls: React.FC<AccordionControlsProps> = ({
   return (
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="controls" className="border-none">
-        <AccordionTrigger className="text-xs font-mono py-2 px-0">
-          Controls
+        <AccordionTrigger className="nodrag py-2 text-[10px] tracking-wider text-muted-foreground hover:no-underline">
+          {keyScaleOctaveProps
+            ? `${keyScaleOctaveProps.selectedKey} · ${keyScaleOctaveProps.selectedScale} · ${padControlsProps?.steps ?? ''}${padControlsProps ? ' steps' : ''}`
+            : 'Shape'}
         </AccordionTrigger>
         <AccordionContent className="overflow-hidden">
           <div className="flex flex-col gap-2 w-0 min-w-full">

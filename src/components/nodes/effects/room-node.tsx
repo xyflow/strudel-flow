@@ -1,14 +1,14 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '..';
 import { useAppStore } from '@/store/app-store';
-import { Slider } from '@/components/ui/slider';
+import { ParameterKnob } from '@/components/parameter-knob';
 
 const ROOM_PARAMS = [
-  { key: 'room', label: 'Room', min: 0, max: 1, step: 0.01, default: 0 },
-  { key: 'roomsize', label: 'Size', min: 0, max: 10, step: 0.1, default: 1 },
-  { key: 'roomfade', label: 'Fade', min: 0, max: 10, step: 0.1, default: 0.5 },
-  { key: 'roomlp', label: 'Lowpass', min: 0, max: 20000, step: 100, default: 10000 },
-  { key: 'roomdim', label: 'Dimension', min: 0, max: 20000, step: 100, default: 8000 },
+  { key: 'room', label: 'room', min: 0, max: 1, step: 0.01, default: 0 },
+  { key: 'roomsize', label: 'rsize', min: 0, max: 10, step: 0.1, default: 1 },
+  { key: 'roomfade', label: 'rfade', min: 0, max: 10, step: 0.1, default: 0.5 },
+  { key: 'roomlp', label: 'rlp', min: 0, max: 20000, step: 100, default: 10000 },
+  { key: 'roomdim', label: 'rdim', min: 0, max: 20000, step: 100, default: 8000 },
 ] as const;
 
 export function RoomNode({ id, data }: WorkflowNodeProps) {
@@ -16,26 +16,13 @@ export function RoomNode({ id, data }: WorkflowNodeProps) {
 
   return (
     <WorkflowNode id={id} data={data}>
-      <div className="flex flex-col gap-4 p-3 min-w-80">
-        {ROOM_PARAMS.map(({ key, label, min, max, step, default: def }) => {
-          const value = data[key] ? parseFloat(data[key] as string) : def;
-          return (
-            <div key={key} className="flex flex-col gap-1">
-              <div className="flex justify-between">
-                <label className="text-sm font-medium">{label}</label>
-                <span className="text-xs text-muted-foreground">{value}</span>
-              </div>
-              <Slider
-                value={[value]}
-                onValueChange={([v]) => updateNodeData(id, { [key]: v.toFixed(2) })}
-                min={min}
-                max={max}
-                step={step}
-                className="w-full"
-              />
-            </div>
-          );
-        })}
+      <div className="grid grid-cols-3 gap-5 p-3">
+        {ROOM_PARAMS.map(({ key, label, min, max, step, default: fallback }) => (
+          <ParameterKnob key={key} label={label} value={parseFloat(data[key] ?? String(fallback))}
+            min={min} max={max} step={step}
+            format={(value) => value >= 1000 ? `${(value / 1000).toFixed(1)}k` : String(value)}
+            onChange={(value) => updateNodeData(id, { [key]: String(value) })} />
+        ))}
       </div>
     </WorkflowNode>
   );

@@ -7,16 +7,14 @@ import { useAppStore } from '@/store/app-store';
 import { WorkflowControls } from './controls';
 import { useDragAndDrop } from '@/hooks/use-drag-and-drop';
 import { useUrlStateLoader } from '@/hooks/use-url-state';
-import { useGlobalPlayback } from '@/hooks/use-global-playback';
+import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
 import { useThemeCss } from '@/hooks/use-theme-css';
+
+const edgeTypes = { default: deleteEdge };
 
 export default function Workflow() {
   useUrlStateLoader();
-  useGlobalPlayback();
-
-  const edgeTypes = {
-    default: deleteEdge,
-  };
+  useWorkflowRunner();
 
   const {
     nodes,
@@ -57,9 +55,12 @@ export default function Workflow() {
         onDrop={onDrop}
         nodeDragThreshold={30}
         colorMode={colorMode}
+        panActivationKeyCode={null}
+        minZoom={0.2}
         fitView
+        fitViewOptions={{ padding: 0.3, maxZoom: 1 }}
       >
-        <Background />
+        <Background gap={32} size={1} className="opacity-20" />
         <WorkflowControls />
       </ReactFlow>
     </div>
