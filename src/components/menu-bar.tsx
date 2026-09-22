@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { AudioLines, Clock3, Piano, Plus, SlidersHorizontal } from 'lucide-react';
 
@@ -23,22 +23,25 @@ function point(radius: number, angle: number) {
   return { x: 240 + radius * Math.cos(radians), y: 240 - radius * Math.sin(radians) };
 }
 
-function sector(index: number) {
-  const start = 180 - index * 45 - 3;
-  const end = start - 39;
+function sector(index: number, count = 4, outer = 128, inner = 62) {
+  const slice = 180 / count;
+  const start = 180 - index * slice - 3;
+  const end = start - slice + 6;
+  const corner = 12;
+  const outerInset = corner / outer * 180 / Math.PI;
+  const innerInset = corner / inner * 180 / Math.PI;
   const at = (radius: number, angle: number) => {
     const { x, y } = point(radius, angle);
     return `${x} ${y}`;
   };
-  // Round both the outside and inside corners of each soft wedge.
-  return `M ${at(116, start)}
-    Q ${at(128, start)} ${at(128, start - 6)}
-    A 128 128 0 0 1 ${at(128, end + 6)}
-    Q ${at(128, end)} ${at(116, end)}
-    L ${at(74, end)}
-    Q ${at(62, end)} ${at(62, end + 11)}
-    A 62 62 0 0 0 ${at(62, start - 11)}
-    Q ${at(62, start)} ${at(74, start)} Z`;
+  return `M ${at(outer - corner, start)}
+    Q ${at(outer, start)} ${at(outer, start - outerInset)}
+    A ${outer} ${outer} 0 0 1 ${at(outer, end + outerInset)}
+    Q ${at(outer, end)} ${at(outer - corner, end)}
+    L ${at(inner + corner, end)}
+    Q ${at(inner, end)} ${at(inner, end + innerInset)}
+    A ${inner} ${inner} 0 0 0 ${at(inner, start - innerInset)}
+    Q ${at(inner, start)} ${at(inner + corner, start)} Z`;
 }
 
 export function MenuBar() {
@@ -85,8 +88,6 @@ export function MenuBar() {
   }, [cancelHover, cancelClose, close]);
 
   const items = openCategory ? nodesByCategory[openCategory] : [];
-  const categoryIndex = categories.findIndex(item => item.category === openCategory);
-  const origin = point(95, 157.5 - Math.max(0, categoryIndex) * 45);
 
   return (
     <nav ref={menuRef} aria-label="Add nodes"
@@ -154,17 +155,17 @@ export function MenuBar() {
             </g>;
           })}
         </svg>
-        {openCategory && <div key={openCategory} id="node-category-items" role="group" aria-label={`${openCategory} nodes`}>
+        {openCategory && <div key={openCategory} id="node-category-items" className="radial-node pointer-events-none absolute inset-0 origin-bottom" role="group" aria-label={`${openCategory} nodes`}>
           {items.map((item, index) => {
-            const position = point(198, items.length === 1 ? 90 : 165 - index * 150 / (items.length - 1));
-            return <div key={item.id} className="radial-node absolute -translate-x-1/2 -translate-y-1/2"
-              style={{
-                left: `${position.x / 480 * 100}%`,
-                top: `${position.y / 240 * 100}%`,
-                '--reveal-x': `${(origin.x - position.x) / 480 * 100}cqw`,
-                '--reveal-y': `${(origin.y - position.y) / 480 * 100}cqw`,
-                '--reveal-delay': `${index * 32}ms`,
-              } as CSSProperties}>
+            const useArc = items.length <= 2;
+            const position = useArc
+              ? point(189, 180 - (index + 0.5) * 180 / items.length)
+              : point(198, 165 - index * 150 / (items.length - 1));
+            if (useArc) return <div key={item.id} className="pointer-events-none absolute inset-0">
+              <DraggableNodeItem {...item} arc={{ path: sector(index, items.length, 224, 154), ...position }} />
+            </div>;
+            return <div key={item.id} className="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2"
+              style={{ left: `${position.x / 480 * 100}%`, top: `${position.y / 240 * 100}%` }}>
               <DraggableNodeItem {...item}
                 className="size-12 gap-0 rounded-full border bg-card p-0 sm:size-14 [&>span:last-child]:absolute [&>span:last-child]:top-full [&>span:last-child]:mt-1 [&>span:last-child]:w-20 [&>span:last-child]:overflow-visible [&>span:last-child]:text-[10px] [&>span:last-child]:leading-tight"
               />

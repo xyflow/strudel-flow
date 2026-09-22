@@ -1,4 +1,4 @@
-import { Background, ReactFlow } from '@xyflow/react';
+import { ReactFlow } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { nodeTypes } from '@/components/nodes';
@@ -60,7 +60,6 @@ export default function Workflow() {
         fitView
         fitViewOptions={{ padding: 0.3, maxZoom: 1 }}
       >
-        <Background gap={32} size={1} className="opacity-20" />
         <WorkflowControls />
       </ReactFlow>
     </div>

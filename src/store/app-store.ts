@@ -41,8 +41,8 @@ export type AppStore = AppState & AppActions;
 
 const appearanceStorageKey = 'strudel-flow-appearance';
 const initialAppearance: Pick<AppState, 'theme' | 'colorMode'> = {
-  theme: 'supabase',
-  colorMode: 'system',
+  theme: 'mono',
+  colorMode: 'dark',
 };
 try {
   const saved = JSON.parse(localStorage.getItem(appearanceStorageKey) ?? 'null');

@@ -191,29 +191,37 @@ body,
   height: 100%;
 }
 
-/* Nodes fan out from the chosen segment, then settle into their outer ring. */
+/* Reveal the outer ring together from the launcher center. */
 @keyframes radial-node-reveal {
-  0% { opacity: 0; transform: translate(var(--reveal-x), var(--reveal-y)) scale(0.25); }
-  65% { opacity: 1; transform: translate(0, -5px) scale(1.12, 0.92); }
-  83% { transform: translate(0, 2px) scale(0.97, 1.04); }
-  100% { opacity: 1; transform: translate(0, 0) scale(1); }
+  from { opacity: 0; transform: scale(0.25); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .radial-node {
-  animation: radial-node-reveal 440ms cubic-bezier(0.2, 0.8, 0.2, 1) var(--reveal-delay) backwards;
+  --reveal-duration: 220ms;
+  animation: radial-node-reveal var(--reveal-duration) cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+/* Moving arcs can pass beneath the cursor; only show hover once settled. */
+@keyframes radial-arc-settle {
+  from, to { fill: var(--card); }
+}
+
+.radial-arc-surface {
+  animation: radial-arc-settle var(--reveal-duration) linear backwards;
 }
 
 .radial-category {
   transform-box: fill-box;
   transform-origin: center;
-  transition: transform 250ms cubic-bezier(0.2, 1.6, 0.4, 1);
+  transition: transform 180ms cubic-bezier(0.2, 1.1, 0.4, 1);
 }
 
 .radial-category[data-active="true"] {
-  transform: scale(1.045);
+  transform: scale(1.025);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .radial-node { animation: none; }
+  .radial-node, .radial-arc-surface { animation: none; }
   .radial-category { transition: none; }
 }

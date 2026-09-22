@@ -42,7 +42,7 @@ export default function PatternPopup({
         Preview
       </label>
       <pre
-        className="w-full p-2 border rounded font-mono text-xs mt-1 whitespace-pre-wrap bg-muted text-muted-foreground border-border w-0 min-w-full select-text"
+        className="w-full p-2 border rounded font-mono text-xs mt-1 whitespace-pre-wrap bg-background text-foreground border-border w-0 min-w-full select-text"
         id="pre"
         style={{
           minHeight: `${rows * 1.5}em`,

@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 export const BaseNode = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement> & { selected?: boolean }>(
   ({ className, selected, ...props }, ref) => (
     <div ref={ref} className={cn(
-      'relative min-w-56 rounded-lg border border-border/80 bg-card p-3 text-card-foreground  transition-colors hover:border-muted-foreground/40 [&_button]:cursor-pointer',
+      'relative min-w-56 rounded-lg border border-border/80 bg-card p-3 text-card-foreground shadow-[0_1px_6px_rgb(0_0_0/0.07)] dark:shadow-[0_1px_6px_rgb(0_0_0/0.16)] transition-colors hover:border-muted-foreground/40 [&_button]:cursor-pointer',
       '[.react-flow__node.selected_&]:border-primary/60 [.react-flow__node.selected_&]:ring-1 [.react-flow__node.selected_&]:ring-primary/20',
       selected && 'border-primary/60 ring-1 ring-primary/20', className,
     )} {...props} />

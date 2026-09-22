@@ -46,7 +46,7 @@ export function PatternPanel({ isVisible }: PatternPanelProps) {
           )}
         </Popover>
       </div>
-      <pre className="max-h-[30vh] min-h-16 overflow-auto whitespace-pre-wrap rounded bg-muted p-3 font-mono text-xs">
+      <pre className="max-h-[30vh] min-h-16 overflow-auto whitespace-pre-wrap rounded border border-border bg-background p-3 font-mono text-xs leading-relaxed text-foreground">
         {pattern}
       </pre>
     </div>

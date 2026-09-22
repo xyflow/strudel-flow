@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
@@ -19,13 +19,16 @@ const selector = (state: AppStore) => ({
 type DraggableNodeItemProps = NodeConfig & {
   onAdd?: () => void;
   className?: string;
+  arc?: { path: string; x: number; y: number };
 };
 
 export function DraggableNodeItem({
   onAdd,
   className,
+  arc,
   ...config
 }: DraggableNodeItemProps) {
+  const clipId = useId().replace(/:/g, '');
   const { screenToFlowPosition } = useReactFlow();
   const { addNode } = useAppStore(useShallow(selector));
   const [isDragging, setIsDragging] = useState(false);
@@ -64,10 +67,11 @@ export function DraggableNodeItem({
   return (
     <div
       className={cn(
-        'relative flex aspect-square w-[4.5rem] flex-col items-center justify-center gap-1 rounded-md border-2 bg-card p-2 text-center active:scale-[.99] cursor-grab active:cursor-grabbing hover:bg-accent/50 transition-colors sm:w-20',
+        arc ? 'group/arc absolute inset-0 size-full cursor-grab text-foreground active:cursor-grabbing focus-visible:outline-none' : 'relative flex aspect-square w-[4.5rem] flex-col items-center justify-center gap-1 rounded-md border-2 bg-card p-2 text-center active:scale-[.99] cursor-grab active:cursor-grabbing hover:bg-accent/50 transition-colors sm:w-20',
         isDragging ? 'border-green-500' : 'border-border',
         className,
       )}
+      style={arc ? { clipPath: `url(#${clipId})`, pointerEvents: 'auto' } : undefined}
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
@@ -82,7 +86,13 @@ export function DraggableNodeItem({
         }
       }}
     >
-      {isDragging && (
+      {arc && <svg viewBox="0 0 480 240" className="pointer-events-none absolute inset-0 size-full" aria-hidden="true">
+        <defs><clipPath id={clipId} clipPathUnits="objectBoundingBox">
+          <path d={arc.path} transform="scale(0.0020833333333333333 0.004166666666666667)" />
+        </clipPath></defs>
+        <path d={arc.path} className="radial-arc-surface fill-card stroke-border transition-colors group-hover/arc:fill-accent group-focus-visible/arc:stroke-ring group-focus-visible/arc:stroke-[4]" />
+      </svg>}
+      {isDragging && !arc && (
         <span
           role="presentation"
           className="absolute -top-2 -right-2 rounded-lg border-2 border-green-500 bg-card"
@@ -90,12 +100,14 @@ export function DraggableNodeItem({
           <Plus className="size-3.5" />
         </span>
       )}
-      {IconComponent ? (
-        <IconComponent className="size-5 shrink-0" aria-label={config.icon} />
-      ) : null}
-      <span className="text-[10px] leading-tight line-clamp-2 sm:text-xs">
-        {config.title}
-      </span>
+      {arc ? <span className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 text-center"
+        style={{ left: `${arc.x / 480 * 100}%`, top: `${arc.y / 240 * 100}%` }}>
+        {IconComponent ? <IconComponent className="size-5 shrink-0" aria-hidden="true" /> : null}
+        <span className="text-[10px] leading-tight line-clamp-2 sm:text-xs">{config.title}</span>
+      </span> : <>
+        {IconComponent ? <IconComponent className="size-5 shrink-0" aria-hidden="true" /> : null}
+        <span className="text-[10px] leading-tight line-clamp-2 sm:text-xs">{config.title}</span>
+      </>}
     </div>
   );
 }
