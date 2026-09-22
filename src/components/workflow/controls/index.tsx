@@ -46,10 +46,14 @@ export function WorkflowControls() {
           <span className="text-[9px] font-medium tracking-widest text-muted-foreground">BPM</span>
         </div>
         <div className="flex items-baseline gap-1.5 border-l border-border pl-3">
-          <input id="beats-per-cycle" aria-label="Beats per cycle" title="Beats per cycle" type="number" min={1} max={16} value={bpc}
-            onChange={event => { const value = event.target.valueAsNumber; if (Number.isFinite(value)) setBpc(String(Math.min(16, Math.max(1, value)))); }}
-            className="nodrag w-6 bg-transparent text-center font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
-          <span title="Beats per cycle" className="text-[9px] tracking-widest text-muted-foreground">B/C</span>
+          <select id="beats-per-cycle" aria-label="Beats per cycle" title="Beats per cycle" value={bpc}
+            onChange={event => setBpc(event.target.value)}
+            className="nodrag h-9 w-12 cursor-pointer rounded-md bg-card text-center font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            {Array.from({ length: 16 }, (_, index) => index + 1).map(value => (
+              <option key={value} value={value}>{value}</option>
+            ))}
+          </select>
+          <label htmlFor="beats-per-cycle" className="cursor-pointer text-[9px] leading-tight text-muted-foreground">BEATS/<br />CYCLE</label>
         </div>
       </Panel>
 

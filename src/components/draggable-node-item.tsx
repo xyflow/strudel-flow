@@ -49,6 +49,7 @@ export function DraggableNodeItem({
         'application/reactflow',
         JSON.stringify(config),
       );
+      event.dataTransfer.effectAllowed = 'copy';
       setIsDragging(true);
     },
     [config],
@@ -71,6 +72,7 @@ export function DraggableNodeItem({
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onClick={onClick}
+      aria-label={`Add ${config.title}`}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {

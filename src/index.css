@@ -190,3 +190,30 @@ body,
   width: 100%;
   height: 100%;
 }
+
+/* Nodes fan out from the chosen segment, then settle into their outer ring. */
+@keyframes radial-node-reveal {
+  0% { opacity: 0; transform: translate(var(--reveal-x), var(--reveal-y)) scale(0.25); }
+  65% { opacity: 1; transform: translate(0, -5px) scale(1.12, 0.92); }
+  83% { transform: translate(0, 2px) scale(0.97, 1.04); }
+  100% { opacity: 1; transform: translate(0, 0) scale(1); }
+}
+
+.radial-node {
+  animation: radial-node-reveal 440ms cubic-bezier(0.2, 0.8, 0.2, 1) var(--reveal-delay) backwards;
+}
+
+.radial-category {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 250ms cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+.radial-category[data-active="true"] {
+  transform: scale(1.045);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radial-node { animation: none; }
+  .radial-category { transition: none; }
+}

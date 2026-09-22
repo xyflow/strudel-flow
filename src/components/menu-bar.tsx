@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { flushSync } from 'react-dom';
 import { AudioLines, Clock3, Piano, Plus, SlidersHorizontal } from 'lucide-react';
 
@@ -6,186 +6,172 @@ import { DraggableNodeItem } from '@/components/draggable-node-item';
 import nodesConfig, { type NodeConfig } from '@/components/nodes';
 import { cn } from '@/lib/utils';
 
-const nodesByCategory = Object.values(nodesConfig).reduce(
-  (acc, node) => {
-    (acc[node.category] ??= []).push(node);
-    return acc;
-  },
-  {} as Record<string, NodeConfig[]>,
-);
+const nodesByCategory = Object.values(nodesConfig).reduce((groups, node) => {
+  (groups[node.category] ??= []).push(node);
+  return groups;
+}, {} as Record<string, NodeConfig[]>);
 
-const MENU_CATEGORIES = [
+const categories = [
   { label: 'Instruments', category: 'Instruments', icon: Piano },
   { label: 'Sounds', category: 'Synths', icon: AudioLines },
   { label: 'Effects', category: 'Audio Effects', icon: SlidersHorizontal },
   { label: 'Time', category: 'Time Effects', icon: Clock3 },
 ] as const;
 
+function point(radius: number, angle: number) {
+  const radians = angle * Math.PI / 180;
+  return { x: 240 + radius * Math.cos(radians), y: 240 - radius * Math.sin(radians) };
+}
+
+function sector(index: number) {
+  const start = 180 - index * 45 - 3;
+  const end = start - 39;
+  const at = (radius: number, angle: number) => {
+    const { x, y } = point(radius, angle);
+    return `${x} ${y}`;
+  };
+  // Round both the outside and inside corners of each soft wedge.
+  return `M ${at(116, start)}
+    Q ${at(128, start)} ${at(128, start - 6)}
+    A 128 128 0 0 1 ${at(128, end + 6)}
+    Q ${at(128, end)} ${at(116, end)}
+    L ${at(74, end)}
+    Q ${at(62, end)} ${at(62, end + 11)}
+    A 62 62 0 0 0 ${at(62, start - 11)}
+    Q ${at(62, start)} ${at(74, start)} Z`;
+}
+
 export function MenuBar() {
   const [expanded, setExpanded] = useState(false);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
-  const closeTimer = useRef<ReturnType<typeof setTimeout>>();
   const menuRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout>>();
+  const openedByHover = useRef(false);
   const dragging = useRef(false);
 
-  const cancelClose = useCallback(() => clearTimeout(closeTimer.current), []);
+  const cancelHover = useCallback(() => clearTimeout(hoverTimer.current), []);
   const close = useCallback(() => {
-    cancelClose();
+    cancelHover();
+    openedByHover.current = false;
     setExpanded(false);
     setOpenCategory(null);
-  }, [cancelClose]);
-  const reveal = () => {
-    cancelClose();
-    setExpanded(true);
+  }, [cancelHover]);
+  const selectCategory = (category: string) => {
+    cancelHover();
+    if (!dragging.current) setOpenCategory(category);
   };
 
   useEffect(() => {
     const dismiss = (event: PointerEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) close();
+      if (!dragging.current && !menuRef.current?.contains(event.target as Node)) close();
     };
     document.addEventListener('pointerdown', dismiss);
     return () => {
-      cancelClose();
+      cancelHover();
       document.removeEventListener('pointerdown', dismiss);
     };
-  }, [cancelClose, close]);
+  }, [cancelHover, close]);
 
-  const activeCategory = MENU_CATEGORIES.find(
-    ({ category }) => category === openCategory,
-  );
+  const items = openCategory ? nodesByCategory[openCategory] : [];
+  const categoryIndex = categories.findIndex(item => item.category === openCategory);
+  const origin = point(95, 157.5 - Math.max(0, categoryIndex) * 45);
 
   return (
-    <nav
-      ref={menuRef}
-      aria-label="Add nodes"
+    <nav ref={menuRef} aria-label="Add nodes"
       className="group/launcher absolute bottom-[max(24px,env(safe-area-inset-bottom))] left-1/2 z-10 -translate-x-1/2 text-foreground"
       data-expanded={expanded}
-      onPointerEnter={(event) => {
-        if (event.pointerType === 'mouse') reveal();
-      }}
-      onPointerLeave={(event) => {
-        if (event.pointerType !== 'mouse' || dragging.current) return;
-        cancelClose();
-        closeTimer.current = setTimeout(close, 220);
-      }}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) close();
-      }}
-      onKeyDown={(event) => {
+      onKeyDown={event => {
         if (event.key === 'Escape') {
-          triggerRef.current?.focus();
+          event.preventDefault();
           close();
+          triggerRef.current?.focus();
         }
       }}
-      onDragStartCapture={() => {
-        dragging.current = true;
-        cancelClose();
-      }}
-      onDragEndCapture={() => {
-        dragging.current = false;
-        close();
-      }}
+      onDragStartCapture={() => { dragging.current = true; cancelHover(); }}
+      onDragEndCapture={() => { dragging.current = false; }}
     >
-      <div
+      <div id="node-categories"
         className={cn(
-          'absolute bottom-full left-1/2 w-[min(344px,calc(100vw-24px))] origin-bottom -translate-x-1/2 pb-4 transition-[opacity,translate,scale] duration-200 ease-out motion-reduce:transition-none',
-          expanded
-            ? 'visible translate-y-0 scale-100 opacity-100'
-            : 'invisible translate-y-3.5 scale-95 opacity-0',
+          'absolute bottom-7 left-1/2 aspect-[2/1] [container-type:inline-size] w-[min(480px,calc(100vw-16px))] -translate-x-1/2 transition-opacity duration-150 motion-reduce:transition-none',
+          expanded ? 'visible opacity-100' : 'invisible opacity-0',
         )}
-        id="node-categories"
       >
-        {activeCategory && (
-          <section
-            className="mb-2.5 rounded-lg border bg-card px-3.5 pt-4.5 pb-2.5   transition-[opacity,translate] duration-200 starting:translate-y-1.5 starting:opacity-0 motion-reduce:transition-none"
-            id="node-category-items"
-            aria-label={activeCategory.label}
-          >
-            <div className="mb-3.5 flex items-center justify-between px-1">
-              <div>
-                <h2 className="mt-0.5 text-[17px] font-semibold tracking-tight">
-                  {activeCategory.label}
-                </h2>
-              </div>
-              <span className="grid size-6.5 place-items-center rounded-md bg-muted text-[11px] text-muted-foreground">
-                {nodesByCategory[activeCategory.category].length}
-              </span>
-            </div>
-            <div
-              className="grid max-h-[min(320px,calc(100dvh-300px))] grid-cols-3 gap-1.5 overflow-y-auto p-0.5"
-              key={openCategory}
-            >
-              {nodesByCategory[activeCategory.category].map((item) => (
-                <DraggableNodeItem
-                  key={item.id}
-                  {...item}
-                  className="aspect-auto min-h-19 w-full gap-2 rounded-md border bg-muted transition-[transform,background-color,border-color] duration-150  hover:border-primary/45 hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none sm:w-full [&>span]:text-[11px]"
-                  onAdd={() => {
-                    triggerRef.current?.focus();
-                    close();
-                  }}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-        <div className="grid grid-cols-4 gap-1 rounded-lg border bg-card p-2  ">
-          {MENU_CATEGORIES.map(({ label, category, icon: Icon }) => (
-            <button
-              key={category}
-              type="button"
-              data-node-category
-              className="group/category flex cursor-pointer flex-col items-center gap-1.5 rounded-lg px-0.5 py-2.5 text-[10px] font-medium text-muted-foreground transition-colors duration-150 hover:bg-primary/10 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring aria-expanded:bg-primary/10 aria-expanded:text-foreground motion-reduce:transition-none"
-              aria-expanded={openCategory === category}
-              aria-controls={
-                openCategory === category ? 'node-category-items' : undefined
-              }
-              onPointerEnter={(event) => {
-                if (event.pointerType === 'mouse') setOpenCategory(category);
-              }}
-              onFocus={() => setOpenCategory(category)}
-              onClick={() => setOpenCategory(category)}
-              onKeyDown={(event) => {
-                if (event.key === 'ArrowUp') {
-                  event.preventDefault();
-                  menuRef.current
-                    ?.querySelector<HTMLElement>('#node-category-items [role=button]')
-                    ?.focus();
-                }
-              }}
-            >
-              <span className="transition-transform duration-150 group-hover/category:-translate-y-0.5 group-aria-expanded/category:text-ring motion-reduce:transition-none">
-                <Icon size={21} strokeWidth={1.7} />
-              </span>
-              <span>{label}</span>
-            </button>
-          ))}
-        </div>
+        <svg viewBox="0 0 480 240" className="absolute inset-0 size-full overflow-visible" aria-label="Node categories">
+          {categories.map(({ label, category, icon: Icon }, index) => {
+            const center = point(95, 157.5 - index * 45);
+            return <g key={category} className="radial-category" data-active={openCategory === category}>
+              <path d={sector(index)} role="button" tabIndex={expanded ? 0 : -1}
+                aria-label={label} aria-expanded={openCategory === category} aria-controls="node-category-items"
+                data-node-category
+                className="cursor-pointer stroke-border transition-colors focus-visible:stroke-ring focus-visible:stroke-2 focus-visible:outline-none"
+                fill={openCategory === category ? 'var(--accent)' : 'var(--card)'}
+                onPointerEnter={event => {
+                  if (event.pointerType !== 'mouse' || dragging.current) return;
+                  cancelHover();
+                  hoverTimer.current = setTimeout(() => setOpenCategory(category), 180);
+                }}
+                onPointerLeave={cancelHover}
+                onClick={() => selectCategory(category)}
+                onFocus={() => selectCategory(category)}
+                onKeyDown={event => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    selectCategory(category);
+                  }
+                  if (event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    menuRef.current?.querySelector<HTMLElement>('#node-category-items [role="button"]')?.focus();
+                  }
+                }}
+              />
+              <g className={cn('pointer-events-none', openCategory === category ? 'text-foreground' : 'text-muted-foreground')}>
+                <Icon x={center.x - 10} y={center.y - 17} width={20} height={20} strokeWidth={1.7} />
+                <text x={center.x} y={center.y + 17} textAnchor="middle" fill="currentColor" fontSize={10}>{label}</text>
+              </g>
+            </g>;
+          })}
+        </svg>
+        {openCategory && <div key={openCategory} id="node-category-items" role="group" aria-label={`${openCategory} nodes`}>
+          {items.map((item, index) => {
+            const position = point(198, items.length === 1 ? 90 : 165 - index * 150 / (items.length - 1));
+            return <div key={item.id} className="radial-node absolute -translate-x-1/2 -translate-y-1/2"
+              style={{
+                left: `${position.x / 480 * 100}%`,
+                top: `${position.y / 240 * 100}%`,
+                '--reveal-x': `${(origin.x - position.x) / 480 * 100}cqw`,
+                '--reveal-y': `${(origin.y - position.y) / 480 * 100}cqw`,
+                '--reveal-delay': `${index * 32}ms`,
+              } as CSSProperties}>
+              <DraggableNodeItem {...item}
+                className="size-12 gap-0 rounded-full border bg-card p-0 sm:size-14 [&>span:last-child]:absolute [&>span:last-child]:top-full [&>span:last-child]:mt-1 [&>span:last-child]:w-20 [&>span:last-child]:overflow-visible [&>span:last-child]:text-[10px] [&>span:last-child]:leading-tight"
+              />
+            </div>;
+          })}
+        </div>}
       </div>
-      <button
-        ref={triggerRef}
-        type="button"
-        className="grid size-14 cursor-pointer place-items-center rounded-md border border-primary/50 bg-primary text-primary-foreground  transition-colors duration-200   hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none"
-        aria-label={expanded ? 'Close node menu' : 'Add a node'}
-        aria-expanded={expanded}
-        aria-controls="node-categories"
-        onClick={() => (expanded ? close() : reveal())}
-        onKeyDown={(event) => {
+      <button ref={triggerRef} type="button"
+        className="relative grid size-14 cursor-pointer place-items-center rounded-md border border-primary/50 bg-primary text-primary-foreground transition-[border-radius,background-color,transform] duration-300 group-data-[expanded=true]/launcher:rounded-full hover:bg-primary/90 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        aria-label={expanded ? 'Close node menu' : 'Add a node'} aria-expanded={expanded} aria-controls="node-categories"
+        onPointerEnter={event => {
+          if (event.pointerType === 'mouse' && !expanded) {
+            openedByHover.current = true;
+            setExpanded(true);
+          }
+        }}
+        onClick={() => {
+          if (expanded && !openedByHover.current) close();
+          else { openedByHover.current = false; setExpanded(true); }
+        }}
+        onKeyDown={event => {
           if (event.key === 'ArrowUp') {
             event.preventDefault();
-            flushSync(reveal);
-            menuRef.current
-              ?.querySelector<HTMLButtonElement>('[data-node-category]')
-              ?.focus();
+            flushSync(() => setExpanded(true));
+            menuRef.current?.querySelector<SVGElement>('[data-node-category]')?.focus();
           }
         }}
       >
-        <Plus
-          size={26}
-          strokeWidth={1.7}
-          className="transition-transform duration-200 group-data-[expanded=true]/launcher:rotate-45 motion-reduce:transition-none"
-        />
+        <Plus size={26} strokeWidth={1.7} className="transition-transform duration-150 group-data-[expanded=true]/launcher:rotate-45 motion-reduce:transition-none" />
       </button>
     </nav>
   );
