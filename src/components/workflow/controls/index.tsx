@@ -1,6 +1,6 @@
 import { Panel } from '@xyflow/react';
 import logo from '@/assets/logo.svg?raw';
-import { Palette, X } from 'lucide-react';
+import { Settings2, X } from 'lucide-react';
 import { SettingsDialog } from '@/components/settings-dialog';
 import { AppInfoPopover } from './app-info-popover';
 import { ControlButton } from './control-button';
@@ -53,11 +53,9 @@ export function WorkflowControls() {
               <option key={value} value={value}>{value}</option>
             ))}
           </select>
-          <label htmlFor="beats-per-cycle" className="cursor-pointer text-[9px] leading-tight text-muted-foreground">BEATS/<br />CYCLE</label>
+          <label htmlFor="beats-per-cycle" className="cursor-pointer text-[9px] leading-tight text-muted-foreground" title="Beats per cycle">B/C</label>
         </div>
       </Panel>
-
-      <Panel position="top-right" className="m-4! flex h-14 items-center sm:m-6!"><PresetPopover /></Panel>
 
       {error && (
         <Panel position="top-center" className="mt-24! flex max-w-[min(420px,90vw)] items-start gap-3 rounded-md border border-destructive/40 bg-card p-3 text-xs" role="alert">
@@ -66,9 +64,10 @@ export function WorkflowControls() {
         </Panel>
       )}
       <ZoomSlider position="bottom-left" />
-      <Panel position="bottom-right" className="m-4! flex gap-1 rounded-md border border-border/60 bg-card p-1 sm:m-6!">
+      <Panel position="top-right" className="m-4! flex gap-1 rounded-md border border-border/60 bg-card p-1 sm:m-6!">
+        <PresetPopover />
         <SettingsDialog>
-          <ControlButton title="Appearance settings"><Palette className="size-4" /></ControlButton>
+          <ControlButton title="Appearance settings"><Settings2 className="size-4" /></ControlButton>
         </SettingsDialog>
         <AppInfoPopover />
       </Panel>

@@ -47,16 +47,26 @@ export function MenuBar() {
   const menuRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const hoverTimer = useRef<ReturnType<typeof setTimeout>>();
+  const closeTimer = useRef<ReturnType<typeof setTimeout>>();
+  const pointerInside = useRef(false);
   const openedByHover = useRef(false);
   const dragging = useRef(false);
 
   const cancelHover = useCallback(() => clearTimeout(hoverTimer.current), []);
+  const cancelClose = useCallback(() => clearTimeout(closeTimer.current), []);
   const close = useCallback(() => {
     cancelHover();
+    cancelClose();
     openedByHover.current = false;
     setExpanded(false);
     setOpenCategory(null);
-  }, [cancelHover]);
+  }, [cancelHover, cancelClose]);
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => {
+      if (!pointerInside.current && !dragging.current) close();
+    }, 280);
+  };
   const selectCategory = (category: string) => {
     cancelHover();
     if (!dragging.current) setOpenCategory(category);
@@ -69,9 +79,10 @@ export function MenuBar() {
     document.addEventListener('pointerdown', dismiss);
     return () => {
       cancelHover();
+      cancelClose();
       document.removeEventListener('pointerdown', dismiss);
     };
-  }, [cancelHover, close]);
+  }, [cancelHover, cancelClose, close]);
 
   const items = openCategory ? nodesByCategory[openCategory] : [];
   const categoryIndex = categories.findIndex(item => item.category === openCategory);
@@ -81,6 +92,17 @@ export function MenuBar() {
     <nav ref={menuRef} aria-label="Add nodes"
       className="group/launcher absolute bottom-[max(24px,env(safe-area-inset-bottom))] left-1/2 z-10 -translate-x-1/2 text-foreground"
       data-expanded={expanded}
+      onPointerEnter={event => {
+        if (event.pointerType !== 'mouse') return;
+        pointerInside.current = true;
+        cancelClose();
+      }}
+      onPointerLeave={event => {
+        if (event.pointerType !== 'mouse') return;
+        pointerInside.current = false;
+        cancelHover();
+        if (!dragging.current) scheduleClose();
+      }}
       onKeyDown={event => {
         if (event.key === 'Escape') {
           event.preventDefault();
@@ -88,8 +110,8 @@ export function MenuBar() {
           triggerRef.current?.focus();
         }
       }}
-      onDragStartCapture={() => { dragging.current = true; cancelHover(); }}
-      onDragEndCapture={() => { dragging.current = false; }}
+      onDragStartCapture={() => { dragging.current = true; cancelHover(); cancelClose(); }}
+      onDragEndCapture={() => { dragging.current = false; if (!pointerInside.current) scheduleClose(); }}
     >
       <div id="node-categories"
         className={cn(
@@ -151,7 +173,7 @@ export function MenuBar() {
         </div>}
       </div>
       <button ref={triggerRef} type="button"
-        className="relative grid size-14 cursor-pointer place-items-center rounded-md border border-primary/50 bg-primary text-primary-foreground transition-[border-radius,background-color,transform] duration-300 group-data-[expanded=true]/launcher:rounded-full hover:bg-primary/90 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        className="relative grid size-14 cursor-pointer place-items-center rounded-full border border-primary/50 bg-primary text-primary-foreground transition-colors duration-150 hover:bg-primary/90 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         aria-label={expanded ? 'Close node menu' : 'Add a node'} aria-expanded={expanded} aria-controls="node-categories"
         onPointerEnter={event => {
           if (event.pointerType === 'mouse' && !expanded) {

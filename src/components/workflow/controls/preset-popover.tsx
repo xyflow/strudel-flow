@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { capturePatch, applyPatch } from '@/lib/patch-state';
 import { downloadState, getShareUrl, loadFromUrl, stateFromJson } from '@/lib/project-state';
 import { PatternPanel } from './pattern-panel';
+import { ControlButton } from './control-button';
 
 type SavedPatch = { id: string; name: string; url: string };
 const storageKey = 'strudel-flow-patches-v1';
@@ -42,8 +43,8 @@ export function PresetPopover() {
   };
   return (
     <Popover onOpenChange={(open) => { if (open) { setSaved(readPatches()); setLink(getShareUrl(capturePatch())); setStatus(''); } }}>
-      <PopoverTrigger asChild><Button variant="outline" className="h-11 gap-2 rounded-md bg-card px-3 sm:px-4" aria-label="Patches"><Folder className="size-4" /><span className="hidden sm:inline">Patches</span></Button></PopoverTrigger>
-      <PopoverContent align="end" className="nowheel max-h-[calc(100dvh-100px)] w-[min(420px,calc(100vw-24px))] overflow-y-auto rounded-lg p-4">
+      <PopoverTrigger asChild><ControlButton title="Patches"><Folder className="size-4" /></ControlButton></PopoverTrigger>
+      <PopoverContent side="bottom" align="end" className="nowheel max-h-[calc(100dvh-100px)] w-[min(420px,calc(100vw-24px))] overflow-y-auto rounded-lg p-4">
         <h3 className="mb-4 text-sm font-medium">Your patches</h3>
         <form className="flex gap-2" onSubmit={(event) => {
           event.preventDefault(); const url = getShareUrl(capturePatch()); setLink(url);
