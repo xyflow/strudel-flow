@@ -191,6 +191,14 @@ body,
   height: 100%;
 }
 
+.reactflow-wrapper .react-flow {
+  --xy-background-color: color-mix(in oklch, var(--accent) 40%, var(--background));
+}
+
+.reactflow-wrapper .react-flow.dark {
+  --xy-background-color: color-mix(in oklch, var(--accent) 20%, var(--background));
+}
+
 /* Reveal the outer ring together from the launcher center. */
 @keyframes radial-node-reveal {
   from { opacity: 0; transform: scale(0.25); }

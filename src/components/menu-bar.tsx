@@ -23,7 +23,7 @@ function point(radius: number, angle: number) {
   return { x: 240 + radius * Math.cos(radians), y: 240 - radius * Math.sin(radians) };
 }
 
-function sector(index: number, count = 4, outer = 128, inner = 62) {
+function sector(index: number, count = 4, outer = 138, inner = 58) {
   const slice = 180 / count;
   const start = 180 - index * slice - 3;
   const end = start - slice + 6;
@@ -91,7 +91,7 @@ export function MenuBar() {
 
   return (
     <nav ref={menuRef} aria-label="Add nodes"
-      className="group/launcher absolute bottom-[max(24px,env(safe-area-inset-bottom))] left-1/2 z-10 -translate-x-1/2 text-foreground"
+      className="group/launcher absolute bottom-[max(24px,env(safe-area-inset-bottom))] left-1/2 z-10 -translate-x-1/2 text-foreground [font-family:Arial,Helvetica,sans-serif] tracking-normal"
       data-expanded={expanded}
       onPointerEnter={event => {
         if (event.pointerType !== 'mouse') return;
@@ -122,12 +122,12 @@ export function MenuBar() {
       >
         <svg viewBox="0 0 480 240" className="absolute inset-0 size-full overflow-visible" aria-label="Node categories">
           {categories.map(({ label, category, icon: Icon }, index) => {
-            const center = point(95, 157.5 - index * 45);
+            const center = point(100, 157.5 - index * 45);
             return <g key={category} className="radial-category" data-active={openCategory === category}>
               <path d={sector(index)} role="button" tabIndex={expanded ? 0 : -1}
                 aria-label={label} aria-expanded={openCategory === category} aria-controls="node-category-items"
                 data-node-category
-                className="cursor-pointer stroke-border transition-colors focus-visible:stroke-ring focus-visible:stroke-2 focus-visible:outline-none"
+                className="cursor-pointer stroke-border outline-none transition-colors focus-visible:stroke-ring focus-visible:stroke-2"
                 fill={openCategory === category ? 'var(--accent)' : 'var(--card)'}
                 onPointerEnter={event => {
                   if (event.pointerType !== 'mouse' || dragging.current) return;
@@ -148,9 +148,9 @@ export function MenuBar() {
                   }
                 }}
               />
-              <g className={cn('pointer-events-none', openCategory === category ? 'text-foreground' : 'text-muted-foreground')}>
-                <Icon x={center.x - 10} y={center.y - 17} width={20} height={20} strokeWidth={1.7} />
-                <text x={center.x} y={center.y + 17} textAnchor="middle" fill="currentColor" fontSize={10}>{label}</text>
+              <g className={cn('pointer-events-none', openCategory === category ? 'text-accent-foreground' : 'text-muted-foreground')}>
+                <Icon x={center.x - 9} y={center.y - 16} width={18} height={18} strokeWidth={1.7} />
+                <text x={center.x} y={center.y + 14} textAnchor="middle" fill="currentColor" fontSize={10} fontWeight={500} letterSpacing={0}>{label}</text>
               </g>
             </g>;
           })}
@@ -167,7 +167,7 @@ export function MenuBar() {
             return <div key={item.id} className="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2"
               style={{ left: `${position.x / 480 * 100}%`, top: `${position.y / 240 * 100}%` }}>
               <DraggableNodeItem {...item}
-                className="size-12 gap-0 rounded-full border bg-card p-0 sm:size-14 [&>span:last-child]:absolute [&>span:last-child]:top-full [&>span:last-child]:mt-1 [&>span:last-child]:w-20 [&>span:last-child]:overflow-visible [&>span:last-child]:text-[10px] [&>span:last-child]:leading-tight"
+                className="size-[14cqw] gap-1 rounded-full border bg-card p-1 sm:w-[14cqw] [&>svg]:size-[4cqw] [&>span:last-child]:overflow-visible [&>span:last-child]:text-[clamp(8px,2.1cqw,10px)] [&>span:last-child]:leading-tight [&>span:last-child]:tracking-normal"
               />
             </div>;
           })}

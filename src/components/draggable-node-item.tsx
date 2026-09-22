@@ -100,10 +100,10 @@ export function DraggableNodeItem({
           <Plus className="size-3.5" />
         </span>
       )}
-      {arc ? <span className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 text-center"
+      {arc ? <span className="pointer-events-none absolute flex w-[14cqw] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 text-center"
         style={{ left: `${arc.x / 480 * 100}%`, top: `${arc.y / 240 * 100}%` }}>
-        {IconComponent ? <IconComponent className="size-5 shrink-0" aria-hidden="true" /> : null}
-        <span className="text-[10px] leading-tight line-clamp-2 sm:text-xs">{config.title}</span>
+        {IconComponent ? <IconComponent className="size-[4cqw] shrink-0" aria-hidden="true" /> : null}
+        <span className="text-[clamp(8px,2.1cqw,10px)] leading-tight tracking-normal">{config.title}</span>
       </span> : <>
         {IconComponent ? <IconComponent className="size-5 shrink-0" aria-hidden="true" /> : null}
         <span className="text-[10px] leading-tight line-clamp-2 sm:text-xs">{config.title}</span>
