@@ -47,7 +47,12 @@ JuxNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const jux = node.data.jux || 'rev';
   if (!node.data.jux) return strudelString;
 
-  const transform = { rev: 'rev()', press: 'press()', crush: 'crush(4)', delay: 'delay(0.5)' }[jux];
+  const transform = {
+    rev: 'rev()',
+    press: 'press()',
+    crush: 'crush(4)',
+    delay: 'delay(0.5)',
+  }[jux];
   if (!transform) return strudelString;
   const juxCall = `jux(x => x.${transform})`;
   return strudelString ? `${strudelString}.${juxCall}` : juxCall;

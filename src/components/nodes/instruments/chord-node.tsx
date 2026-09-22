@@ -29,7 +29,7 @@ const SCALE_DEGREES = {
 
 const getChordNotes = (
   scaleStep: number,
-  complexity: ChordComplexity
+  complexity: ChordComplexity,
 ): string => {
   const chordIntervals = {
     triad: [0, 2, 4],
@@ -49,7 +49,6 @@ const getChordNotes = (
 export function ChordNode({ id, data, type }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Use node data directly with defaults
   const selectedKey = data.selectedKey || 'C';
   const scaleType = data.scaleType || 'major';
   const chordComplexity = data.chordComplexity || 'triad';
@@ -146,7 +145,6 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
 ChordNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const data = node.data;
 
-  // Get data directly from node.data with defaults
   const pressedKeys = data.pressedKeys || [];
   const selectedKey = data.selectedKey || 'C';
   const scaleType = data.scaleType || 'major';
@@ -155,7 +153,6 @@ ChordNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   if (pressedKeys.length === 0) return strudelString;
 
-  // Process chords inline (same logic as before)
   const chords = [...pressedKeys]
     .sort((a, b) => a - b)
     .map((scaleStep) => getChordNotes(scaleStep, chordComplexity));

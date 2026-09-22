@@ -6,11 +6,10 @@ import { Textarea } from '@/components/ui/textarea';
 export function CustomNode({ id, data, type }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Use node data directly with defaults
   const customPattern = data.customPattern ?? 'sound("bd sd hh sd")';
 
   const handlePatternChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
+    event: React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
     updateNodeData(id, { customPattern: event.target.value });
   };
@@ -19,9 +18,7 @@ export function CustomNode({ id, data, type }: WorkflowNodeProps) {
     <WorkflowNode id={id} data={data} type={type}>
       <div className="flex flex-col gap-3 px-4 pt-1 pb-4 w-80">
         <div className="flex flex-col gap-2">
-          <label className="sr-only">
-            Strudel pattern
-          </label>
+          <label className="sr-only">Strudel pattern</label>
           <Textarea
             aria-label="Strudel pattern"
             value={customPattern}
@@ -31,7 +28,6 @@ export function CustomNode({ id, data, type }: WorkflowNodeProps) {
             spellCheck={false}
           />
         </div>
-
       </div>
     </WorkflowNode>
   );

@@ -77,8 +77,12 @@ export type WorkflowNodeData = {
   pressedKeys?: number[];
 
   // Beat machine node data
-  rows?: Array<{ instrument: string; pattern: boolean[]; modifiers?: Record<number, CellState> }>;
-    modifiersEnabled?: boolean;
+  rows?: Array<{
+    instrument: string;
+    pattern: boolean[];
+    modifiers?: Record<number, CellState>;
+  }>;
+  modifiersEnabled?: boolean;
 
   // Arpeggiator node data
   selectedPattern?: string;
@@ -118,10 +122,30 @@ export type NodeConfig = {
 };
 
 const nodesConfig: Record<AppNodeType, NodeConfig> = {
-  'rhythm-node': { id: 'rhythm-node', title: 'Rhythm', category: 'Time Effects', icon: 'Grid3x3' },
-  'time-node': { id: 'time-node', title: 'Time', category: 'Time Effects', icon: 'Clock' },
-  'texture-node': { id: 'texture-node', title: 'Texture', category: 'Audio Effects', icon: 'Zap' },
-  'level-node': { id: 'level-node', title: 'Level', category: 'Audio Effects', icon: 'Volume2' },
+  'rhythm-node': {
+    id: 'rhythm-node',
+    title: 'Rhythm',
+    category: 'Time Effects',
+    icon: 'Grid3x3',
+  },
+  'time-node': {
+    id: 'time-node',
+    title: 'Time',
+    category: 'Time Effects',
+    icon: 'Clock',
+  },
+  'texture-node': {
+    id: 'texture-node',
+    title: 'Texture',
+    category: 'Audio Effects',
+    icon: 'Zap',
+  },
+  'level-node': {
+    id: 'level-node',
+    title: 'Level',
+    category: 'Audio Effects',
+    icon: 'Volume2',
+  },
   'pad-node': {
     id: 'pad-node',
     title: 'Pad',

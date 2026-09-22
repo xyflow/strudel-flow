@@ -22,7 +22,23 @@ export function DrumSoundsNode({ id, data }: WorkflowNodeProps) {
   return (
     <WorkflowNode id={id} data={data}>
       <div className="flex w-64 flex-col gap-3 px-4 pt-1 pb-4">
-        <div className="grid grid-cols-4 gap-2">{[['bd', 'Kick'], ['sd', 'Snare'], ['hh', 'Hat'], ['cp', 'Clap']].map(([value, label]) => <button key={value} aria-pressed={sound === value} onClick={() => handleValueChange(value)} className="nodrag rounded-md border border-border bg-background/40 py-5 text-[10px] text-muted-foreground transition hover:border-primary/50 aria-pressed:border-primary/60 aria-pressed:bg-primary/15 aria-pressed:text-primary">{label}</button>)}</div>
+        <div className="grid grid-cols-4 gap-2">
+          {[
+            ['bd', 'Kick'],
+            ['sd', 'Snare'],
+            ['hh', 'Hat'],
+            ['cp', 'Clap'],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              aria-pressed={sound === value}
+              onClick={() => handleValueChange(value)}
+              className="nodrag rounded-md border border-border bg-background/40 py-5 text-[10px] text-muted-foreground transition hover:border-primary/50 aria-pressed:border-primary/60 aria-pressed:bg-primary/15 aria-pressed:text-primary"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <Select value={sound} onValueChange={handleValueChange}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="More sounds" />

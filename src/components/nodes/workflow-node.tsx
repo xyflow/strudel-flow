@@ -64,7 +64,8 @@ function WorkflowNode({
         </h3>
         <div className="flex items-center gap-1">
           {isInstrument && (
-            <Button variant="ghost"
+            <Button
+              variant="ghost"
               aria-label={isPaused ? 'Unmute instrument' : 'Mute instrument'}
               onClick={() => setGroupState(id, isPaused ? 'running' : 'paused')}
               className={cn(
@@ -81,7 +82,8 @@ function WorkflowNode({
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost"
+              <Button
+                variant="ghost"
                 aria-label="Module options"
                 className="nodrag size-7 rounded-md p-1 text-muted-foreground"
               >

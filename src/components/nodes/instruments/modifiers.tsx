@@ -52,7 +52,11 @@ export function ModifierDropdown({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <button
-          aria-label={currentState.type === 'off' ? 'Step variation' : `Step variation ${currentState.value}`}
+          aria-label={
+            currentState.type === 'off'
+              ? 'Step variation'
+              : `Step variation ${currentState.value}`
+          }
           className={`w-12 h-6 transition-colors duration-150 rounded-lg text-[10px] font-mono select-none ${
             currentState.type === 'off'
               ? 'text-muted-foreground/50 hover:bg-muted hover:text-foreground'
@@ -76,30 +80,32 @@ export function ModifierDropdown({
             None
           </button>
 
-          {Object.entries(modifierGroups || DEFAULT_MODIFIER_GROUPS).map(([groupName, modifiers]) => (
-            <div key={groupName} className="border-t pt-2">
-              <div className="text-xs font-medium text-muted-foreground px-2 mb-1">
-                {groupName}
+          {Object.entries(modifierGroups || DEFAULT_MODIFIER_GROUPS).map(
+            ([groupName, modifiers]) => (
+              <div key={groupName} className="border-t pt-2">
+                <div className="text-xs font-medium text-muted-foreground px-2 mb-1">
+                  {groupName}
+                </div>
+                {modifiers.map((mod) => (
+                  <button
+                    key={mod.value}
+                    className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-muted ${
+                      currentState.type === 'modifier' &&
+                      currentState.value === mod.value
+                        ? 'bg-muted font-medium'
+                        : ''
+                    }`}
+                    onClick={() => {
+                      onModifierSelect({ type: 'modifier', value: mod.value });
+                      setIsOpen(false);
+                    }}
+                  >
+                    {mod.label}
+                  </button>
+                ))}
               </div>
-              {modifiers.map((mod) => (
-                <button
-                  key={mod.value}
-                  className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-muted ${
-                    currentState.type === 'modifier' &&
-                    currentState.value === mod.value
-                      ? 'bg-muted font-medium'
-                      : ''
-                  }`}
-                  onClick={() => {
-                    onModifierSelect({ type: 'modifier', value: mod.value });
-                    setIsOpen(false);
-                  }}
-                >
-                  {mod.label}
-                </button>
-              ))}
-            </div>
-          ))}
+            ),
+          )}
         </div>
       </PopoverContent>
     </Popover>

@@ -1,4 +1,9 @@
-import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { AccordionControls } from '@/components/accordion-controls';
 import { CellState, ModifierDropdown } from './modifiers';
@@ -15,6 +20,14 @@ interface BeatMachineRow {
   modifiers?: { [stepIdx: number]: CellState };
 }
 
+function createDefaultRows(steps: number): BeatMachineRow[] {
+  return ['bd', 'sd', 'hh'].map((instrument) => ({
+    instrument,
+    pattern: Array(steps).fill(false),
+    modifiers: {},
+  }));
+}
+
 function applyStepModifier(pattern: string, modifier?: CellState): string {
   if (modifier && modifier.type === 'modifier') {
     if (modifier.value === 'rarely') {
@@ -25,7 +38,10 @@ function applyStepModifier(pattern: string, modifier?: CellState): string {
   return pattern;
 }
 
-const patternToString = (pattern: boolean[], modifiers?: { [stepIdx: number]: CellState }) => {
+const patternToString = (
+  pattern: boolean[],
+  modifiers?: { [stepIdx: number]: CellState },
+) => {
   return pattern
     .map((active, idx) => {
       const base = active ? '1' : '~';
@@ -46,7 +62,11 @@ function SequencerRow({
   rowIndex: number;
   onStepClick: (rowIndex: number, step: number) => void;
   onInstrumentChange: (rowIndex: number, instrument: string) => void;
-  onModifierSelect: (rowIndex: number, stepIdx: number, modifier: CellState) => void;
+  onModifierSelect: (
+    rowIndex: number,
+    stepIdx: number,
+    modifier: CellState,
+  ) => void;
   showModifiers: boolean;
 }) {
   return (
@@ -81,12 +101,13 @@ function SequencerRow({
                     ? 'border-primary bg-primary text-primary-foreground'
                     : 'border-border bg-muted text-muted-foreground hover:border-muted-foreground/60 hover:bg-accent'
                 }`}
-              >
-              </button>
+              ></button>
               {showModifiers && (
                 <ModifierDropdown
                   currentState={row.modifiers?.[step] || { type: 'off' }}
-                  onModifierSelect={(modifier) => onModifierSelect(rowIndex, step, modifier)}
+                  onModifierSelect={(modifier) =>
+                    onModifierSelect(rowIndex, step, modifier)
+                  }
                   modifierGroups={{
                     Speed: [
                       { value: '*2', label: '*2' },
@@ -112,48 +133,43 @@ function SequencerRow({
 export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Modifier toggle state (persisted in node data)
-  const modifiersEnabled = typeof data.modifiersEnabled === 'boolean' ? data.modifiersEnabled : false;
+  const modifiersEnabled =
+    typeof data.modifiersEnabled === 'boolean' ? data.modifiersEnabled : false;
 
-  // Number of steps (default 16)
   const steps = typeof data.steps === 'number' ? data.steps : 16;
 
-  // Use node data directly with defaults
-  // Ensure all rows have a 'modifiers' property for type safety
-  const rows = (data.rows || [
-    { instrument: 'bd', pattern: Array(steps).fill(false), modifiers: {} },
-    { instrument: 'sd', pattern: Array(steps).fill(false), modifiers: {} },
-    { instrument: 'hh', pattern: Array(steps).fill(false), modifiers: {} },
-  ]).map((row) => {
-    // Type guard for modifiers property
+  const rows = (data.rows || createDefaultRows(steps)).map((row) => {
     return {
       ...row,
-      pattern: Array.isArray(row.pattern) && row.pattern.length === steps ? row.pattern : Array(steps).fill(false),
+      pattern:
+        Array.isArray(row.pattern) && row.pattern.length === steps
+          ? row.pattern
+          : Array(steps).fill(false),
       modifiers: row.modifiers ?? {},
     };
   });
 
-  // Step counter handlers
   const setSteps = (newSteps: number) => {
     if (newSteps < 1 || newSteps > 32) return;
     // Adjust all row patterns to new length
     const newRows = rows.map((row) => {
       let newPattern = row.pattern.slice(0, newSteps);
       if (newPattern.length < newSteps) {
-        newPattern = newPattern.concat(Array(newSteps - newPattern.length).fill(false));
+        newPattern = newPattern.concat(
+          Array(newSteps - newPattern.length).fill(false),
+        );
       }
       // Remove modifiers for steps that no longer exist
       const newModifiers: { [stepIdx: number]: CellState } = {};
       Object.entries(row.modifiers).forEach(([k, v]) => {
         const idx = Number(k);
-        if (idx < newSteps) newModifiers[idx] = v as CellState;
+        if (idx < newSteps) newModifiers[idx] = v;
       });
       return { ...row, pattern: newPattern, modifiers: newModifiers };
     });
     updateNodeData(id, { steps: newSteps, rows: newRows });
   };
 
-  // Track counter handlers
   const addTrack = () => {
     const newRows = [
       ...rows,
@@ -171,7 +187,6 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
     updateNodeData(id, { rows: newRows });
   };
 
-  // Modifier toggle handler
   const setModifiersEnabled = (enabled: boolean) => {
     updateNodeData(id, { modifiersEnabled: enabled });
   };
@@ -196,7 +211,11 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
     updateNodeData(id, { rows: newRows });
   };
 
-  const handleModifierSelect = (rowIndex: number, stepIdx: number, modifier: CellState) => {
+  const handleModifierSelect = (
+    rowIndex: number,
+    stepIdx: number,
+    modifier: CellState,
+  ) => {
     const newRows = rows.map((row, rIndex) => {
       const modifiers = row.modifiers || {};
       if (rIndex === rowIndex) {
@@ -239,75 +258,77 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
             />
           ))}
         </div>
-        <AccordionControls><div className="flex flex-wrap gap-4 items-center justify-between">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearAll}
-              className="text-xs"
-            >
-              Clear All
-            </Button>
+        <AccordionControls>
+          <div className="flex flex-wrap gap-4 items-center justify-between">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearAll}
+                className="text-xs"
+              >
+                Clear All
+              </Button>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xs">Steps</span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 px-0 text-xs"
+                  onClick={() => setSteps(steps - 1)}
+                  disabled={steps <= 1}
+                  aria-label="Decrease steps"
+                >
+                  -
+                </Button>
+                <span className="text-xs w-5 text-center">{steps}</span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 px-0 text-xs"
+                  onClick={() => setSteps(steps + 1)}
+                  disabled={steps >= 32}
+                  aria-label="Increase steps"
+                >
+                  +
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs">Tracks</span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 px-0 text-xs"
+                  onClick={removeTrack}
+                  disabled={rows.length <= 1}
+                  aria-label="Remove track"
+                >
+                  -
+                </Button>
+                <span className="text-xs w-5 text-center">{rows.length}</span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 px-0 text-xs"
+                  onClick={addTrack}
+                  aria-label="Add track"
+                >
+                  +
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs">Modifiers</span>
+                <Switch
+                  checked={modifiersEnabled}
+                  onCheckedChange={setModifiersEnabled}
+                  aria-label="Toggle modifiers"
+                />
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xs">Steps</span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 px-0 text-xs"
-                onClick={() => setSteps(steps - 1)}
-                disabled={steps <= 1}
-                aria-label="Decrease steps"
-              >
-                -
-              </Button>
-              <span className="text-xs w-5 text-center">{steps}</span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 px-0 text-xs"
-                onClick={() => setSteps(steps + 1)}
-                disabled={steps >= 32}
-                aria-label="Increase steps"
-              >
-                +
-              </Button>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs">Tracks</span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 px-0 text-xs"
-                onClick={removeTrack}
-                disabled={rows.length <= 1}
-                aria-label="Remove track"
-              >
-                -
-              </Button>
-              <span className="text-xs w-5 text-center">{rows.length}</span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 px-0 text-xs"
-                onClick={addTrack}
-                aria-label="Add track"
-              >
-                +
-              </Button>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs">Modifiers</span>
-              <Switch
-                checked={modifiersEnabled}
-                onCheckedChange={setModifiersEnabled}
-                aria-label="Toggle modifiers"
-              />
-            </div>
-          </div>
-        </div></AccordionControls>
+        </AccordionControls>
       </div>
     </WorkflowNode>
   );
@@ -315,30 +336,25 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
 
 BeatMachineNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const data = node.data;
-  const modifiersEnabled = typeof data.modifiersEnabled === 'boolean' ? data.modifiersEnabled : false;
+  const modifiersEnabled =
+    typeof data.modifiersEnabled === 'boolean' ? data.modifiersEnabled : false;
   const steps = typeof data.steps === 'number' ? data.steps : 16;
-  const rows = data.rows || [
-    { instrument: 'bd', pattern: Array(steps).fill(false), modifiers: {} },
-    { instrument: 'sd', pattern: Array(steps).fill(false), modifiers: {} },
-    { instrument: 'hh', pattern: Array(steps).fill(false), modifiers: {} },
-  ];
+  const rows = data.rows || createDefaultRows(steps);
 
   // If modifiers are disabled, ignore them in output
-  const patterns = rows.filter(row => row.pattern.some(Boolean)).map(
-    (row) =>
-      `sound("${row.instrument}").struct("${patternToString(row.pattern, modifiersEnabled ? (row.modifiers ?? {}) : {})}")`,
-  );
+  const patterns = rows
+    .filter((row) => row.pattern.some(Boolean))
+    .map(
+      (row) =>
+        `sound("${row.instrument}").struct("${patternToString(row.pattern, modifiersEnabled ? (row.modifiers ?? {}) : {})}")`,
+    );
 
-  const validPatterns = patterns;
-
-  if (validPatterns.length === 0) {
+  if (patterns.length === 0) {
     return strudelString;
   }
 
   const beatCall =
-    validPatterns.length === 1
-      ? validPatterns[0]
-      : `stack(${validPatterns.join(', ')})`;
+    patterns.length === 1 ? patterns[0] : `stack(${patterns.join(', ')})`;
 
   return strudelString ? `${strudelString}.stack(${beatCall})` : beatCall;
 };

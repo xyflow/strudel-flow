@@ -23,7 +23,7 @@ const OCTAVE_RANGES = [
 
 const expandPatternAcrossOctaves = (
   basePattern: number[],
-  octaves: number
+  octaves: number,
 ): string => {
   if (octaves === 1) {
     return basePattern.join(' ');
@@ -64,8 +64,8 @@ function ArpeggioVisualizer({
                     isSet && isActive
                       ? 'bg-primary'
                       : isSet
-                      ? 'bg-muted-foreground/40'
-                      : 'bg-muted-foreground/10'
+                        ? 'bg-muted-foreground/40'
+                        : 'bg-muted-foreground/10',
                   )}
                 />
               );
@@ -80,7 +80,6 @@ function ArpeggioVisualizer({
 export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  // Use node data directly with defaults
   const selectedPattern = data.selectedPattern || '';
   const octaveRange = data.octaveRange || 1;
   const octave = data.octave || 4;
@@ -102,7 +101,9 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
                 pattern={p.pattern}
                 isActive={selectedPattern === p.id}
               />
-              <span className="text-[9px] tracking-wide text-muted-foreground">{p.label}</span>
+              <span className="text-[9px] tracking-wide text-muted-foreground">
+                {p.label}
+              </span>
             </button>
           ))}
         </div>
@@ -160,7 +161,7 @@ ArpeggiatorNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const finalPattern = expandPatternAcrossOctaves(
     patternData.pattern,
-    octaveRange
+    octaveRange,
   );
   const arpCall = `n("${finalPattern}").scale("${selectedKey}${octave}:${selectedChordType}")`;
 
