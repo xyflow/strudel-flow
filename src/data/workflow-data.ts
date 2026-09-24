@@ -7,7 +7,7 @@ export const initialNodes: AppNode[] = [
     type: 'pad-node',
     position: { x: 0, y: 0 },
     data: {
-      title: 'Pad', icon: 'Spline', state: 'running', steps: 8, octave: 3,
+      title: 'Pad', icon: 'Grid3x3', state: 'running', steps: 8, octave: 3,
       grid: Array.from({ length: 16 }, (_, step) =>
         Array.from({ length: 8 }, (_, note) => step < 8 && note === [0, 2, 4, 6, 4, 2, 1, 4][step])),
     },

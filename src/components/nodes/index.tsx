@@ -13,10 +13,8 @@ import { DrumSoundsNode } from './synths/drum-sounds-node';
 
 // Instruments
 import { PadNode } from './instruments/pad-node';
-import { ArpeggiatorNode } from './instruments/arpeggiator-node';
 import { ChordNode } from './instruments/chord-node';
 import { CustomNode } from './instruments/custom-node';
-import { PolyrhythmNode } from './instruments/polyrhythm-node';
 import { BeatMachineNode } from './instruments/beat-machine-node';
 
 // Effects
@@ -47,24 +45,12 @@ export type WorkflowNodeData = {
   steps?: number;
   mode?: 'arp' | 'chord';
   octave?: number;
-  octaveRange?: number;
   selectedKey?: string;
   selectedScaleType?: string;
   grid?: boolean[][];
   columnModifiers?: Record<number, CellState>;
   selectedButtons?: string[];
   noteGroups?: Record<number, number[][]>;
-
-  // Polyrhythm node data
-  polyPattern1?: string;
-  polyPattern2?: string;
-  polyPattern3?: string;
-  polySound1?: string;
-  polySound2?: string;
-  polySound3?: string;
-  pattern1Active?: boolean;
-  pattern2Active?: boolean;
-  pattern3Active?: boolean;
 
   // Custom node data
   customPattern?: string;
@@ -86,10 +72,6 @@ export type WorkflowNodeData = {
     modifiers?: Record<number, CellState>;
   }>;
   modifiersEnabled?: boolean;
-
-  // Arpeggiator node data
-  selectedPattern?: string;
-  selectedChordType?: string;
 
   gain?: string;
   pan?: string;
@@ -151,13 +133,7 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     id: 'pad-node',
     title: 'Pad',
     category: 'Instruments',
-    icon: 'Spline',
-  },
-  'arpeggiator-node': {
-    id: 'arpeggiator-node',
-    title: 'Arpeggiator',
-    category: 'Instruments',
-    icon: 'Zap',
+    icon: 'Grid3x3',
   },
   'chord-node': {
     id: 'chord-node',
@@ -165,17 +141,11 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     category: 'Instruments',
     icon: 'Music2',
   },
-  'polyrhythm-node': {
-    id: 'polyrhythm-node',
-    title: 'Polyrhythm',
-    category: 'Instruments',
-    icon: 'Layers',
-  },
   'beat-machine-node': {
     id: 'beat-machine-node',
     title: 'Beats',
     category: 'Instruments',
-    icon: 'Grid3x3',
+    icon: 'Drum',
   },
   'custom-node': {
     id: 'custom-node',
@@ -228,13 +198,11 @@ export const nodeTypes = {
   'level-node': LevelNode,
   'synth-select-node': SynthSelectNode,
   'pad-node': PadNode,
-  'arpeggiator-node': ArpeggiatorNode,
   'lpf-node': LpfNode,
   'phaser-node': PhaserNode,
   'drum-sounds-node': DrumSoundsNode,
   'chord-node': ChordNode,
   'custom-node': CustomNode,
-  'polyrhythm-node': PolyrhythmNode,
   'beat-machine-node': BeatMachineNode,
   'room-node': RoomNode,
   'adsr-node': ADSRNode,
