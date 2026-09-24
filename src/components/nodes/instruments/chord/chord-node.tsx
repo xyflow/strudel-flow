@@ -1,101 +1,15 @@
+import {
+  chordProgression,
+  chordNotes,
+  chordLabels,
+  PRESETS,
+  DEFAULTS,
+} from './chord';
 import { useRef, useState } from 'react';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode, WorkflowNodeData } from '..';
+import type { WorkflowNodeProps } from '@/components/nodes/types';
 import { useAppStore } from '@/store/app-store';
 import { AccordionControls } from '@/components/accordion-controls';
-const chordSizes = { triad: 3, seventh: 4, ninth: 5, eleventh: 6 };
-const finite = (value: unknown, fallback: number, min: number, max: number) => {
-  const number = Number(value ?? fallback);
-  return Number.isFinite(number)
-    ? Math.min(max, Math.max(min, number))
-    : fallback;
-};
-
-function chordDegrees(
-  root: number,
-  complexity: WorkflowNodeData['chordComplexity'] = 'triad',
-  inversion = 0,
-  open = false,
-) {
-  const notes = Array.from(
-    { length: chordSizes[complexity] ?? 3 },
-    (_, index) => root + index * 2,
-  );
-  for (let i = 0; i < Math.min(inversion, notes.length - 1); i++)
-    notes.push(notes.shift()! + 7);
-  if (open) notes[1] += 7;
-  return notes.sort((a, b) => a - b);
-}
-
-function chordProgression(data: WorkflowNodeData) {
-  // Old patches retain their selected chords; new instruments start with a progression.
-  return (
-    data.chordNotes?.map((notes) => (notes[0] ?? 0) % 7) ??
-    data.chordProgression ??
-    (data.pressedKeys
-      ? [...data.pressedKeys].sort((a, b) => a - b)
-      : [0, 5, 3, 4])
-  );
-}
-
-function chordNotes(data: WorkflowNodeData) {
-  return (
-    data.chordNotes ??
-    chordProgression(data).map((root) =>
-      chordDegrees(
-        root,
-        data.chordComplexity,
-        Math.round(finite(data.chordInversion, 0, 0, 2)),
-        data.chordVoicing === 'open',
-      ),
-    )
-  );
-}
-
-function chordPattern(data: WorkflowNodeData) {
-  const notes = chordNotes(data);
-  if (!notes.length) return '';
-  const chords = notes.map((chord) =>
-    chord.length ? `[${chord.join(',')}]` : '~',
-  );
-  const scale = `${data.selectedKey ?? 'C'}${data.octave ?? 4}:${data.scaleType ?? 'major'}`;
-  return `n(${JSON.stringify(`<${chords.join(' ')}>`)}).scale(${JSON.stringify(scale)})`;
-}
-
-const PITCHES = [
-  'C',
-  'C♯',
-  'D',
-  'E♭',
-  'E',
-  'F',
-  'F♯',
-  'G',
-  'A♭',
-  'A',
-  'B♭',
-  'B',
-];
-const KEY_PITCH: Record<string, number> = {
-  C: 0,
-  'C#': 1,
-  Db: 1,
-  D: 2,
-  'D#': 3,
-  Eb: 3,
-  E: 4,
-  F: 5,
-  'F#': 6,
-  Gb: 6,
-  G: 7,
-  'G#': 8,
-  Ab: 8,
-  A: 9,
-  'A#': 10,
-  Bb: 10,
-  B: 11,
-};
-
 function NoteShape({ notes }: { notes: number[] }) {
   return (
     <svg viewBox="0 0 48 40" className="h-10 w-full" aria-hidden="true">
@@ -121,16 +35,6 @@ function NoteShape({ notes }: { notes: number[] }) {
     </svg>
   );
 }
-
-const DEGREES = {
-  major: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'],
-  minor: ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'],
-};
-const PRESETS = [
-  { label: 'Home', steps: [0, 5, 3, 4] },
-  { label: 'Turnaround', steps: [1, 4, 0, 0] },
-  { label: 'Descending', steps: [0, 6, 5, 4] },
-];
 
 // Drag state stays local to the chart; the patch updates only when a note is dropped.
 function ChordEditor({
@@ -318,17 +222,8 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
   const [selectedStep, setSelectedStep] = useState(0);
   const steps = chordProgression(data);
   const activeStep = Math.min(selectedStep, Math.max(0, steps.length - 1));
-  const scaleType = data.scaleType ?? 'major';
-  const degrees = DEGREES[scaleType] ?? DEGREES.major;
-  const scale =
-    scaleType === 'minor' ? [0, 2, 3, 5, 7, 8, 10] : [0, 2, 4, 5, 7, 9, 11];
-  const pitch = (degree: number) =>
-    (KEY_PITCH[data.selectedKey ?? 'C'] ?? 0) +
-    scale[degree % 7] +
-    Math.floor(degree / 7) * 12;
-  const noteName = (degree: number) => PITCHES[pitch(degree) % 12];
-  const chordName = (degree: number) =>
-    `${noteName(degree)}${degrees[degree]?.includes('°') ? '°' : degrees[degree] === degrees[degree]?.toLowerCase() ? 'm' : ''}`;
+  const { scaleType, degrees, noteName, noteLabel, chordName } =
+    chordLabels(data);
   const manual = data.chordNotes !== undefined;
   const chords = chordNotes(data);
   const tones = chords[activeStep] ?? [];
@@ -354,9 +249,7 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
           notes={tones}
           noteSlots={noteSlots}
           noteName={noteName}
-          noteLabel={(note) =>
-            `${noteName(note)}${(data.octave ?? 4) + Math.floor(pitch(note) / 12)}`
-          }
+          noteLabel={noteLabel}
           onChange={editChord}
         />
         <div className="flex gap-1.5" aria-label="Progression presets">
@@ -445,11 +338,11 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
         </div>
         <AccordionControls
           keyScaleOctaveProps={{
-            selectedKey: data.selectedKey ?? 'C',
+            selectedKey: data.selectedKey ?? DEFAULTS.selectedKey,
             onKeyChange: (selectedKey) => update(id, { selectedKey }),
             selectedScale: scaleType,
             onScaleChange: (scale) => update(id, { scaleType: scale }),
-            octave: data.octave ?? 4,
+            octave: data.octave ?? DEFAULTS.octave,
             onOctaveChange: (octave) => update(id, { octave }),
             allowedScales: ['major', 'minor'],
           }}
@@ -458,9 +351,3 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
-
-ChordNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const pattern = chordPattern(node.data);
-  if (!pattern) return strudelString;
-  return strudelString ? `stack(${strudelString}, ${pattern})` : pattern;
-};

@@ -1,3 +1,4 @@
+import { DEFAULT_SOUND } from './drum-sounds';
 import {
   Select,
   SelectContent,
@@ -5,7 +6,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAppStore } from '@/store/app-store';
-import { WorkflowNodeProps, AppNode } from '..';
+import type { WorkflowNodeProps } from '@/components/nodes/types';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { DRUM_CATEGORIES } from '@/data/sounds';
 import { CategorySelectItems } from '@/components/category-select-items';
@@ -13,7 +14,7 @@ import { CategorySelectItems } from '@/components/category-select-items';
 export function DrumSoundsNode({ id, data }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  const sound = data.sound || '';
+  const sound = data.sound || DEFAULT_SOUND;
 
   const handleValueChange = (value: string) => {
     updateNodeData(id, { sound: value });
@@ -51,10 +52,3 @@ export function DrumSoundsNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
-
-DrumSoundsNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  if (!node.data.sound) return strudelString;
-
-  const soundCall = `sound("${node.data.sound}")`;
-  return strudelString ? `${strudelString}.${soundCall}` : soundCall;
-};

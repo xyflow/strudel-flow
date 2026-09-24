@@ -1,3 +1,4 @@
+import { DEFAULT_SOUND } from './synth-select';
 import {
   Select,
   SelectContent,
@@ -6,7 +7,7 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { useAppStore } from '@/store/app-store';
-import { WorkflowNodeProps, AppNode } from '..';
+import type { WorkflowNodeProps } from '@/components/nodes/types';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { SYNTH_CATEGORIES } from '@/data/sounds';
 import { cn } from '@/lib/utils';
@@ -25,7 +26,7 @@ const waveforms = [
 
 export function SynthSelectNode({ id, data }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
-  const sound = data.sound || '';
+  const sound = data.sound || DEFAULT_SOUND;
 
   const handleValueChange = (value: string) => {
     updateNodeData(id, { sound: value });
@@ -86,10 +87,3 @@ export function SynthSelectNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
-
-SynthSelectNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  if (!node.data.sound) return strudelString;
-
-  const soundCall = `sound("${node.data.sound}")`;
-  return strudelString ? `${strudelString}.${soundCall}` : soundCall;
-};

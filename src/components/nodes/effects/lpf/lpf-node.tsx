@@ -1,11 +1,12 @@
+import { DEFAULT_FILTER } from './lpf';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import type { WorkflowNodeProps } from '@/components/nodes/types';
 import { useAppStore } from '@/store/app-store';
 import { ParameterKnob } from '@/components/parameter-knob';
 
 export function LpfNode({ id, data }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);
-  const [frequency = 1000, resonance = 1] = (data.lpf || '1000 1')
+  const [frequency = 1000, resonance = 1] = (data.lpf || DEFAULT_FILTER)
     .split(' ')
     .map(Number);
   return (
@@ -39,11 +40,3 @@ export function LpfNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
-
-LpfNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const [frequency = 1000, resonance = 1] = (node.data.lpf || '1000 1')
-    .split(' ')
-    .map(Number);
-  const filter = `lpf(${frequency}).lpq(${resonance})`;
-  return strudelString ? `${strudelString}.${filter}` : filter;
-};

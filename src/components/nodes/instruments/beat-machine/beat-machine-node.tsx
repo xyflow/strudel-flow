@@ -1,3 +1,5 @@
+import { createDefaultRows, DEFAULT_STEPS } from './beat-machine';
+import type { BeatMachineRow } from './beat-machine';
 import {
   Select,
   SelectContent,
@@ -6,49 +8,13 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { AccordionControls } from '@/components/accordion-controls';
-import { CellState, ModifierDropdown } from './modifiers';
+import { CellState, ModifierDropdown } from '../modifiers';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import type { WorkflowNodeProps } from '@/components/nodes/types';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
 import { DRUM_CATEGORIES } from '@/data/sounds';
 import { CategorySelectItems } from '@/components/category-select-items';
-
-interface BeatMachineRow {
-  instrument: string;
-  pattern: boolean[];
-  modifiers?: { [stepIdx: number]: CellState };
-}
-
-function createDefaultRows(steps: number): BeatMachineRow[] {
-  return ['bd', 'sd', 'hh'].map((instrument) => ({
-    instrument,
-    pattern: Array(steps).fill(false),
-    modifiers: {},
-  }));
-}
-
-function applyStepModifier(pattern: string, modifier?: CellState): string {
-  if (modifier && modifier.type === 'modifier') {
-    if (modifier.value === 'rarely') {
-      return `rarely(${pattern})`;
-    }
-    return `${pattern}${modifier.value}`;
-  }
-  return pattern;
-}
-
-const patternToString = (
-  pattern: boolean[],
-  modifiers?: { [stepIdx: number]: CellState },
-) => {
-  return pattern
-    .map((active, idx) => {
-      const base = active ? '1' : '~';
-      return applyStepModifier(base, modifiers?.[idx]);
-    })
-    .join(' ');
-};
 
 function SequencerRow({
   row,
@@ -136,7 +102,7 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
   const modifiersEnabled =
     typeof data.modifiersEnabled === 'boolean' ? data.modifiersEnabled : false;
 
-  const steps = typeof data.steps === 'number' ? data.steps : 16;
+  const steps = typeof data.steps === 'number' ? data.steps : DEFAULT_STEPS;
 
   const rows = (data.rows || createDefaultRows(steps)).map((row) => {
     return {
@@ -333,28 +299,3 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
-
-BeatMachineNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const data = node.data;
-  const modifiersEnabled =
-    typeof data.modifiersEnabled === 'boolean' ? data.modifiersEnabled : false;
-  const steps = typeof data.steps === 'number' ? data.steps : 16;
-  const rows = data.rows || createDefaultRows(steps);
-
-  // If modifiers are disabled, ignore them in output
-  const patterns = rows
-    .filter((row) => row.pattern.some(Boolean))
-    .map(
-      (row) =>
-        `sound("${row.instrument}").struct("${patternToString(row.pattern, modifiersEnabled ? (row.modifiers ?? {}) : {})}")`,
-    );
-
-  if (patterns.length === 0) {
-    return strudelString;
-  }
-
-  const beatCall =
-    patterns.length === 1 ? patterns[0] : `stack(${patterns.join(', ')})`;
-
-  return strudelString ? `${strudelString}.stack(${beatCall})` : beatCall;
-};

@@ -1,24 +1,19 @@
+import { NOTES, DEFAULTS, createDefaultGrid } from './pad';
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/app-store';
 import { getSchedulerNow } from '@/lib/strudel-clock';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import type { WorkflowNodeProps } from '@/components/nodes/types';
 
-import { CellState, ModifierDropdown } from './modifiers';
+import { CellState, ModifierDropdown } from '../modifiers';
 import { AccordionControls } from '@/components/accordion-controls';
-
-const NOTES = ['0', '1', '2', '3', '4', '5', '6', '7'];
-
-function applyColumnModifier(pattern: string, modifier: CellState): string {
-  return modifier.type === 'modifier' ? `${pattern}${modifier.value}` : pattern;
-}
 
 export function PadNode({ id, data, type }: WorkflowNodeProps) {
   const [activeStep, setActiveStep] = useState(-1);
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
   const isPlaying = useAppStore((state) => state.isPlaying);
-  const steps = data.steps || 5;
+  const steps = data.steps || DEFAULTS.steps;
 
   useEffect(() => {
     if (!isPlaying || data.state === 'paused') {
@@ -35,15 +30,12 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
     return () => cancelAnimationFrame(rafId);
   }, [steps, isPlaying, data.state]);
 
-  const mode = data.mode || 'arp';
-  const octave = data.octave || 3;
-  const selectedKey = data.selectedKey || 'C';
-  const selectedScaleType = data.selectedScaleType || 'major';
-  const grid =
-    data.grid ||
-    Array(16)
-      .fill(null)
-      .map(() => Array(8).fill(false));
+  const mode = data.mode || DEFAULTS.mode;
+  const octave = data.octave || DEFAULTS.octave;
+  const selectedKey = data.selectedKey || DEFAULTS.selectedKey;
+  const selectedScaleType =
+    data.selectedScaleType || DEFAULTS.selectedScaleType;
+  const grid = data.grid || createDefaultGrid();
   const columnModifiers = data.columnModifiers || {};
   const selectedButtons = new Set(data.selectedButtons || []);
   const noteGroups = data.noteGroups || {};
@@ -182,60 +174,6 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
-
-PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const { data } = node;
-  const grid =
-    data.grid ||
-    Array(16)
-      .fill(null)
-      .map(() => Array(8).fill(false));
-  const columnModifiers = data.columnModifiers || {};
-  const noteGroups = data.noteGroups || {};
-
-  const generateStepPattern = (row: boolean[], stepIdx: number) => {
-    const individualNotes = row
-      .map((on, noteIdx) => (on ? NOTES[noteIdx] : null))
-      .filter(Boolean);
-
-    const stepGroups = noteGroups[stepIdx] || [];
-    const groupPatterns = stepGroups.map(
-      (group) => `<${group.map((noteIdx) => NOTES[noteIdx]).join(' ')}>`,
-    );
-
-    const allPatterns = [...individualNotes, ...groupPatterns];
-    if (allPatterns.length === 0) return '';
-
-    const separator = (data.mode || 'arp') === 'arp' ? ' ' : ', ';
-    const stepPattern = `[${allPatterns.join(separator)}]`;
-
-    const columnModifier = columnModifiers[stepIdx];
-    if (columnModifier && columnModifier.type !== 'off') {
-      return applyColumnModifier(stepPattern, columnModifier);
-    }
-
-    return stepPattern;
-  };
-
-  // Only use the first `steps` rows of the grid
-  const steps = data.steps || 5;
-  const stepPatternsWithEmpty = grid.slice(0, steps).map((row, stepIdx) => {
-    const step = generateStepPattern(row, stepIdx);
-    return step === '' ? '[~]' : step;
-  });
-  const pattern = stepPatternsWithEmpty.join(' ');
-
-  if (!pattern || !pattern.trim() || /^[~\s]*$/.test(pattern.trim())) {
-    return strudelString;
-  }
-
-  const octavePart = data.octave ? data.octave : '';
-  const scale = `${data.selectedKey || 'C'}${octavePart}:${data.selectedScaleType || 'major'}`;
-
-  return strudelString
-    ? `${strudelString}.n("${pattern}").scale("${scale}")`
-    : `n("${pattern}").scale("${scale}")`;
-};
 
 const getButtonClasses = (
   isSelected: boolean,

@@ -10,15 +10,19 @@ export default function PatternPopup({
   id: string;
   rows?: number;
 }) {
-  const node = useAppStore(state => state.nodes.find(node => node.id === id));
-  const strudelPattern = node ? getNodeStrudelOutput(node.type)?.(node, '') : '';
+  const node = useAppStore((state) =>
+    state.nodes.find((node) => node.id === id),
+  );
+  const strudelPattern = node
+    ? getNodeStrudelOutput(node.type)?.(node.data, '')
+    : '';
 
   return (
     <div
       className={`px-3 py-2 border-t bg-card text-card-foreground border-border w-0 min-w-full ${className}`}
     >
       <label htmlFor={`preview-${id}`} className="text-xs font-mono">
-        Preview
+        Strudel Pattern
       </label>
       <pre
         className="w-full p-2 border rounded font-mono text-xs mt-1 whitespace-pre-wrap bg-background text-foreground border-border w-0 min-w-full select-text"

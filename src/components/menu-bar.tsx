@@ -1,5 +1,5 @@
 import { useReactFlow } from '@xyflow/react';
-import { AudioLines, Clock3, Piano, SlidersHorizontal } from 'lucide-react';
+import { AudioLines, Piano, SlidersHorizontal } from 'lucide-react';
 import {
   RadialMenu,
   RadialMenuItem,
@@ -13,7 +13,6 @@ const categories = [
   { label: 'Instruments', category: 'Instruments', icon: Piano },
   { label: 'Sounds', category: 'Synths', icon: AudioLines },
   { label: 'Effects', category: 'Audio Effects', icon: SlidersHorizontal },
-  { label: 'Time', category: 'Time Effects', icon: Clock3 },
 ].map((category) => ({
   ...category,
   items: Object.values(nodesConfig).filter(

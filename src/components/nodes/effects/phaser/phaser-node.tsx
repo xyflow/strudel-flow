@@ -1,5 +1,6 @@
-import WorkflowNode from '../workflow-node';
-import type { WorkflowNodeProps, AppNode } from '..';
+import { DEFAULTS } from './phaser';
+import WorkflowNode from '@/components/nodes/workflow-node';
+import type { WorkflowNodeProps } from '@/components/nodes/types';
 import { useAppStore } from '@/store/app-store';
 import { ParameterKnob } from '@/components/parameter-knob';
 export function PhaserNode({ id, data }: WorkflowNodeProps) {
@@ -9,26 +10,26 @@ export function PhaserNode({ id, data }: WorkflowNodeProps) {
       <div className="flex justify-center gap-3 px-4 pt-1 pb-5">
         <ParameterKnob
           label="phaser"
-          value={Number(data.phaser ?? 1)}
+          value={Number(data.phaser ?? DEFAULTS.phaser)}
           min={0.1}
           max={10}
           step={0.1}
           onChange={(value) =>
             update(id, {
-              phaserdepth: String(data.phaserdepth ?? 0.5),
+              phaserdepth: String(data.phaserdepth ?? DEFAULTS.phaserdepth),
               phaser: String(value),
             })
           }
         />
         <ParameterKnob
           label="phaserdepth"
-          value={Number(data.phaserdepth ?? 0.5)}
+          value={Number(data.phaserdepth ?? DEFAULTS.phaserdepth)}
           min={0}
           max={1}
           step={0.01}
           onChange={(value) =>
             update(id, {
-              phaser: String(data.phaser ?? 1),
+              phaser: String(data.phaser ?? DEFAULTS.phaser),
               phaserdepth: String(value),
             })
           }
@@ -37,12 +38,3 @@ export function PhaserNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
-PhaserNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const phaser = node.data.phaser;
-  const phaserdepth = node.data.phaserdepth;
-
-  if (!phaser || !phaserdepth) return strudelString;
-
-  const phaserCall = `phaser(${phaser}).phaserdepth(${phaserdepth})`;
-  return strudelString ? `${strudelString}.${phaserCall}` : phaserCall;
-};

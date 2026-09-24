@@ -1,15 +1,11 @@
 import { Edge } from '@xyflow/react';
 import { AppNode } from '@/components/nodes';
-import nodesConfig, { nodeTypes } from '@/components/nodes';
+import nodesConfig, { nodeDefinitions } from '@/components/nodes';
 import { findConnectedComponents } from './graph-utils';
 
-type NodeWithStrudelOutput = {
-  strudelOutput?: (node: AppNode, strudelString: string) => string;
-};
-
 export function getNodeStrudelOutput(nodeType: string) {
-  const NodeComponent = nodeTypes[nodeType as keyof typeof nodeTypes] as NodeWithStrudelOutput;
-  return NodeComponent?.strudelOutput;
+  return nodeDefinitions[nodeType as keyof typeof nodeDefinitions]
+    ?.generatePattern;
 }
 
 function optimizeSoundCalls(strudelString: string): string {
@@ -23,7 +19,7 @@ function optimizeSoundCalls(strudelString: string): string {
     // This regex matches: .sound("something").sound("something else")
     optimized = optimized.replace(
       /\.sound\("([^"]+)"\)\.sound\("([^"]+)"\)/g,
-      '.sound("$1 $2")'
+      '.sound("$1 $2")',
     );
   }
 
@@ -38,7 +34,7 @@ export function generateOutput(
   nodes: AppNode[],
   edges: Edge[],
   cpm: string,
-  bpc: string
+  bpc: string,
 ): string {
   const nodePatterns: Record<string, string> = {};
   for (const node of nodes) {
@@ -46,7 +42,7 @@ export function generateOutput(
     if (!strudelOutput) continue;
 
     try {
-      const pattern = strudelOutput(node, '');
+      const pattern = strudelOutput(node.data, '');
       if (pattern?.trim()) {
         nodePatterns[node.id] = pattern;
       }
@@ -68,13 +64,13 @@ export function generateOutput(
         isSoundSource(node) ? src.push(node) : eff.push(node);
         return [src, eff];
       },
-      [[], []]
+      [[], []],
     );
 
     if (sources.length === 0) continue;
 
     const allSourcesPaused = sources.every(
-      (node) => node.data.state === 'paused'
+      (node) => node.data.state === 'paused',
     );
     const activePatterns = (
       allSourcesPaused
@@ -94,7 +90,7 @@ export function generateOutput(
     for (const effect of effects) {
       const strudelOutput = getNodeStrudelOutput(effect.type);
       if (strudelOutput && pattern) {
-        pattern = strudelOutput(effect, pattern);
+        pattern = strudelOutput(effect.data, pattern);
       }
     }
 
