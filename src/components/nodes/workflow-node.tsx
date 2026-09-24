@@ -39,7 +39,12 @@ function WorkflowNode({
   const isPaused = data.state === 'paused';
 
   return (
-    <BaseNode>
+    <BaseNode
+      data-muted={isPaused || undefined}
+      className={
+        isPaused ? 'border-amber-500/70 ring-1 ring-amber-500/25' : undefined
+      }
+    >
       <BaseHandle
         position={Position.Left}
         type="target"
@@ -69,7 +74,8 @@ function WorkflowNode({
               onClick={() => setGroupState(id, isPaused ? 'running' : 'paused')}
               className={cn(
                 'nodrag size-7 rounded-md p-1 text-muted-foreground',
-                isPaused && 'text-primary',
+                isPaused &&
+                  'bg-amber-500/15 text-amber-700 dark:text-amber-300',
               )}
             >
               {isPaused ? (
@@ -105,6 +111,25 @@ function WorkflowNode({
           </DropdownMenu>
         </div>
       </header>
+      {isPaused && (
+        <div
+          role="status"
+          className="mx-2 mb-4 flex items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/15 px-3 py-2 text-amber-800 dark:text-amber-200"
+        >
+          <VolumeX className="size-4 shrink-0" aria-hidden="true" />
+          <div className="flex-1">
+            <p className="text-xs font-semibold">Muted</p>
+            <p className="text-[10px] opacity-80">This group is silent</p>
+          </div>
+          <button
+            aria-label={`Unmute ${data.title} group`}
+            onClick={() => setGroupState(id, 'running')}
+            className="nodrag rounded-md border border-amber-600/30 bg-background/70 px-2 py-1.5 text-xs font-semibold hover:bg-background"
+          >
+            Unmute
+          </button>
+        </div>
+      )}
       {children}
       {showCode && <PatternPopup id={id} />}
     </BaseNode>

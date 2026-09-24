@@ -33,15 +33,23 @@ export function AppInfoPopover() {
         </ul>
         <p className="mt-4 border-t pt-3 text-muted-foreground">
           Powered by{' '}
-          <a href="https://reactflow.dev" className="text-foreground underline">
-            React Flow
-          </a>{' '}
-          and{' '}
           <a href="https://strudel.cc" className="text-foreground underline">
             Strudel
+          </a>{' '}
+          and made by the creators of{' '}
+          <a href="https://reactflow.dev" className="text-foreground underline">
+            React Flow
           </a>
           .
         </p>
+        <a
+          href="https://github.com/xyflow/strudel-flow"
+          target="_blank"
+          rel="noreferrer"
+          className="mt-3 inline-flex text-foreground underline underline-offset-2"
+        >
+          Contribute on GitHub
+        </a>
       </PopoverContent>
     </Popover>
   );

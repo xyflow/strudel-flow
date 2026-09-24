@@ -22,7 +22,6 @@ import { BeatMachineNode } from './instruments/beat-machine-node';
 // Effects
 import { RoomNode } from './effects/room-node';
 import { LpfNode } from './effects/lpf-node';
-import { JuxNode } from './effects/jux-node';
 import { PhaserNode } from './effects/phaser-node';
 import { ADSRNode } from './effects/adsr-node';
 
@@ -52,7 +51,6 @@ export type WorkflowNodeData = {
   selectedKey?: string;
   selectedScaleType?: string;
   grid?: boolean[][];
-  buttonModifiers?: Record<string, CellState>;
   columnModifiers?: Record<number, CellState>;
   selectedButtons?: string[];
   noteGroups?: Record<number, number[][]>;
@@ -70,11 +68,16 @@ export type WorkflowNodeData = {
 
   // Custom node data
   customPattern?: string;
+  customDraft?: string;
 
   // Chord node data
   scaleType?: 'major' | 'minor';
   chordComplexity?: 'triad' | 'seventh' | 'ninth' | 'eleventh';
   pressedKeys?: number[];
+  chordProgression?: number[];
+  chordNotes?: number[][];
+  chordInversion?: number;
+  chordVoicing?: 'close' | 'open';
 
   // Beat machine node data
   rows?: Array<{
@@ -95,7 +98,6 @@ export type WorkflowNodeData = {
   fm?: string;
   distort?: string;
   lpf?: string;
-  jux?: string;
   phaser?: string;
   phaserdepth?: string;
   room?: string;
@@ -117,7 +119,6 @@ export type NodeConfig = {
   title: string;
   category: 'Instruments' | 'Synths' | 'Audio Effects' | 'Time Effects';
   sound?: string;
-  notes?: string;
   icon: keyof typeof iconMapping;
 };
 
@@ -212,12 +213,6 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
     category: 'Audio Effects',
     icon: 'CheckCheck',
   },
-  'jux-node': {
-    id: 'jux-node',
-    title: 'Stereo',
-    category: 'Audio Effects',
-    icon: 'Split',
-  },
   'adsr-node': {
     id: 'adsr-node',
     title: 'Envelope',
@@ -235,7 +230,6 @@ export const nodeTypes = {
   'pad-node': PadNode,
   'arpeggiator-node': ArpeggiatorNode,
   'lpf-node': LpfNode,
-  'jux-node': JuxNode,
   'phaser-node': PhaserNode,
   'drum-sounds-node': DrumSoundsNode,
   'chord-node': ChordNode,
@@ -264,7 +258,6 @@ export function createNodeByType({
     data: data ?? {
       title: node.title,
       sound: node.sound,
-      notes: node.notes,
       icon: node.icon,
       state: 'running',
     },
@@ -278,25 +271,7 @@ export function createNodeByType({
   return newNode;
 }
 
-export type AppNode =
-  | Node<WorkflowNodeData, 'rhythm-node'>
-  | Node<WorkflowNodeData, 'time-node'>
-  | Node<WorkflowNodeData, 'texture-node'>
-  | Node<WorkflowNodeData, 'level-node'>
-  | Node<WorkflowNodeData, 'pad-node'>
-  | Node<WorkflowNodeData, 'arpeggiator-node'>
-  | Node<WorkflowNodeData, 'lpf-node'>
-  | Node<WorkflowNodeData, 'jux-node'>
-  | Node<WorkflowNodeData, 'phaser-node'>
-  | Node<WorkflowNodeData, 'room-node'>
-  | Node<WorkflowNodeData, 'drum-sounds-node'>
-  | Node<WorkflowNodeData, 'chord-node'>
-  | Node<WorkflowNodeData, 'custom-node'>
-  | Node<WorkflowNodeData, 'polyrhythm-node'>
-  | Node<WorkflowNodeData, 'beat-machine-node'>
-  | Node<WorkflowNodeData, 'synth-select-node'>
-  | Node<WorkflowNodeData, 'adsr-node'>;
-
-export type AppNodeType = NonNullable<AppNode['type']>;
+export type AppNodeType = keyof typeof nodeTypes;
+export type AppNode = Node<WorkflowNodeData, AppNodeType>;
 
 export default nodesConfig;

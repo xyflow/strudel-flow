@@ -1,7 +1,6 @@
 import WorkflowNode from '../workflow-node';
 import type { WorkflowNodeProps, AppNode } from '..';
-import { useAppStore } from '@/store/app-store';
-import { ParameterKnob } from '@/components/parameter-knob';
+import { ParameterControls } from '../parameter-controls';
 
 const PARAMETERS = [
   {
@@ -26,26 +25,10 @@ const PARAMETERS = [
 ] as const;
 
 export function LevelNode({ id, data }: WorkflowNodeProps) {
-  const update = useAppStore((state) => state.updateNodeData);
   return (
     <WorkflowNode id={id} data={data}>
       <div className="space-y-4 px-4 pt-1 pb-5">
-        <div className="flex justify-center gap-4">
-          {PARAMETERS.map((dial) => (
-            <ParameterKnob
-              key={dial.key}
-              label={dial.label}
-              value={Number(data[dial.key] ?? dial.initial)}
-              min={dial.min}
-              max={dial.max}
-              step={dial.step}
-              format={(value) =>
-                `${Number(value.toFixed(2))}${'unit' in dial ? dial.unit : ''}`
-              }
-              onChange={(value) => update(id, { [dial.key]: String(value) })}
-            />
-          ))}
-        </div>
+        <ParameterControls id={id} data={data} parameters={PARAMETERS} />
       </div>
     </WorkflowNode>
   );

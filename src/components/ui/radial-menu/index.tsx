@@ -1,4 +1,13 @@
-import { isValidElement, useCallback, useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import {
+  isValidElement,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 import { flushSync } from 'react-dom';
 import { MenuContext, PositionContext, menuChildren } from './context';
 export { RadialMenuItem } from './radial-menu-item';
@@ -16,8 +25,14 @@ export type RadialMenuProps = {
   style?: CSSProperties;
 };
 
-export function RadialMenu({ children, label = 'Actions', openLabel = 'Open menu',
-  closeLabel = 'Close menu', className = '', style }: RadialMenuProps) {
+export function RadialMenu({
+  children,
+  label = 'Actions',
+  openLabel = 'Open menu',
+  closeLabel = 'Close menu',
+  className = '',
+  style,
+}: RadialMenuProps) {
   const categoriesId = useId();
   const [expanded, setExpanded] = useState(false);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
@@ -53,7 +68,8 @@ export function RadialMenu({ children, label = 'Actions', openLabel = 'Open menu
 
   useEffect(() => {
     const dismiss = (event: PointerEvent) => {
-      if (!dragging.current && !menuRef.current?.contains(event.target as Node)) close();
+      if (!dragging.current && !menuRef.current?.contains(event.target as Node))
+        close();
     };
     document.addEventListener('pointerdown', dismiss);
     return () => {
@@ -74,68 +90,106 @@ export function RadialMenu({ children, label = 'Actions', openLabel = 'Open menu
       hoverTimer.current = setTimeout(() => selectCategory(id), 180);
     },
     cancelHover,
-    select: () => { close(); triggerRef.current?.focus(); },
+    select: () => {
+      close();
+      triggerRef.current?.focus();
+    },
   };
 
   return (
     <MenuContext.Provider value={context}>
-    <nav ref={menuRef} aria-label={label}
-      className={`radial-menu ${className}`} style={style}
-      data-expanded={expanded}
-      onPointerEnter={event => {
-        if (event.pointerType !== 'mouse') return;
-        pointerInside.current = true;
-        cancelClose();
-      }}
-      onPointerLeave={event => {
-        if (event.pointerType !== 'mouse') return;
-        pointerInside.current = false;
-        cancelHover();
-        if (!dragging.current) scheduleClose();
-      }}
-      onKeyDown={event => {
-        if (event.key === 'Escape') {
-          event.preventDefault();
-          close();
-          triggerRef.current?.focus();
-        }
-      }}
-      onDragStartCapture={() => { dragging.current = true; cancelHover(); cancelClose(); }}
-      onDragEndCapture={() => { dragging.current = false; if (!pointerInside.current) scheduleClose(); }}
-    >
-      <div ref={ringsRef} id={categoriesId} className="radial-menu__rings" hidden={!expanded}>
-        {items.map((item, index) => (
-          <PositionContext.Provider key={isValidElement(item) ? item.key ?? index : index} value={{ index, count: items.length }}>
-            {item}
-          </PositionContext.Provider>
-        ))}
-      </div>
-      <button ref={triggerRef} type="button"
-        className="radial-menu__trigger"
-        aria-label={expanded ? closeLabel : openLabel} aria-expanded={expanded} aria-controls={categoriesId}
-        onPointerEnter={event => {
-          if (event.pointerType === 'mouse' && !expanded) {
-            openedByHover.current = true;
-            setExpanded(true);
-          }
+      <nav
+        ref={menuRef}
+        aria-label={label}
+        className={`radial-menu ${className}`}
+        style={style}
+        data-expanded={expanded}
+        onPointerEnter={(event) => {
+          if (event.pointerType !== 'mouse') return;
+          pointerInside.current = true;
+          cancelClose();
         }}
-        onClick={() => {
-          if (expanded && !openedByHover.current) close();
-          else { openedByHover.current = false; setExpanded(true); }
+        onPointerLeave={(event) => {
+          if (event.pointerType !== 'mouse') return;
+          pointerInside.current = false;
+          cancelHover();
+          if (!dragging.current) scheduleClose();
         }}
-        onKeyDown={event => {
-          if (event.key === 'ArrowUp') {
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') {
             event.preventDefault();
-            flushSync(() => setExpanded(true));
-            ringsRef.current?.querySelector<SVGElement>('[data-radial-category]')?.focus();
+            close();
+            triggerRef.current?.focus();
           }
+        }}
+        onDragStartCapture={() => {
+          dragging.current = true;
+          cancelHover();
+          cancelClose();
+        }}
+        onDragEndCapture={() => {
+          dragging.current = false;
+          if (!pointerInside.current) scheduleClose();
         }}
       >
-        <svg className="radial-menu__trigger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true">
-          <path d="M12 5v14M5 12h14" />
-        </svg>
-      </button>
-    </nav>
+        <div
+          ref={ringsRef}
+          id={categoriesId}
+          className="radial-menu__rings"
+          hidden={!expanded}
+        >
+          {items.map((item, index) => (
+            <PositionContext.Provider
+              key={isValidElement(item) ? (item.key ?? index) : index}
+              value={{ index, count: items.length }}
+            >
+              {item}
+            </PositionContext.Provider>
+          ))}
+        </div>
+        <button
+          ref={triggerRef}
+          type="button"
+          className="radial-menu__trigger"
+          aria-label={expanded ? closeLabel : openLabel}
+          aria-expanded={expanded}
+          aria-controls={categoriesId}
+          onPointerEnter={(event) => {
+            if (event.pointerType === 'mouse' && !expanded) {
+              openedByHover.current = true;
+              setExpanded(true);
+            }
+          }}
+          onClick={() => {
+            if (expanded && !openedByHover.current) close();
+            else {
+              openedByHover.current = false;
+              setExpanded(true);
+            }
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'ArrowUp') {
+              event.preventDefault();
+              flushSync(() => setExpanded(true));
+              ringsRef.current
+                ?.querySelector<SVGElement>('[data-radial-category]')
+                ?.focus();
+            }
+          }}
+        >
+          <svg
+            className="radial-menu__trigger-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+            aria-hidden="true"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
+      </nav>
     </MenuContext.Provider>
   );
 }

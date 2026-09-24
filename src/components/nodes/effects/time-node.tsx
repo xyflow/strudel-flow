@@ -1,7 +1,7 @@
 import WorkflowNode from '../workflow-node';
 import type { WorkflowNodeProps, AppNode } from '..';
 import { useAppStore } from '@/store/app-store';
-import { ParameterKnob } from '@/components/parameter-knob';
+import { ParameterControls } from '../parameter-controls';
 
 export function TimeNode(props: WorkflowNodeProps) {
   const update = useAppStore((state) => state.updateNodeData);
@@ -45,24 +45,7 @@ export function TimeNode(props: WorkflowNodeProps) {
             </button>
           ))}
         </div>
-        <div className="flex justify-center gap-4">
-          {dials.map((dial) => (
-            <ParameterKnob
-              key={dial.key}
-              label={dial.label}
-              value={Number(props.data[dial.key] ?? dial.initial)}
-              min={dial.min}
-              max={dial.max}
-              step={dial.step}
-              format={(value) =>
-                `${Number(value.toFixed(2))}${'unit' in dial ? dial.unit : ''}`
-              }
-              onChange={(value) =>
-                update(props.id, { [dial.key]: String(value) })
-              }
-            />
-          ))}
-        </div>
+        <ParameterControls id={props.id} data={props.data} parameters={dials} />
       </div>
     </WorkflowNode>
   );
