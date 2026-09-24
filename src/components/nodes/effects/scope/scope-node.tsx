@@ -1,11 +1,9 @@
-import { useEffect, useMemo, useRef } from 'react';
-import WorkflowNode from '@/components/nodes/shared/workflow-node';
+import type { CustomControlsProps } from '../../define-node';
+import type { ScopeData } from './scope';
+import { useEffect, useRef } from 'react';
 import { ParameterControls } from '@/components/nodes/shared/parameter-controls';
-import type { WorkflowNodeProps } from '@/components/nodes/types';
-import { useAppStore } from '@/store/app-store';
-import { findConnectedComponents } from '@/lib/graph-utils';
 import { drawScope } from '@/lib/strudel-scope';
-import { DEFAULT_SCOPE_SCALE, scopeIdForGroup } from './scope';
+import { DEFAULT_SCOPE_SCALE } from './scope';
 
 const PARAMETERS = [
   {
@@ -18,17 +16,13 @@ const PARAMETERS = [
   },
 ] as const;
 
-export function ScopeNode({ id, data, type }: WorkflowNodeProps) {
+export function ScopeNode({
+  values: data,
+  onChange,
+  isPlaying: playing,
+  scopeId,
+}: CustomControlsProps<ScopeData>) {
   const canvas = useRef<HTMLCanvasElement>(null);
-  const nodes = useAppStore((state) => state.nodes);
-  const edges = useAppStore((state) => state.edges);
-  const playing = useAppStore((state) => state.isPlaying);
-  const scopeId = useMemo(() => {
-    const group = findConnectedComponents(nodes, edges).find((ids) =>
-      ids.includes(id),
-    );
-    return scopeIdForGroup(group?.[0] ?? id);
-  }, [nodes, edges, id]);
   const scale = Number(data.scopeScale ?? DEFAULT_SCOPE_SCALE);
 
   useEffect(() => {
@@ -57,16 +51,18 @@ export function ScopeNode({ id, data, type }: WorkflowNodeProps) {
   }, [scopeId, scale, playing]);
 
   return (
-    <WorkflowNode id={id} data={data} type={type}>
-      <div className="w-72 max-w-[calc(100vw-32px)] space-y-3 px-4 pb-4">
-        <canvas
-          ref={canvas}
-          role="img"
-          aria-label="Audio waveform"
-          className="h-28 w-full rounded border border-border bg-background text-primary"
-        />
-        <ParameterControls id={id} data={data} parameters={PARAMETERS} />
-      </div>
-    </WorkflowNode>
+    <div className="w-72 max-w-[calc(100vw-32px)] space-y-3 px-4 pb-4">
+      <canvas
+        ref={canvas}
+        role="img"
+        aria-label="Audio waveform"
+        className="h-28 w-full rounded border border-border bg-background text-primary"
+      />
+      <ParameterControls
+        data={data}
+        onChange={onChange}
+        parameters={PARAMETERS}
+      />
+    </div>
   );
 }

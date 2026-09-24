@@ -1,5 +1,5 @@
-import { ScopeNode } from './effects/scope/scope-node';
-import { generatePattern as generateScopeNode } from './effects/scope/scope';
+import type { NodeDefinition } from './define-node';
+import { createDefinitionComponent } from './shared/definition-node';
 import type { ComponentType } from 'react';
 import type { XYPosition } from '@xyflow/react';
 import { nanoid } from 'nanoid';
@@ -16,32 +16,6 @@ export type {
   WorkflowNodeData,
   WorkflowNodeProps,
 } from './types';
-import { ADSRNode } from './effects/adsr/adsr-node';
-import { generatePattern as generateADSRNode } from './effects/adsr/adsr';
-import { LevelNode } from './effects/level/level-node';
-import { generatePattern as generateLevelNode } from './effects/level/level';
-import { TextureNode } from './effects/texture/texture-node';
-import { generatePattern as generateTextureNode } from './effects/texture/texture';
-import { TimeNode } from './effects/time/time-node';
-import { generatePattern as generateTimeNode } from './effects/time/time';
-import { LpfNode } from './effects/lpf/lpf-node';
-import { generatePattern as generateLpfNode } from './effects/lpf/lpf';
-import { PhaserNode } from './effects/phaser/phaser-node';
-import { generatePattern as generatePhaserNode } from './effects/phaser/phaser';
-import { RoomNode } from './effects/room/room-node';
-import { generatePattern as generateRoomNode } from './effects/room/room';
-import { PadNode } from './instruments/pad/pad-node';
-import { generatePattern as generatePadNode } from './instruments/pad/pad';
-import { ChordNode } from './instruments/chord/chord-node';
-import { generatePattern as generateChordNode } from './instruments/chord/chord';
-import { CustomNode } from './instruments/custom/custom-node';
-import { generatePattern as generateCustomNode } from './instruments/custom/custom';
-import { BeatMachineNode } from './instruments/beat-machine/beat-machine-node';
-import { generatePattern as generateBeatMachineNode } from './instruments/beat-machine/beat-machine';
-import { SynthSelectNode } from './sounds/synth-select/synth-select-node';
-import { generatePattern as generateSynthSelectNode } from './sounds/synth-select/synth-select';
-import { DrumSoundsNode } from './sounds/drum-sounds/drum-sounds-node';
-import { generatePattern as generateDrumSoundsNode } from './sounds/drum-sounds/drum-sounds';
 
 export type NodeConfig = {
   id: AppNodeType;
@@ -50,107 +24,34 @@ export type NodeConfig = {
   icon: keyof typeof iconMapping;
 };
 
-// One registration connects a node's menu entry, UI, and musical behavior.
-export const nodeDefinitions = {
-  'scope-node': {
-    title: 'Scope',
-    category: 'Audio Effects',
-    icon: 'Activity',
-    component: ScopeNode,
-    generatePattern: generateScopeNode,
-  },
-  'time-node': {
-    title: 'Time',
-    category: 'Audio Effects',
-    icon: 'Clock',
-    component: TimeNode,
-    generatePattern: generateTimeNode,
-  },
-  'texture-node': {
-    title: 'Texture',
-    category: 'Audio Effects',
-    icon: 'Zap',
-    component: TextureNode,
-    generatePattern: generateTextureNode,
-  },
-  'level-node': {
-    title: 'Level',
-    category: 'Audio Effects',
-    icon: 'Volume2',
-    component: LevelNode,
-    generatePattern: generateLevelNode,
-  },
-  'pad-node': {
-    title: 'Pad',
-    category: 'Instruments',
-    icon: 'Grid3x3',
-    component: PadNode,
-    generatePattern: generatePadNode,
-  },
-  'chord-node': {
-    title: 'Chords',
-    category: 'Instruments',
-    icon: 'Music2',
-    component: ChordNode,
-    generatePattern: generateChordNode,
-  },
-  'beat-machine-node': {
-    title: 'Beats',
-    category: 'Instruments',
-    icon: 'Drum',
-    component: BeatMachineNode,
-    generatePattern: generateBeatMachineNode,
-  },
-  'custom-node': {
-    title: 'Code',
-    category: 'Instruments',
-    icon: 'Code',
-    component: CustomNode,
-    generatePattern: generateCustomNode,
-  },
-  'drum-sounds-node': {
-    title: 'Drums',
-    category: 'Synths',
-    icon: 'Music',
-    component: DrumSoundsNode,
-    generatePattern: generateDrumSoundsNode,
-  },
-  'synth-select-node': {
-    title: 'Voice',
-    category: 'Synths',
-    icon: 'CheckCheck',
-    component: SynthSelectNode,
-    generatePattern: generateSynthSelectNode,
-  },
-  'lpf-node': {
-    title: 'Filter',
-    category: 'Audio Effects',
-    icon: 'Filter',
-    component: LpfNode,
-    generatePattern: generateLpfNode,
-  },
-  'phaser-node': {
-    title: 'Phaser',
-    category: 'Audio Effects',
-    icon: 'Waves',
-    component: PhaserNode,
-    generatePattern: generatePhaserNode,
-  },
-  'room-node': {
-    title: 'Space',
-    category: 'Audio Effects',
-    icon: 'CheckCheck',
-    component: RoomNode,
-    generatePattern: generateRoomNode,
-  },
-  'adsr-node': {
-    title: 'Envelope',
-    category: 'Audio Effects',
-    icon: 'Activity',
-    component: ADSRNode,
-    generatePattern: generateADSRNode,
-  },
-} as const;
+// New nodes register themselves by exporting a definition from a *.node.ts(x) file.
+const discovered = import.meta.glob<NodeDefinition>('./**/*.node.{ts,tsx}', {
+  eager: true,
+  import: 'default',
+});
+type RegisteredNode = Omit<
+  NodeDefinition,
+  'parameters' | 'defaults' | 'renderControls'
+> & {
+  component: ComponentType<WorkflowNodeProps>;
+  defaults: Record<string, unknown>;
+};
+const registered: Record<string, RegisteredNode> = Object.create(null);
+for (const definition of Object.values(discovered)) {
+  if (Object.prototype.hasOwnProperty.call(registered, definition.id)) {
+    throw new Error(`Duplicate node ID: ${definition.id}`);
+  }
+  registered[definition.id] = {
+    ...definition,
+    component: createDefinitionComponent(definition),
+  };
+}
+export const nodeDefinitions = Object.fromEntries(
+  Object.entries(registered).sort(
+    ([, a], [, b]) =>
+      (a.order ?? 100) - (b.order ?? 100) || a.title.localeCompare(b.title),
+  ),
+);
 
 const nodesConfig = Object.fromEntries(
   Object.entries(nodeDefinitions).map(([id, { title, category, icon }]) => [
@@ -174,12 +75,20 @@ export function createNodeByType({
   position?: XYPosition;
   data?: WorkflowNodeData;
 }): AppNode {
+  if (!Object.prototype.hasOwnProperty.call(nodesConfig, type)) {
+    throw new Error(`Unknown node type: ${type}`);
+  }
   const { title, icon } = nodesConfig[type];
   return {
     id,
     type,
     position,
-    data: data ?? { title, icon, state: 'running' },
+    data: data ?? {
+      ...nodeDefinitions[type].defaults,
+      title,
+      icon,
+      state: 'running',
+    },
   };
 }
 

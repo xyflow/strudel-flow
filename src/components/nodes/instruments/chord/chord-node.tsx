@@ -1,3 +1,5 @@
+import type { CustomControlsProps } from '../../define-node';
+import type { ChordData } from './chord';
 import {
   chordProgression,
   chordNotes,
@@ -6,9 +8,6 @@ import {
   DEFAULTS,
 } from './chord';
 import { useRef, useState } from 'react';
-import WorkflowNode from '@/components/nodes/shared/workflow-node';
-import type { WorkflowNodeProps } from '@/components/nodes/types';
-import { useAppStore } from '@/store/app-store';
 import { AccordionControls } from '@/components/nodes/shared/accordion-controls';
 function NoteShape({ notes }: { notes: number[] }) {
   return (
@@ -217,8 +216,10 @@ function ChordEditor({
   );
 }
 
-export function ChordNode({ id, data, type }: WorkflowNodeProps) {
-  const update = useAppStore((state) => state.updateNodeData);
+export function ChordNode({
+  values: data,
+  onChange,
+}: CustomControlsProps<ChordData>) {
   const [selectedStep, setSelectedStep] = useState(0);
   const steps = chordProgression(data);
   const activeStep = Math.min(selectedStep, Math.max(0, steps.length - 1));
@@ -232,8 +233,8 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
     Math.ceil((Math.max(0, ...chords.flat()) + 1) / 7) * 7,
   );
   const changeSteps = (next: number[]) =>
-    update(id, { chordProgression: next, chordNotes: undefined });
-  const changeNotes = (next: number[][]) => update(id, { chordNotes: next });
+    onChange({ chordProgression: next, chordNotes: undefined });
+  const changeNotes = (next: number[][]) => onChange({ chordNotes: next });
   const editChord = (next: number[]) =>
     changeNotes(
       chords.length
@@ -242,112 +243,113 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
     );
 
   return (
-    <WorkflowNode id={id} data={data} type={type}>
-      <div className="flex w-80 flex-col gap-3 px-4 pt-1 pb-3">
-        <ChordEditor
-          key={activeStep}
-          notes={tones}
-          noteSlots={noteSlots}
-          noteName={noteName}
-          noteLabel={noteLabel}
-          onChange={editChord}
-        />
-        <div className="flex gap-1.5" aria-label="Progression presets">
-          {PRESETS.map((preset) => (
-            <button
-              key={preset.label}
-              onClick={() => {
-                changeSteps(preset.steps);
-                setSelectedStep(0);
-              }}
-              className="nodrag flex-1 rounded-lg border px-2 py-2 text-[10px] transition-colors hover:bg-accent"
-            >
-              <svg
-                viewBox="0 0 72 22"
-                className="mb-1 h-5 w-full"
-                aria-hidden="true"
-              >
-                <polyline
-                  points={preset.steps
-                    .map(
-                      (degree, index) => `${9 + index * 18},${18 - degree * 2}`,
-                    )
-                    .join(' ')}
-                  fill="none"
-                  stroke="currentColor"
-                  opacity=".25"
-                  strokeWidth="2"
-                />
-                {preset.steps.map((degree, index) => (
-                  <circle
-                    key={index}
-                    cx={9 + index * 18}
-                    cy={18 - degree * 2}
-                    r="3"
-                    className="fill-primary"
-                  />
-                ))}
-              </svg>
-              {preset.label}
-            </button>
-          ))}
-        </div>
-        <div
-          className="flex flex-wrap gap-1.5"
-          role="group"
-          aria-label="Chord progression"
-        >
-          {steps.map((degree, index) => (
-            <button
-              key={index}
-              aria-label={`Chord step ${index + 1}: ${manual ? (chords[index].length ? chords[index].join(', ') : 'rest') : degrees[degree]}`}
-              aria-pressed={activeStep === index}
-              onClick={() => setSelectedStep(index)}
-              className="nodrag w-[calc((100%-1.125rem)/4)] rounded-lg border p-2 text-left transition-colors hover:bg-accent aria-pressed:border-primary aria-pressed:bg-primary/10 aria-pressed:ring-1 aria-pressed:ring-primary aria-pressed:ring-inset"
-            >
-              <span className="flex justify-between text-[9px] text-muted-foreground">
-                <span>{index + 1}</span>
-                <span>{manual ? 'n' : degrees[degree]}</span>
-              </span>
-              <NoteShape notes={chords[index]} />
-              <span className="block text-center break-words text-xs font-semibold">
-                {manual
-                  ? chords[index].length
-                    ? chords[index].join('·')
-                    : 'Rest'
-                  : chordName(degree)}
-              </span>
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-2">
+    <div className="flex w-80 flex-col gap-3 px-4 pt-1 pb-3">
+      <ChordEditor
+        key={activeStep}
+        notes={tones}
+        noteSlots={noteSlots}
+        noteName={noteName}
+        noteLabel={noteLabel}
+        onChange={editChord}
+      />
+      <div className="flex gap-1.5" aria-label="Progression presets">
+        {PRESETS.map((preset) => (
           <button
-            aria-label="Add chord step"
-            disabled={steps.length >= 16}
+            key={preset.label}
             onClick={() => {
-              changeNotes([
-                ...chords,
-                [...(chords[chords.length - 1] ?? [0, 2, 4])],
-              ]);
-              setSelectedStep(steps.length);
+              changeSteps(preset.steps);
+              setSelectedStep(0);
             }}
-            className="nodrag min-h-9 flex-1 rounded-lg border border-dashed text-lg text-muted-foreground hover:bg-accent disabled:opacity-40"
+            className="nodrag flex-1 rounded-lg border px-2 py-2 text-[10px] transition-colors hover:bg-accent"
           >
-            +
+            <svg
+              viewBox="0 0 72 22"
+              className="mb-1 h-5 w-full"
+              aria-hidden="true"
+            >
+              <polyline
+                points={preset.steps
+                  .map(
+                    (degree, index) => `${9 + index * 18},${18 - degree * 2}`,
+                  )
+                  .join(' ')}
+                fill="none"
+                stroke="currentColor"
+                opacity=".25"
+                strokeWidth="2"
+              />
+              {preset.steps.map((degree, index) => (
+                <circle
+                  key={index}
+                  cx={9 + index * 18}
+                  cy={18 - degree * 2}
+                  r="3"
+                  className="fill-primary"
+                />
+              ))}
+            </svg>
+            {preset.label}
           </button>
-        </div>
-        <AccordionControls
-          keyScaleOctaveProps={{
-            selectedKey: data.selectedKey ?? DEFAULTS.selectedKey,
-            onKeyChange: (selectedKey) => update(id, { selectedKey }),
-            selectedScale: scaleType,
-            onScaleChange: (scale) => update(id, { scaleType: scale }),
-            octave: data.octave ?? DEFAULTS.octave,
-            onOctaveChange: (octave) => update(id, { octave }),
-            allowedScales: ['major', 'minor'],
-          }}
-        />
+        ))}
       </div>
-    </WorkflowNode>
+      <div
+        className="flex flex-wrap gap-1.5"
+        role="group"
+        aria-label="Chord progression"
+      >
+        {steps.map((degree, index) => (
+          <button
+            key={index}
+            aria-label={`Chord step ${index + 1}: ${manual ? (chords[index].length ? chords[index].join(', ') : 'rest') : degrees[degree]}`}
+            aria-pressed={activeStep === index}
+            onClick={() => setSelectedStep(index)}
+            className="nodrag w-[calc((100%-1.125rem)/4)] rounded-lg border p-2 text-left transition-colors hover:bg-accent aria-pressed:border-primary aria-pressed:bg-primary/10 aria-pressed:ring-1 aria-pressed:ring-primary aria-pressed:ring-inset"
+          >
+            <span className="flex justify-between text-[9px] text-muted-foreground">
+              <span>{index + 1}</span>
+              <span>{manual ? 'n' : degrees[degree]}</span>
+            </span>
+            <NoteShape notes={chords[index]} />
+            <span className="block text-center break-words text-xs font-semibold">
+              {manual
+                ? chords[index].length
+                  ? chords[index].join('·')
+                  : 'Rest'
+                : chordName(degree)}
+            </span>
+          </button>
+        ))}
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          aria-label="Add chord step"
+          disabled={steps.length >= 16}
+          onClick={() => {
+            changeNotes([
+              ...chords,
+              [...(chords[chords.length - 1] ?? [0, 2, 4])],
+            ]);
+            setSelectedStep(steps.length);
+          }}
+          className="nodrag min-h-9 flex-1 rounded-lg border border-dashed text-lg text-muted-foreground hover:bg-accent disabled:opacity-40"
+        >
+          +
+        </button>
+      </div>
+      <AccordionControls
+        keyScaleOctaveProps={{
+          selectedKey: data.selectedKey ?? DEFAULTS.selectedKey,
+          onKeyChange: (selectedKey) => onChange({ selectedKey }),
+          selectedScale: scaleType,
+          onScaleChange: (scale) => {
+            if (scale === 'major' || scale === 'minor')
+              onChange({ scaleType: scale });
+          },
+          octave: data.octave ?? DEFAULTS.octave,
+          onOctaveChange: (octave) => onChange({ octave }),
+          allowedScales: ['major', 'minor'],
+        }}
+      />
+    </div>
   );
 }

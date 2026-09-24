@@ -1,5 +1,4 @@
 import { ParameterKnob } from '@/components/nodes/shared/parameter-knob';
-import { useAppStore } from '@/store/app-store';
 import type { WorkflowNodeData } from '../registry';
 
 type Parameter = {
@@ -13,15 +12,14 @@ type Parameter = {
 };
 
 export function ParameterControls({
-  id,
+  onChange,
   data,
   parameters,
 }: {
-  id: string;
+  onChange: (updates: Record<string, string>) => void;
   data: WorkflowNodeData;
   parameters: readonly Parameter[];
 }) {
-  const update = useAppStore((state) => state.updateNodeData);
   return (
     <div className="flex justify-center gap-4">
       {parameters.map(({ key, label, initial, min, max, step, unit = '' }) => (
@@ -33,7 +31,7 @@ export function ParameterControls({
           max={max}
           step={step}
           format={(value) => `${Number(value.toFixed(2))}${unit}`}
-          onChange={(value) => update(id, { [key]: String(value) })}
+          onChange={(value) => onChange({ [key]: String(value) })}
         />
       ))}
     </div>

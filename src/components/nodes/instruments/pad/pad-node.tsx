@@ -1,22 +1,24 @@
+import type { CustomControlsProps } from '../../define-node';
+import type { PadData } from './pad';
 import { NOTES, DEFAULTS, createDefaultGrid } from './pad';
 import { useState, useEffect } from 'react';
-import { useAppStore } from '@/store/app-store';
 import { getSchedulerNow } from '@/lib/strudel-clock';
-import WorkflowNode from '@/components/nodes/shared/workflow-node';
-import type { WorkflowNodeProps } from '@/components/nodes/types';
 
 import { CellState, ModifierDropdown } from '../../shared/modifiers';
 import { AccordionControls } from '@/components/nodes/shared/accordion-controls';
 
-export function PadNode({ id, data, type }: WorkflowNodeProps) {
+export function PadNode({
+  values: data,
+  onChange,
+  isPlaying,
+  isMuted,
+}: CustomControlsProps<PadData>) {
   const [activeStep, setActiveStep] = useState(-1);
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  const isPlaying = useAppStore((state) => state.isPlaying);
   const steps = data.steps || DEFAULTS.steps;
 
   useEffect(() => {
-    if (!isPlaying || data.state === 'paused') {
+    if (!isPlaying || isMuted) {
       setActiveStep(-1);
       return;
     }
@@ -28,7 +30,7 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
     };
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [steps, isPlaying, data.state]);
+  }, [steps, isPlaying, isMuted]);
 
   const mode = data.mode || DEFAULTS.mode;
   const octave = data.octave || DEFAULTS.octave;
@@ -55,7 +57,7 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
         .map((key) => Number(key.split('-')[1]))
         .sort((a, b) => a - b);
       if (notes.length < 2) {
-        updateNodeData(id, { selectedButtons: [...selected] });
+        onChange({ selectedButtons: [...selected] });
         return;
       }
       const groups = noteGroups[stepIdx] || [];
@@ -64,7 +66,7 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
           group.length === notes.length &&
           group.every((note, i) => note === notes[i]),
       );
-      updateNodeData(id, {
+      onChange({
         noteGroups: {
           ...noteGroups,
           [stepIdx]: exists ? groups : [...groups, notes],
@@ -91,9 +93,9 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
         )
         .filter((group) => group.length >= 2);
       if (!nextGroups[stepIdx].length) delete nextGroups[stepIdx];
-      updateNodeData(id, { grid: nextGrid, noteGroups: nextGroups });
+      onChange({ grid: nextGrid, noteGroups: nextGroups });
     } else {
-      updateNodeData(id, { grid: nextGrid });
+      onChange({ grid: nextGrid });
     }
   };
 
@@ -104,74 +106,66 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
     } else {
       newColumnModifiers[stepIdx] = modifier;
     }
-    updateNodeData(id, { columnModifiers: newColumnModifiers });
+    onChange({ columnModifiers: newColumnModifiers });
   };
 
   return (
-    <WorkflowNode id={id} data={data} type={type}>
-      <div className="flex flex-col gap-2 p-3 bg-card text-card-foreground rounded-lg w-full max-w-full overflow-hidden">
-        <div className="flex gap-1 w-full nodrag">
-          {Array.from({ length: steps }, (_, stepIdx) => (
-            <div key={stepIdx} className="flex flex-col gap-1 items-center">
-              <div
-                className={`w-1.5 h-1.5 rounded-full mb-0.5 transition-colors duration-75 ${
-                  stepIdx === activeStep
-                    ? 'bg-primary'
-                    : 'bg-card-foreground/20'
-                }`}
-              />
-              {NOTES.map((_, noteIdx) => {
-                const groupIndex = (noteGroups[stepIdx] || []).findIndex(
-                  (group) => group.includes(noteIdx),
-                );
-                const on = grid[stepIdx]?.[noteIdx] || false;
-                return (
-                  <button
-                    key={noteIdx}
-                    className={`${getButtonClasses(selectedButtons.has(`${stepIdx}-${noteIdx}`), groupIndex >= 0, groupIndex, on)} w-12 h-10`}
-                    onClick={(event) =>
-                      handleToggleCell(stepIdx, noteIdx, event)
-                    }
-                    aria-pressed={on || groupIndex >= 0}
-                    title={`Note ${noteIdx + 1}, Step ${stepIdx + 1}`}
-                  />
-                );
-              })}
-              <ModifierDropdown
-                currentState={columnModifiers[stepIdx] || { type: 'off' }}
-                onModifierSelect={(modifier) =>
-                  handleColumnModifierSelect(stepIdx, modifier)
-                }
-              />
-            </div>
-          ))}
-        </div>
-        <div className="w-full max-w-full overflow-hidden">
-          <AccordionControls
-            keyScaleOctaveProps={{
-              selectedKey,
-              onKeyChange: (key) => updateNodeData(id, { selectedKey: key }),
-              selectedScale: selectedScaleType,
-              onScaleChange: (scale) =>
-                updateNodeData(id, { selectedScaleType: scale }),
-              octave,
-              onOctaveChange: (oct) => updateNodeData(id, { octave: oct }),
-            }}
-            padControlsProps={{
-              steps,
-              onStepsChange: (s) => updateNodeData(id, { steps: s }),
-              mode,
-              onModeChange: (m) => updateNodeData(id, { mode: m }),
-              noteGroups,
-              onClearGroups: () => updateNodeData(id, { noteGroups: {} }),
-              selectedButtons,
-              onClearSelection: () =>
-                updateNodeData(id, { selectedButtons: [] }),
-            }}
-          />
-        </div>
+    <div className="flex flex-col gap-2 p-3 bg-card text-card-foreground rounded-lg w-full max-w-full overflow-hidden">
+      <div className="flex gap-1 w-full nodrag">
+        {Array.from({ length: steps }, (_, stepIdx) => (
+          <div key={stepIdx} className="flex flex-col gap-1 items-center">
+            <div
+              className={`w-1.5 h-1.5 rounded-full mb-0.5 transition-colors duration-75 ${
+                stepIdx === activeStep ? 'bg-primary' : 'bg-card-foreground/20'
+              }`}
+            />
+            {NOTES.map((_, noteIdx) => {
+              const groupIndex = (noteGroups[stepIdx] || []).findIndex(
+                (group) => group.includes(noteIdx),
+              );
+              const on = grid[stepIdx]?.[noteIdx] || false;
+              return (
+                <button
+                  key={noteIdx}
+                  className={`${getButtonClasses(selectedButtons.has(`${stepIdx}-${noteIdx}`), groupIndex >= 0, groupIndex, on)} w-12 h-10`}
+                  onClick={(event) => handleToggleCell(stepIdx, noteIdx, event)}
+                  aria-pressed={on || groupIndex >= 0}
+                  title={`Note ${noteIdx + 1}, Step ${stepIdx + 1}`}
+                />
+              );
+            })}
+            <ModifierDropdown
+              currentState={columnModifiers[stepIdx] || { type: 'off' }}
+              onModifierSelect={(modifier) =>
+                handleColumnModifierSelect(stepIdx, modifier)
+              }
+            />
+          </div>
+        ))}
       </div>
-    </WorkflowNode>
+      <div className="w-full max-w-full overflow-hidden">
+        <AccordionControls
+          keyScaleOctaveProps={{
+            selectedKey,
+            onKeyChange: (key) => onChange({ selectedKey: key }),
+            selectedScale: selectedScaleType,
+            onScaleChange: (scale) => onChange({ selectedScaleType: scale }),
+            octave,
+            onOctaveChange: (oct) => onChange({ octave: oct }),
+          }}
+          padControlsProps={{
+            steps,
+            onStepsChange: (s) => onChange({ steps: s }),
+            mode,
+            onModeChange: (m) => onChange({ mode: m }),
+            noteGroups,
+            onClearGroups: () => onChange({ noteGroups: {} }),
+            selectedButtons,
+            onClearSelection: () => onChange({ selectedButtons: [] }),
+          }}
+        />
+      </div>
+    </div>
   );
 }
 

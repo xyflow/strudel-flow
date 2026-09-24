@@ -16,6 +16,8 @@ pnpm install
 pnpm dev
 ```
 
+Want to add an effect or instrument? See [Adding nodes](docs/adding-nodes.md).
+
 ## Acknowledgments
 
 - [Strudel.cc](https://strudel.cc)

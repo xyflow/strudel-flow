@@ -1,3 +1,5 @@
+import type { CustomControlsProps } from '../../define-node';
+import type { BeatMachineData } from './beat-machine';
 import { createDefaultRows, DEFAULT_STEPS } from './beat-machine';
 import type { BeatMachineRow } from './beat-machine';
 import {
@@ -9,9 +11,6 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { AccordionControls } from '@/components/nodes/shared/accordion-controls';
 import { CellState, ModifierDropdown } from '../../shared/modifiers';
-import WorkflowNode from '@/components/nodes/shared/workflow-node';
-import type { WorkflowNodeProps } from '@/components/nodes/types';
-import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
 import { DRUM_CATEGORIES } from '@/data/sounds';
 import { CategorySelectItems } from '@/components/nodes/shared/category-select-items';
@@ -96,9 +95,10 @@ function SequencerRow({
   );
 }
 
-export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
-
+export function BeatMachineNode({
+  values: data,
+  onChange,
+}: CustomControlsProps<BeatMachineData>) {
   const modifiersEnabled =
     typeof data.modifiersEnabled === 'boolean' ? data.modifiersEnabled : false;
 
@@ -133,7 +133,7 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
       });
       return { ...row, pattern: newPattern, modifiers: newModifiers };
     });
-    updateNodeData(id, { steps: newSteps, rows: newRows });
+    onChange({ steps: newSteps, rows: newRows });
   };
 
   const addTrack = () => {
@@ -145,16 +145,16 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
         modifiers: {},
       },
     ];
-    updateNodeData(id, { rows: newRows });
+    onChange({ rows: newRows });
   };
   const removeTrack = () => {
     if (rows.length <= 1) return;
     const newRows = rows.slice(0, -1);
-    updateNodeData(id, { rows: newRows });
+    onChange({ rows: newRows });
   };
 
   const setModifiersEnabled = (enabled: boolean) => {
-    updateNodeData(id, { modifiersEnabled: enabled });
+    onChange({ modifiersEnabled: enabled });
   };
 
   const toggleStep = (rowIndex: number, step: number) => {
@@ -167,14 +167,14 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
       }
       return row;
     });
-    updateNodeData(id, { rows: newRows });
+    onChange({ rows: newRows });
   };
 
   const handleInstrumentChange = (rowIndex: number, instrument: string) => {
     const newRows = rows.map((row, i) =>
       i === rowIndex ? { ...row, instrument } : row,
     );
-    updateNodeData(id, { rows: newRows });
+    onChange({ rows: newRows });
   };
 
   const handleModifierSelect = (
@@ -195,7 +195,7 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
       }
       return { ...row, modifiers };
     });
-    updateNodeData(id, { rows: newRows });
+    onChange({ rows: newRows });
   };
 
   const clearAll = () => {
@@ -204,98 +204,96 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
       pattern: Array(steps).fill(false),
       modifiers: {},
     }));
-    updateNodeData(id, { rows: newRows });
+    onChange({ rows: newRows });
   };
 
   return (
-    <WorkflowNode id={id} data={data} type={type}>
-      <div className="flex flex-col gap-3 px-4 pt-1 pb-3 w-[min(1040px,90vw)]">
-        {/* Sequencer rows */}
-        <div className="nowheel flex flex-col gap-3 overflow-x-auto rounded-md bg-background/40 p-3">
-          {rows.map((row, index) => (
-            <SequencerRow
-              key={index}
-              row={row}
-              rowIndex={index}
-              onStepClick={toggleStep}
-              onInstrumentChange={handleInstrumentChange}
-              onModifierSelect={handleModifierSelect}
-              showModifiers={modifiersEnabled}
-            />
-          ))}
-        </div>
-        <AccordionControls>
-          <div className="flex flex-wrap gap-4 items-center justify-between">
-            <div className="flex gap-2">
+    <div className="flex flex-col gap-3 px-4 pt-1 pb-3 w-[min(1040px,90vw)]">
+      {/* Sequencer rows */}
+      <div className="nowheel flex flex-col gap-3 overflow-x-auto rounded-md bg-background/40 p-3">
+        {rows.map((row, index) => (
+          <SequencerRow
+            key={index}
+            row={row}
+            rowIndex={index}
+            onStepClick={toggleStep}
+            onInstrumentChange={handleInstrumentChange}
+            onModifierSelect={handleModifierSelect}
+            showModifiers={modifiersEnabled}
+          />
+        ))}
+      </div>
+      <AccordionControls>
+        <div className="flex flex-wrap gap-4 items-center justify-between">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearAll}
+              className="text-xs"
+            >
+              Clear All
+            </Button>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xs">Steps</span>
               <Button
                 variant="outline"
-                size="sm"
-                onClick={clearAll}
-                className="text-xs"
+                size="icon"
+                className="h-8 w-8 px-0 text-xs"
+                onClick={() => setSteps(steps - 1)}
+                disabled={steps <= 1}
+                aria-label="Decrease steps"
               >
-                Clear All
+                -
+              </Button>
+              <span className="text-xs w-5 text-center">{steps}</span>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 px-0 text-xs"
+                onClick={() => setSteps(steps + 1)}
+                disabled={steps >= 32}
+                aria-label="Increase steps"
+              >
+                +
               </Button>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-xs">Steps</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 px-0 text-xs"
-                  onClick={() => setSteps(steps - 1)}
-                  disabled={steps <= 1}
-                  aria-label="Decrease steps"
-                >
-                  -
-                </Button>
-                <span className="text-xs w-5 text-center">{steps}</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 px-0 text-xs"
-                  onClick={() => setSteps(steps + 1)}
-                  disabled={steps >= 32}
-                  aria-label="Increase steps"
-                >
-                  +
-                </Button>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs">Tracks</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 px-0 text-xs"
-                  onClick={removeTrack}
-                  disabled={rows.length <= 1}
-                  aria-label="Remove track"
-                >
-                  -
-                </Button>
-                <span className="text-xs w-5 text-center">{rows.length}</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 px-0 text-xs"
-                  onClick={addTrack}
-                  aria-label="Add track"
-                >
-                  +
-                </Button>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs">Modifiers</span>
-                <Switch
-                  checked={modifiersEnabled}
-                  onCheckedChange={setModifiersEnabled}
-                  aria-label="Toggle modifiers"
-                />
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs">Tracks</span>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 px-0 text-xs"
+                onClick={removeTrack}
+                disabled={rows.length <= 1}
+                aria-label="Remove track"
+              >
+                -
+              </Button>
+              <span className="text-xs w-5 text-center">{rows.length}</span>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 px-0 text-xs"
+                onClick={addTrack}
+                aria-label="Add track"
+              >
+                +
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs">Modifiers</span>
+              <Switch
+                checked={modifiersEnabled}
+                onCheckedChange={setModifiersEnabled}
+                aria-label="Toggle modifiers"
+              />
             </div>
           </div>
-        </AccordionControls>
-      </div>
-    </WorkflowNode>
+        </div>
+      </AccordionControls>
+    </div>
   );
 }
