@@ -1,3 +1,4 @@
+import { scopeIdForGroup } from '@/components/nodes/effects/scope/scope';
 import { Edge } from '@xyflow/react';
 import { AppNode } from '@/components/nodes/registry';
 import nodesConfig, { nodeDefinitions } from '@/components/nodes/registry';
@@ -90,7 +91,11 @@ export function generateOutput(
     for (const effect of effects) {
       const strudelOutput = getNodeStrudelOutput(effect.type);
       if (strudelOutput && pattern) {
-        pattern = strudelOutput(effect.data, pattern);
+        pattern = strudelOutput(
+          effect.data,
+          pattern,
+          scopeIdForGroup(componentNodeIds[0]),
+        );
       }
     }
 
@@ -107,7 +112,12 @@ export function generateOutput(
   const result = finalPatterns
     .map(({ pattern, paused }) => {
       const line = `$: ${pattern}`;
-      return paused ? `// ${line}` : line;
+      return paused
+        ? line
+            .split('\n')
+            .map((part) => `// ${part}`)
+            .join('\n')
+        : line;
     })
     .join('\n');
 

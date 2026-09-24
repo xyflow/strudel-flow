@@ -1,3 +1,4 @@
+import type { ScopeData } from './effects/scope/scope';
 import type { Node, NodeProps } from '@xyflow/react';
 import type { ReactNode } from 'react';
 import type { iconMapping } from '@/data/icon-mapping';
@@ -21,7 +22,8 @@ export type WorkflowNodeData = {
   label?: string;
   icon?: keyof typeof iconMapping;
   state?: 'running' | 'paused' | 'stopped';
-} & ADSRData &
+} & ScopeData &
+  ADSRData &
   LevelData &
   TextureData &
   TimeData &

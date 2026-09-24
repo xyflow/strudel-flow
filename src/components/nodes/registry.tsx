@@ -1,3 +1,5 @@
+import { ScopeNode } from './effects/scope/scope-node';
+import { generatePattern as generateScopeNode } from './effects/scope/scope';
 import type { ComponentType } from 'react';
 import type { XYPosition } from '@xyflow/react';
 import { nanoid } from 'nanoid';
@@ -50,6 +52,13 @@ export type NodeConfig = {
 
 // One registration connects a node's menu entry, UI, and musical behavior.
 export const nodeDefinitions = {
+  'scope-node': {
+    title: 'Scope',
+    category: 'Audio Effects',
+    icon: 'Activity',
+    component: ScopeNode,
+    generatePattern: generateScopeNode,
+  },
   'time-node': {
     title: 'Time',
     category: 'Audio Effects',

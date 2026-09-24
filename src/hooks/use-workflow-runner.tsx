@@ -1,3 +1,4 @@
+import '@/lib/strudel-scope';
 import { useEffect, useMemo, useRef } from 'react';
 import { useKeyboardShortcuts } from './use-keyboard-shortcuts';
 import { useAppStore } from '@/store/app-store';
