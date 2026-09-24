@@ -198,29 +198,3 @@ body,
 .reactflow-wrapper .react-flow.dark {
   --xy-background-color: color-mix(in oklch, var(--accent) 20%, var(--background));
 }
-
-/* Animate only the artwork; the pointer targets stay in their final positions. */
-@keyframes radial-item-reveal {
-  from { transform: scale(0.88); }
-  to { transform: scale(1); }
-}
-
-.radial-item-visual {
-  transform-origin: 50% 100%;
-  animation: radial-item-reveal 240ms cubic-bezier(0.2, 1.35, 0.4, 1) both;
-}
-
-.radial-category-visual {
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: transform 180ms cubic-bezier(0.2, 1.1, 0.4, 1);
-}
-
-[data-active="true"] > .radial-category-visual {
-  transform: scale(1.025);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .radial-item-visual { animation: none; }
-  .radial-category-visual { transition: none; }
-}
