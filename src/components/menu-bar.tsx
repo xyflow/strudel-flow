@@ -3,45 +3,53 @@ import { flushSync } from 'react-dom';
 import { AudioLines, Clock3, Piano, Plus, SlidersHorizontal } from 'lucide-react';
 
 import { DraggableNodeItem } from '@/components/draggable-node-item';
-import nodesConfig, { type NodeConfig } from '@/components/nodes';
+import nodesConfig from '@/components/nodes';
 import { cn } from '@/lib/utils';
-
-const nodesByCategory = Object.values(nodesConfig).reduce((groups, node) => {
-  (groups[node.category] ??= []).push(node);
-  return groups;
-}, {} as Record<string, NodeConfig[]>);
 
 const categories = [
   { label: 'Instruments', category: 'Instruments', icon: Piano },
   { label: 'Sounds', category: 'Synths', icon: AudioLines },
   { label: 'Effects', category: 'Audio Effects', icon: SlidersHorizontal },
   { label: 'Time', category: 'Time Effects', icon: Clock3 },
-] as const;
+].map(category => ({
+  ...category,
+  items: Object.values(nodesConfig).filter(node => node.category === category.category),
+}));
 
 function point(radius: number, angle: number) {
   const radians = angle * Math.PI / 180;
   return { x: 240 + radius * Math.cos(radians), y: 240 - radius * Math.sin(radians) };
 }
 
+// Rounded ring segments with consistent spacing along their shared edges.
 function sector(index: number, count = 4, outer = 130, inner = 46) {
   const slice = 180 / count;
-  const start = 180 - index * slice - 2;
-  const end = start - slice + 4;
-  const corner = 12;
-  const outerInset = corner / outer * 180 / Math.PI;
-  const innerInset = corner / inner * 180 / Math.PI;
+  const start = 180 - index * slice;
+  const end = start - slice;
+  const halfGap = 4.5;
+  const inset = (radius: number) => Math.asin(halfGap / radius) * 180 / Math.PI;
+  const outerStart = start - inset(outer);
+  const outerEnd = end + inset(outer);
+  const innerStart = start - inset(inner);
+  const innerEnd = end + inset(inner);
+  // Keep rounded corners from crossing on the narrower inner edge.
+  const corner = (radius: number) => Math.min(20, (slice - 2 * inset(radius)) * Math.PI / 180 * radius * 0.4);
+  const outerCorner = corner(outer);
+  const innerCorner = corner(inner);
+  const outerInset = outerCorner / outer * 180 / Math.PI;
+  const innerInset = innerCorner / inner * 180 / Math.PI;
   const at = (radius: number, angle: number) => {
     const { x, y } = point(radius, angle);
     return `${x} ${y}`;
   };
-  return `M ${at(outer - corner, start)}
-    Q ${at(outer, start)} ${at(outer, start - outerInset)}
-    A ${outer} ${outer} 0 0 1 ${at(outer, end + outerInset)}
-    Q ${at(outer, end)} ${at(outer - corner, end)}
-    L ${at(inner + corner, end)}
-    Q ${at(inner, end)} ${at(inner, end + innerInset)}
-    A ${inner} ${inner} 0 0 0 ${at(inner, start - innerInset)}
-    Q ${at(inner, start)} ${at(inner + corner, start)} Z`;
+  return `M ${at(outer - outerCorner, start - inset(outer - outerCorner))}
+    Q ${at(outer, outerStart)} ${at(outer, outerStart - outerInset)}
+    A ${outer} ${outer} 0 0 1 ${at(outer, outerEnd + outerInset)}
+    Q ${at(outer, outerEnd)} ${at(outer - outerCorner, end + inset(outer - outerCorner))}
+    L ${at(inner + innerCorner, end + inset(inner + innerCorner))}
+    Q ${at(inner, innerEnd)} ${at(inner, innerEnd + innerInset)}
+    A ${inner} ${inner} 0 0 0 ${at(inner, innerStart - innerInset)}
+    Q ${at(inner, innerStart)} ${at(inner + innerCorner, start - inset(inner + innerCorner))} Z`;
 }
 
 export function MenuBar() {
@@ -72,6 +80,7 @@ export function MenuBar() {
   };
   const selectCategory = (category: string) => {
     cancelHover();
+    cancelClose();
     if (!dragging.current) setOpenCategory(category);
   };
 
@@ -87,7 +96,7 @@ export function MenuBar() {
     };
   }, [cancelHover, cancelClose, close]);
 
-  const items = openCategory ? nodesByCategory[openCategory] : [];
+  const items = categories.find(({ category }) => category === openCategory)?.items ?? [];
 
   return (
     <nav ref={menuRef} aria-label="Add nodes"
@@ -116,23 +125,30 @@ export function MenuBar() {
     >
       <div id="node-categories"
         className={cn(
-          'absolute bottom-7 left-1/2 aspect-[2/1] [container-type:inline-size] w-[min(440px,calc(100vw-16px))] -translate-x-1/2 transition-opacity duration-150 motion-reduce:transition-none',
-          expanded ? 'visible opacity-100' : 'invisible opacity-0',
+          'absolute bottom-7 left-1/2 aspect-[2/1] [container-type:inline-size] w-[min(440px,calc(100vw-16px))] -translate-x-1/2',
+          expanded ? 'visible' : 'invisible',
         )}
       >
         <svg viewBox="0 0 480 240" className="absolute inset-0 size-full overflow-visible" aria-label="Node categories">
           {categories.map(({ label, category, icon: Icon }, index) => {
             const center = point(90, 157.5 - index * 45);
-            return <g key={category} className="radial-category" data-active={openCategory === category}>
+            return <g key={category} data-active={openCategory === category}>
+              <g className="radial-category-visual pointer-events-none">
+                <path d={sector(index)} className="stroke-border transition-colors"
+                  fill={openCategory === category ? 'var(--accent)' : 'var(--card)'} />
+                <g className={cn('pointer-events-none', openCategory === category ? 'text-accent-foreground' : 'text-muted-foreground')}>
+                  <Icon x={center.x - 11} y={center.y - 21} width={22} height={22} strokeWidth={1.7} />
+                  <text x={center.x} y={center.y + 14} textAnchor="middle" fill="currentColor" fontSize={14} fontWeight={500} letterSpacing={0}>{label}</text>
+                </g>
+              </g>
               <path d={sector(index)} role="button" tabIndex={expanded ? 0 : -1}
                 aria-label={label} aria-expanded={openCategory === category} aria-controls="node-category-items"
                 data-node-category
-                className="touch-manipulation cursor-pointer stroke-border outline-none transition-colors focus-visible:stroke-ring focus-visible:stroke-2"
-                fill={openCategory === category ? 'var(--accent)' : 'var(--card)'}
+                className="touch-manipulation cursor-pointer fill-transparent stroke-transparent outline-none focus-visible:stroke-ring focus-visible:stroke-2"
                 onPointerEnter={event => {
-                  if (event.pointerType !== 'mouse' || dragging.current) return;
+                  if (event.pointerType !== 'mouse' || dragging.current || openCategory === category) return;
                   cancelHover();
-                  hoverTimer.current = setTimeout(() => setOpenCategory(category), 180);
+                  hoverTimer.current = setTimeout(() => selectCategory(category), 180);
                 }}
                 onPointerLeave={cancelHover}
                 onClick={() => selectCategory(category)}
@@ -148,27 +164,15 @@ export function MenuBar() {
                   }
                 }}
               />
-              <g className={cn('pointer-events-none', openCategory === category ? 'text-accent-foreground' : 'text-muted-foreground')}>
-                <Icon x={center.x - 11} y={center.y - 21} width={22} height={22} strokeWidth={1.7} />
-                <text x={center.x} y={center.y + 14} textAnchor="middle" fill="currentColor" fontSize={14} fontWeight={500} letterSpacing={0}>{label}</text>
-              </g>
             </g>;
           })}
         </svg>
-        {openCategory && <div key={openCategory} id="node-category-items" className="radial-node pointer-events-none absolute inset-0 origin-bottom" role="group" aria-label={`${openCategory} nodes`}>
+        {openCategory && <div key={openCategory} id="node-category-items" className="pointer-events-none absolute inset-0" role="group" aria-label={`${openCategory} nodes`}>
           {items.map((item, index) => {
-            const useArc = items.length <= 2;
-            const position = useArc
-              ? point(171, 180 - (index + 0.5) * 180 / items.length)
-              : point(174, 165 - index * 150 / (items.length - 1));
-            if (useArc) return <div key={item.id} className="pointer-events-none absolute inset-0">
-              <DraggableNodeItem {...item} onAdd={close} arc={{ path: sector(index, items.length, 204, 138), ...position }} />
-            </div>;
-            return <div key={item.id} className="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${position.x / 480 * 100}%`, top: `${position.y / 240 * 100}%` }}>
+            const position = point(183, 180 - (index + 0.5) * 180 / items.length);
+            return <div key={item.id} className="pointer-events-none absolute inset-0">
               <DraggableNodeItem {...item} onAdd={close}
-                className="size-[14cqw] min-h-11 min-w-11 gap-1 rounded-full border bg-card p-1 sm:w-[14cqw] [&>svg]:size-[4cqw] [&>span:last-child]:overflow-visible [&>span:last-child]:text-[clamp(9px,2.3cqw,11px)] [&>span:last-child]:leading-tight [&>span:last-child]:tracking-normal"
-              />
+                arc={{ path: sector(index, items.length, 224, 142), ...position }} />
             </div>;
           })}
         </div>}
