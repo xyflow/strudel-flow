@@ -36,10 +36,10 @@ import { CustomNode } from './instruments/custom/custom-node';
 import { generatePattern as generateCustomNode } from './instruments/custom/custom';
 import { BeatMachineNode } from './instruments/beat-machine/beat-machine-node';
 import { generatePattern as generateBeatMachineNode } from './instruments/beat-machine/beat-machine';
-import { SynthSelectNode } from './synths/synth-select/synth-select-node';
-import { generatePattern as generateSynthSelectNode } from './synths/synth-select/synth-select';
-import { DrumSoundsNode } from './synths/drum-sounds/drum-sounds-node';
-import { generatePattern as generateDrumSoundsNode } from './synths/drum-sounds/drum-sounds';
+import { SynthSelectNode } from './sounds/synth-select/synth-select-node';
+import { generatePattern as generateSynthSelectNode } from './sounds/synth-select/synth-select';
+import { DrumSoundsNode } from './sounds/drum-sounds/drum-sounds-node';
+import { generatePattern as generateDrumSoundsNode } from './sounds/drum-sounds/drum-sounds';
 
 export type NodeConfig = {
   id: AppNodeType;

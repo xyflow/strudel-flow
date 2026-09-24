@@ -1,6 +1,6 @@
 import { CODE_EXAMPLES, DEFAULT_CODE, codeSyntaxError } from './custom';
 import { useState } from 'react';
-import WorkflowNode from '@/components/nodes/workflow-node';
+import WorkflowNode from '@/components/nodes/shared/workflow-node';
 import type { WorkflowNodeProps } from '@/components/nodes/types';
 import { useAppStore } from '@/store/app-store';
 import { Textarea } from '@/components/ui/textarea';

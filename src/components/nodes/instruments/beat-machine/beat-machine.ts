@@ -1,4 +1,4 @@
-import type { CellState } from '../modifiers';
+import type { CellState } from '../../shared/modifiers';
 
 export type BeatMachineData = {
   steps?: number;

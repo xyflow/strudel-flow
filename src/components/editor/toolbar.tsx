@@ -1,7 +1,7 @@
 import { Panel } from '@xyflow/react';
 import logo from '@/assets/logo.svg?raw';
 import { Settings2, X } from 'lucide-react';
-import { SettingsDialog } from '@/components/settings-dialog';
+import { SettingsDialog } from '@/components/editor/settings-dialog';
 import { AppInfoPopover } from './app-info-popover';
 import { ControlButton } from './control-button';
 import { useAppStore } from '@/store/app-store';
@@ -9,7 +9,7 @@ import { PlayPauseButton } from './play-pause-button';
 import { ZoomSlider } from './zoom-slider';
 import { PresetPopover } from './preset-popover';
 
-export function WorkflowControls() {
+export function EditorToolbar() {
   const cpm = useAppStore((state) => state.cpm);
   const setCpm = useAppStore((state) => state.setCpm);
   const bpc = useAppStore((state) => state.bpc);

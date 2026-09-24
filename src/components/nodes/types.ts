@@ -1,7 +1,7 @@
 import type { Node, NodeProps } from '@xyflow/react';
 import type { ReactNode } from 'react';
 import type { iconMapping } from '@/data/icon-mapping';
-import type { nodeDefinitions } from '.';
+import type { nodeDefinitions } from './registry';
 import type { ADSRData } from './effects/adsr/adsr';
 import type { LevelData } from './effects/level/level';
 import type { TextureData } from './effects/texture/texture';
@@ -13,8 +13,8 @@ import type { PadData } from './instruments/pad/pad';
 import type { ChordData } from './instruments/chord/chord';
 import type { CustomData } from './instruments/custom/custom';
 import type { BeatMachineData } from './instruments/beat-machine/beat-machine';
-import type { VoiceData } from './synths/synth-select/synth-select';
-import type { DrumSoundsData } from './synths/drum-sounds/drum-sounds';
+import type { VoiceData } from './sounds/synth-select/synth-select';
+import type { DrumSoundsData } from './sounds/drum-sounds/drum-sounds';
 
 export type WorkflowNodeData = {
   title?: string;

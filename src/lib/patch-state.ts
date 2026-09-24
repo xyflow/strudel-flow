@@ -1,5 +1,5 @@
 import { useAppStore } from '@/store/app-store';
-import { nodeTypes, type AppNode } from '@/components/nodes';
+import { nodeTypes, type AppNode } from '@/components/nodes/registry';
 import type { ProjectState } from './project-state';
 
 export function capturePatch(): ProjectState {

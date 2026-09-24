@@ -1,10 +1,10 @@
 import { ReactFlow } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
-import { nodeTypes } from '@/components/nodes';
-import deleteEdge from '@/components/delete-edge';
+import { nodeTypes } from '@/components/nodes/registry';
+import deleteEdge from '@/components/edges/delete-edge';
 import { useAppStore } from '@/store/app-store';
-import { WorkflowControls } from './controls';
+import { EditorToolbar } from './toolbar';
 import { useDragAndDrop } from '@/hooks/use-drag-and-drop';
 import { useUrlState } from '@/hooks/use-url-state';
 import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
@@ -12,7 +12,7 @@ import { useThemeCss } from '@/hooks/use-theme-css';
 
 const edgeTypes = { default: deleteEdge };
 
-export default function Workflow() {
+export default function Editor() {
   useUrlState();
   useWorkflowRunner();
 
@@ -60,7 +60,7 @@ export default function Workflow() {
         fitView
         fitViewOptions={{ padding: 0.3, maxZoom: 1 }}
       >
-        <WorkflowControls />
+        <EditorToolbar />
       </ReactFlow>
     </div>
   );

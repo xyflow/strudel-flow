@@ -1,8 +1,8 @@
 import { PARAMETERS, DEFAULTS } from './time';
-import WorkflowNode from '@/components/nodes/workflow-node';
+import WorkflowNode from '@/components/nodes/shared/workflow-node';
 import type { WorkflowNodeProps } from '@/components/nodes/types';
 import { useAppStore } from '@/store/app-store';
-import { ParameterControls } from '@/components/nodes/parameter-controls';
+import { ParameterControls } from '@/components/nodes/shared/parameter-controls';
 
 export function TimeNode(props: WorkflowNodeProps) {
   const update = useAppStore((state) => state.updateNodeData);

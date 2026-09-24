@@ -11,7 +11,7 @@ import {
   Edge,
 } from '@xyflow/react';
 
-import type { AppNode } from '@/components/nodes';
+import type { AppNode } from '@/components/nodes/registry';
 import { initialEdges, initialNodes } from '@/data/workflow-data';
 import { findConnectedComponents } from '@/lib/graph-utils';
 

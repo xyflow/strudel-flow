@@ -1,8 +1,8 @@
 import { DEFAULTS } from './phaser';
-import WorkflowNode from '@/components/nodes/workflow-node';
+import WorkflowNode from '@/components/nodes/shared/workflow-node';
 import type { WorkflowNodeProps } from '@/components/nodes/types';
 import { useAppStore } from '@/store/app-store';
-import { ParameterKnob } from '@/components/parameter-knob';
+import { ParameterKnob } from '@/components/nodes/shared/parameter-knob';
 export function PhaserNode({ id, data }: WorkflowNodeProps) {
   const update = useAppStore((state) => state.updateNodeData);
   return (

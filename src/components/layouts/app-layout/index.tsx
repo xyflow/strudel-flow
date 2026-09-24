@@ -1,4 +1,4 @@
-import { MenuBar } from '@/components/menu-bar';
+import { MenuBar } from '@/components/editor/menu-bar';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (

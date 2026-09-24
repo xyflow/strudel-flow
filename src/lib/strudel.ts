@@ -1,6 +1,6 @@
 import { Edge } from '@xyflow/react';
-import { AppNode } from '@/components/nodes';
-import nodesConfig, { nodeDefinitions } from '@/components/nodes';
+import { AppNode } from '@/components/nodes/registry';
+import nodesConfig, { nodeDefinitions } from '@/components/nodes/registry';
 import { findConnectedComponents } from './graph-utils';
 
 export function getNodeStrudelOutput(nodeType: string) {

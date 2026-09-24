@@ -1,8 +1,8 @@
 import { ROOM_PARAMS } from './room';
-import WorkflowNode from '@/components/nodes/workflow-node';
+import WorkflowNode from '@/components/nodes/shared/workflow-node';
 import type { WorkflowNodeProps } from '@/components/nodes/types';
 import { useAppStore } from '@/store/app-store';
-import { ParameterKnob } from '@/components/parameter-knob';
+import { ParameterKnob } from '@/components/nodes/shared/parameter-knob';
 
 export function RoomNode({ id, data }: WorkflowNodeProps) {
   const updateNodeData = useAppStore((state) => state.updateNodeData);

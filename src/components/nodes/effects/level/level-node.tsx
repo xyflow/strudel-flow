@@ -1,7 +1,7 @@
 import { PARAMETERS } from './level';
-import WorkflowNode from '@/components/nodes/workflow-node';
+import WorkflowNode from '@/components/nodes/shared/workflow-node';
 import type { WorkflowNodeProps } from '@/components/nodes/types';
-import { ParameterControls } from '@/components/nodes/parameter-controls';
+import { ParameterControls } from '@/components/nodes/shared/parameter-controls';
 
 export function LevelNode({ id, data }: WorkflowNodeProps) {
   return (

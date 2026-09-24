@@ -6,10 +6,10 @@ import {
   DEFAULTS,
 } from './chord';
 import { useRef, useState } from 'react';
-import WorkflowNode from '@/components/nodes/workflow-node';
+import WorkflowNode from '@/components/nodes/shared/workflow-node';
 import type { WorkflowNodeProps } from '@/components/nodes/types';
 import { useAppStore } from '@/store/app-store';
-import { AccordionControls } from '@/components/accordion-controls';
+import { AccordionControls } from '@/components/nodes/shared/accordion-controls';
 function NoteShape({ notes }: { notes: number[] }) {
   return (
     <svg viewBox="0 0 48 40" className="h-10 w-full" aria-hidden="true">

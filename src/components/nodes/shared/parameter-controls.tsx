@@ -1,6 +1,6 @@
-import { ParameterKnob } from '@/components/parameter-knob';
+import { ParameterKnob } from '@/components/nodes/shared/parameter-knob';
 import { useAppStore } from '@/store/app-store';
-import type { WorkflowNodeData } from '.';
+import type { WorkflowNodeData } from '../registry';
 
 type Parameter = {
   key: keyof WorkflowNodeData;

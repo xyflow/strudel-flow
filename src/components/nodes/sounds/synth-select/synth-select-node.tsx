@@ -8,10 +8,10 @@ import {
 } from '@/components/ui/select';
 import { useAppStore } from '@/store/app-store';
 import type { WorkflowNodeProps } from '@/components/nodes/types';
-import WorkflowNode from '@/components/nodes/workflow-node';
+import WorkflowNode from '@/components/nodes/shared/workflow-node';
 import { SYNTH_CATEGORIES } from '@/data/sounds';
 import { cn } from '@/lib/utils';
-import { CategorySelectItems } from '@/components/category-select-items';
+import { CategorySelectItems } from '@/components/nodes/shared/category-select-items';
 
 const waveforms = [
   { value: 'sine', label: 'Sine', path: 'M2 16 C8 0 12 0 18 16 S28 32 34 16' },

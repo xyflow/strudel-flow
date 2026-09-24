@@ -5,7 +5,7 @@ import {
   RadialMenuItem,
   RadialMenuSubItem,
 } from '@/components/ui/radial-menu';
-import nodesConfig, { createNodeByType } from '@/components/nodes';
+import nodesConfig, { createNodeByType } from '@/components/nodes/registry';
 import { iconMapping } from '@/data/icon-mapping';
 import { useAppStore } from '@/store/app-store';
 

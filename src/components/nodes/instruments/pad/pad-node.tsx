@@ -2,11 +2,11 @@ import { NOTES, DEFAULTS, createDefaultGrid } from './pad';
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/app-store';
 import { getSchedulerNow } from '@/lib/strudel-clock';
-import WorkflowNode from '@/components/nodes/workflow-node';
+import WorkflowNode from '@/components/nodes/shared/workflow-node';
 import type { WorkflowNodeProps } from '@/components/nodes/types';
 
-import { CellState, ModifierDropdown } from '../modifiers';
-import { AccordionControls } from '@/components/accordion-controls';
+import { CellState, ModifierDropdown } from '../../shared/modifiers';
+import { AccordionControls } from '@/components/nodes/shared/accordion-controls';
 
 export function PadNode({ id, data, type }: WorkflowNodeProps) {
   const [activeStep, setActiveStep] = useState(-1);

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Code2, Ellipsis, Trash2, Volume2, VolumeX } from 'lucide-react';
 import { Position } from '@xyflow/react';
-import { WorkflowNodeData, AppNodeType } from '@/components/nodes/';
-import nodesConfig from '@/components/nodes/';
-import { BaseNode } from '@/components/base-node';
+import { WorkflowNodeData, AppNodeType } from '@/components/nodes/registry';
+import nodesConfig from '@/components/nodes/registry';
+import { BaseNode } from '@/components/nodes/shared/base-node';
 import { useAppStore } from '@/store/app-store';
-import PatternPopup from '@/components/pattern-popup';
-import { BaseHandle } from '@/components/base-handle';
+import PatternPopup from '@/components/nodes/shared/pattern-popup';
+import { BaseHandle } from '@/components/nodes/shared/base-handle';
 import {
   DropdownMenu,
   DropdownMenuContent,

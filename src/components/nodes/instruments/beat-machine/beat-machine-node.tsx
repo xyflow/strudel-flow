@@ -7,14 +7,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { AccordionControls } from '@/components/accordion-controls';
-import { CellState, ModifierDropdown } from '../modifiers';
-import WorkflowNode from '@/components/nodes/workflow-node';
+import { AccordionControls } from '@/components/nodes/shared/accordion-controls';
+import { CellState, ModifierDropdown } from '../../shared/modifiers';
+import WorkflowNode from '@/components/nodes/shared/workflow-node';
 import type { WorkflowNodeProps } from '@/components/nodes/types';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
 import { DRUM_CATEGORIES } from '@/data/sounds';
-import { CategorySelectItems } from '@/components/category-select-items';
+import { CategorySelectItems } from '@/components/nodes/shared/category-select-items';
 
 function SequencerRow({
   row,

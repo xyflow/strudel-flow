@@ -1,4 +1,4 @@
-import type { AppNode } from '@/components/nodes';
+import type { AppNode } from '@/components/nodes/registry';
 import { Edge } from '@xyflow/react';
 
 export const initialNodes: AppNode[] = [

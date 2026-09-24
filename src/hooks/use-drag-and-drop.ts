@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
-import nodesConfig, { AppNode, createNodeByType, type AppNodeType } from '@/components/nodes';
+import nodesConfig, { AppNode, createNodeByType, type AppNodeType } from '@/components/nodes/registry';
 import { useAppStore, AppStore } from '@/store/app-store';
 
 const selector = (state: AppStore) => ({

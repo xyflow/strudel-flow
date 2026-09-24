@@ -3,7 +3,7 @@ import { memo } from 'react';
 import { X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { ButtonEdge } from '@/components/button-edge';
+import { ButtonEdge } from '@/components/edges/button-edge';
 
 const DeleteEdge = memo((props: EdgeProps) => {
   const { setEdges } = useReactFlow();
