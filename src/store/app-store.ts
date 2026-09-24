@@ -19,6 +19,7 @@ export type AppState = {
   name: string;
   author: string;
   description: string;
+  graphRevision: number;
   nodes: AppNode[];
   edges: Edge[];
   colorMode: ColorMode;
@@ -52,6 +53,7 @@ export type AppStore = AppState & AppActions;
 
 export const useAppStore = create<AppStore>()(
   subscribeWithSelector((set, get) => ({
+    graphRevision: 0,
     name: 'Untitled patch',
     author: '',
     description: '',

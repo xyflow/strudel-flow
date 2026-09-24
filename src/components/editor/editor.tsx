@@ -8,6 +8,7 @@ import { EditorToolbar } from './toolbar';
 import { useDragAndDrop } from '@/hooks/use-drag-and-drop';
 import { useUrlState } from '@/hooks/use-url-state';
 import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useThemeCss } from '@/hooks/use-theme-css';
 
 const edgeTypes = { default: deleteEdge };
@@ -15,6 +16,7 @@ const edgeTypes = { default: deleteEdge };
 export default function Editor() {
   useUrlState();
   useWorkflowRunner();
+  useKeyboardShortcuts();
 
   const {
     nodes,

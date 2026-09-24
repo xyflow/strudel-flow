@@ -50,6 +50,7 @@ export function applyPatch(state: ProjectState): boolean {
   )
     return false;
   useAppStore.setState({
+    graphRevision: useAppStore.getState().graphRevision + 1,
     name: state.name ?? 'Untitled patch',
     author: state.author ?? '',
     description: state.description ?? '',

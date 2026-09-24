@@ -1,6 +1,5 @@
 import '@/lib/strudel-scope';
 import { useEffect, useMemo, useRef } from 'react';
-import { useKeyboardShortcuts } from './use-keyboard-shortcuts';
 import { useAppStore } from '@/store/app-store';
 import { generateOutput } from '@/lib/strudel';
 
@@ -103,7 +102,6 @@ function createPlaybackEngine(adapter: PlaybackAdapter) {
 
 // Mounted once by the editor. UI components read playback state from the app store.
 export function useWorkflowRunner() {
-  useKeyboardShortcuts();
   const engine = useRef<ReturnType<typeof createPlaybackEngine> | null>(null);
   const nodes = useAppStore((state) => state.nodes);
   const edges = useAppStore((state) => state.edges);
