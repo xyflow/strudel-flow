@@ -34,3 +34,7 @@ We’re here to help! If you have any questions, feedback, instrument recommenda
 - **Contact Form**: Use the contact form on our [website](https://xyflow.com/contact).
 - **Email**: Drop us an email at [info@xyflow.com](mailto:info@xyflow.com).
 - **Discord**: Join our [Discord server](https://discord.com/invite/RVmnytFmGW) to connect with the community and get support.
+
+## Share a patch
+
+Export your patch and [add it to `patches/`](patches/README.md) in a pull request. Accepted patches appear in the searchable community gallery in the Patches menu after deployment.

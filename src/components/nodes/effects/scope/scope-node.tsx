@@ -1,27 +1,25 @@
 import type { CustomControlsProps } from '../../define-node';
 import type { ScopeData } from './scope';
 import { useEffect, useRef } from 'react';
-import { ParameterControls } from '@/components/nodes/shared/parameter-controls';
+import { ParameterKnob } from '../../shared/parameter-knob';
+import { useAppStore } from '@/store/app-store';
+import { findConnectedComponents } from '@/lib/graph-utils';
 import { drawScope } from '@/lib/strudel-scope';
-import { DEFAULT_SCOPE_SCALE } from './scope';
-
-const PARAMETERS = [
-  {
-    key: 'scopeScale',
-    label: 'Scale',
-    initial: DEFAULT_SCOPE_SCALE,
-    min: 0.1,
-    max: 4,
-    step: 0.05,
-  },
-] as const;
+import { DEFAULT_SCOPE_SCALE, scopeIdForGroup } from './scope';
 
 export function ScopeNode({
   values: data,
   onChange,
   isPlaying: playing,
-  scopeId,
+  id,
 }: CustomControlsProps<ScopeData>) {
+  const scopeId = useAppStore((state) =>
+    scopeIdForGroup(
+      findConnectedComponents(state.nodes, state.edges).find((ids) =>
+        ids.includes(id),
+      )?.[0] ?? id,
+    ),
+  );
   const canvas = useRef<HTMLCanvasElement>(null);
   const scale = Number(data.scopeScale ?? DEFAULT_SCOPE_SCALE);
 
@@ -58,11 +56,17 @@ export function ScopeNode({
         aria-label="Audio waveform"
         className="h-28 w-full rounded border border-border bg-background text-primary"
       />
-      <ParameterControls
-        data={data}
-        onChange={onChange}
-        parameters={PARAMETERS}
-      />
+      <div className="flex justify-center">
+        <ParameterKnob
+          label="Scale"
+          value={scale}
+          min={0.1}
+          max={4}
+          step={0.05}
+          format={(value) => String(Number(value.toFixed(2)))}
+          onChange={(value) => onChange({ scopeScale: String(value) })}
+        />
+      </div>
     </div>
   );
 }

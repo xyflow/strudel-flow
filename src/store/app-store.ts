@@ -16,6 +16,9 @@ import { initialEdges, initialNodes } from '@/data/workflow-data';
 import { findConnectedComponents } from '@/lib/graph-utils';
 
 export type AppState = {
+  name: string;
+  author: string;
+  description: string;
   nodes: AppNode[];
   edges: Edge[];
   colorMode: ColorMode;
@@ -49,6 +52,9 @@ export type AppStore = AppState & AppActions;
 
 export const useAppStore = create<AppStore>()(
   subscribeWithSelector((set, get) => ({
+    name: 'Untitled patch',
+    author: '',
+    description: '',
     nodes: initialNodes,
     edges: initialEdges,
     theme: 'mono',
@@ -62,7 +68,8 @@ export const useAppStore = create<AppStore>()(
     setBpc: (bpc) => set({ bpc }),
     setPattern: (pattern) => set({ pattern }),
     pause: () => set({ isPlaying: false }),
-    toggle: () => set((state) => ({ isPlaying: !state.isPlaying, error: null })),
+    toggle: () =>
+      set((state) => ({ isPlaying: !state.isPlaying, error: null })),
     setError: (error) => set({ error, ...(error ? { isPlaying: false } : {}) }),
 
     onNodesChange: (changes) => {
@@ -74,16 +81,26 @@ export const useAppStore = create<AppStore>()(
     removeNode: (nodeId) =>
       set((state) => ({
         nodes: state.nodes.filter((node) => node.id !== nodeId),
-        edges: state.edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+        edges: state.edges.filter(
+          (edge) => edge.source !== nodeId && edge.target !== nodeId,
+        ),
       })),
 
-    setGroupState: (nodeId, playbackState) => set((state) => {
-      const group = new Set(findConnectedComponents(state.nodes, state.edges)
-        .find((ids) => ids.includes(nodeId)) ?? [nodeId]);
-      return { nodes: state.nodes.map((node) => group.has(node.id)
-        ? { ...node, data: { ...node.data, state: playbackState } }
-        : node) };
-    }),
+    setGroupState: (nodeId, playbackState) =>
+      set((state) => {
+        const group = new Set(
+          findConnectedComponents(state.nodes, state.edges).find((ids) =>
+            ids.includes(nodeId),
+          ) ?? [nodeId],
+        );
+        return {
+          nodes: state.nodes.map((node) =>
+            group.has(node.id)
+              ? { ...node, data: { ...node.data, state: playbackState } }
+              : node,
+          ),
+        };
+      }),
 
     onEdgesChange: (changes) =>
       set({ edges: applyEdgeChanges(changes, get().edges) }),
@@ -101,7 +118,7 @@ export const useAppStore = create<AppStore>()(
             ...(sourceHandle ? { sourceHandle } : {}),
             ...(targetHandle ? { targetHandle } : {}),
           },
-          get().edges
+          get().edges,
         ),
       });
     },
@@ -115,21 +132,27 @@ export const useAppStore = create<AppStore>()(
         nodes: state.nodes.map((node) =>
           node.id === nodeId
             ? { ...node, data: { ...node.data, ...updates } }
-            : node
+            : node,
         ),
       })),
-  }))
+  })),
 );
 
 const systemAppearance = window.matchMedia('(prefers-color-scheme: dark)');
 function applyColorMode() {
   const { colorMode } = useAppStore.getState();
   document.documentElement.classList.toggle(
-    'dark', colorMode === 'dark' || (colorMode === 'system' && systemAppearance.matches),
+    'dark',
+    colorMode === 'dark' ||
+      (colorMode === 'system' && systemAppearance.matches),
   );
 }
-useAppStore.subscribe((state) => state.colorMode, applyColorMode, { fireImmediately: true });
+useAppStore.subscribe((state) => state.colorMode, applyColorMode, {
+  fireImmediately: true,
+});
 systemAppearance.addEventListener('change', applyColorMode);
 if (import.meta.hot) {
-  import.meta.hot.dispose(() => systemAppearance.removeEventListener('change', applyColorMode));
+  import.meta.hot.dispose(() =>
+    systemAppearance.removeEventListener('change', applyColorMode),
+  );
 }

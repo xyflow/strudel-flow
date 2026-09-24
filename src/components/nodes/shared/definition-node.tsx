@@ -1,5 +1,3 @@
-import { findConnectedComponents } from '@/lib/graph-utils';
-import { scopeIdForGroup } from '../effects/scope/scope';
 import WorkflowNode from './workflow-node';
 import { ParameterKnob } from './parameter-knob';
 import { useAppStore } from '@/store/app-store';
@@ -10,13 +8,6 @@ export function createDefinitionComponent(definition: NodeDefinition) {
   return function DefinitionNode({ id, data, type }: WorkflowNodeProps) {
     const update = useAppStore((state) => state.updateNodeData);
     const isPlaying = useAppStore((state) => state.isPlaying);
-    const scopeId = useAppStore((state) =>
-      scopeIdForGroup(
-        findConnectedComponents(state.nodes, state.edges).find((ids) =>
-          ids.includes(id),
-        )?.[0] ?? id,
-      ),
-    );
     const values = definition.getValues(data);
     const updateValues = (updates: Record<string, unknown>) =>
       update(id, updates);
@@ -27,7 +18,6 @@ export function createDefinitionComponent(definition: NodeDefinition) {
             id,
             isPlaying,
             isMuted: data.state === 'paused',
-            scopeId,
           })
         ) : (
           <div className="space-y-4 px-4 pt-1 pb-5">

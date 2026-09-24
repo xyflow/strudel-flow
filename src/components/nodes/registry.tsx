@@ -1,15 +1,8 @@
 import type { NodeDefinition } from './define-node';
 import { createDefinitionComponent } from './shared/definition-node';
-import type { ComponentType } from 'react';
 import type { XYPosition } from '@xyflow/react';
 import { nanoid } from 'nanoid';
-import type { iconMapping } from '@/data/icon-mapping';
-import type {
-  AppNode,
-  AppNodeType,
-  WorkflowNodeData,
-  WorkflowNodeProps,
-} from './types';
+import type { AppNode, AppNodeType, WorkflowNodeData } from './types';
 export type {
   AppNode,
   AppNodeType,
@@ -17,34 +10,17 @@ export type {
   WorkflowNodeProps,
 } from './types';
 
-export type NodeConfig = {
-  id: AppNodeType;
-  title: string;
-  category: 'Instruments' | 'Synths' | 'Audio Effects';
-  icon: keyof typeof iconMapping;
-};
-
 // New nodes register themselves by exporting a definition from a *.node.ts(x) file.
 const discovered = import.meta.glob<NodeDefinition>('./**/*.node.{ts,tsx}', {
   eager: true,
   import: 'default',
 });
-type RegisteredNode = Omit<
-  NodeDefinition,
-  'parameters' | 'defaults' | 'renderControls'
-> & {
-  component: ComponentType<WorkflowNodeProps>;
-  defaults: Record<string, unknown>;
-};
-const registered: Record<string, RegisteredNode> = Object.create(null);
+const registered: Record<string, NodeDefinition> = Object.create(null);
 for (const definition of Object.values(discovered)) {
   if (Object.prototype.hasOwnProperty.call(registered, definition.id)) {
     throw new Error(`Duplicate node ID: ${definition.id}`);
   }
-  registered[definition.id] = {
-    ...definition,
-    component: createDefinitionComponent(definition),
-  };
+  registered[definition.id] = definition;
 }
 export const nodeDefinitions = Object.fromEntries(
   Object.entries(registered).sort(
@@ -53,16 +29,12 @@ export const nodeDefinitions = Object.fromEntries(
   ),
 );
 
-const nodesConfig = Object.fromEntries(
-  Object.entries(nodeDefinitions).map(([id, { title, category, icon }]) => [
-    id,
-    { id, title, category, icon },
-  ]),
-) as Record<AppNodeType, NodeConfig>;
-
 export const nodeTypes = Object.fromEntries(
-  Object.entries(nodeDefinitions).map(([id, { component }]) => [id, component]),
-) as Record<AppNodeType, ComponentType<WorkflowNodeProps>>;
+  Object.values(nodeDefinitions).map((definition) => [
+    definition.id,
+    createDefinitionComponent(definition),
+  ]),
+);
 
 export function createNodeByType({
   type,
@@ -75,16 +47,16 @@ export function createNodeByType({
   position?: XYPosition;
   data?: WorkflowNodeData;
 }): AppNode {
-  if (!Object.prototype.hasOwnProperty.call(nodesConfig, type)) {
+  if (!Object.prototype.hasOwnProperty.call(nodeDefinitions, type)) {
     throw new Error(`Unknown node type: ${type}`);
   }
-  const { title, icon } = nodesConfig[type];
+  const { title, icon, defaults } = nodeDefinitions[type];
   return {
     id,
     type,
     position,
     data: data ?? {
-      ...nodeDefinitions[type].defaults,
+      ...defaults,
       title,
       icon,
       state: 'running',
@@ -92,4 +64,4 @@ export function createNodeByType({
   };
 }
 
-export default nodesConfig;
+export default nodeDefinitions;

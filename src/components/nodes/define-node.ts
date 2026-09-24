@@ -32,13 +32,12 @@ export type NodeControlsProps<
   id: string;
   isPlaying: boolean;
   isMuted: boolean;
-  scopeId: string;
 };
 export type CustomControlsProps<D extends Record<string, unknown>> =
   NodeControlsProps<Record<never, never>, D>;
 export type ControlsContext = Pick<
   CustomControlsProps<Record<never, never>>,
-  'id' | 'isPlaying' | 'isMuted' | 'scopeId'
+  'id' | 'isPlaying' | 'isMuted'
 >;
 export type NodeDefinition = {
   id: string;
@@ -115,12 +114,14 @@ export function defineNode<
     write,
     ...metadata
   } = definition;
-  const resolve = (data: Record<string, unknown>) =>
-    ({
+  const resolve = (data: Record<string, unknown>) => {
+    const values = read(data);
+    return {
       ...defaults,
-      ...read(data),
-      ...parameterValues(parameters, read(data)),
-    }) as D & ParameterValues<P>;
+      ...values,
+      ...parameterValues(parameters, values),
+    } as D & ParameterValues<P>;
+  };
   const encode = (updates: Record<string, unknown>) =>
     Object.fromEntries(
       Object.entries(updates).map(([key, value]) => [
@@ -128,22 +129,22 @@ export function defineNode<
         key in parameters && value !== undefined ? String(value) : value,
       ]),
     );
+  const updateValues = (
+    data: Record<string, unknown>,
+    updates: Record<string, unknown>,
+  ) =>
+    encode(
+      write ? write(updates as Partial<D & ParameterValues<P>>, data) : updates,
+    );
   return {
     ...metadata,
     parameters,
     getValues: (data) => parameterValues(parameters, read(data)),
-    updateValues: (data, updates) =>
-      encode(
-        write
-          ? write(updates as Partial<D & ParameterValues<P>>, data)
-          : updates,
-      ),
+    updateValues,
     defaults: {
       ...defaults,
       ...encode(
-        write
-          ? write(resolve({}), {})
-          : parameterValues(parameters, {}),
+        write ? write(resolve({}), {}) : parameterValues(parameters, {}),
       ),
     },
     generatePattern: (data, input, scopeId) =>
@@ -157,8 +158,7 @@ export function defineNode<
           createElement(component, {
             ...context,
             values: resolve(data),
-            onChange: (updates) =>
-              update(encode(write ? write(updates, data) : updates)),
+            onChange: (updates) => update(updateValues(data, updates)),
           })
       : undefined,
   };

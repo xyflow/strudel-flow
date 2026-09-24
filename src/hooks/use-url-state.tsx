@@ -25,7 +25,11 @@ export function useUrlState() {
       if (url.searchParams.has('state') || url.hash.startsWith('#patch=')) {
         const state = loadFromUrl();
         if (!state || !applyPatch(state)) {
-          useAppStore.getState().setError('This patch link is invalid or uses an unsupported module.');
+          useAppStore
+            .getState()
+            .setError(
+              'This patch link is invalid or uses an unsupported module.',
+            );
         }
       }
       lastPatch = JSON.stringify(capturePatch());
@@ -33,14 +37,28 @@ export function useUrlState() {
     };
     load();
     const unsubscribe = useAppStore.subscribe((state, previous) => {
-      if (loading || (state.nodes === previous.nodes && state.edges === previous.edges &&
-        state.theme === previous.theme && state.colorMode === previous.colorMode &&
-        state.cpm === previous.cpm && state.bpc === previous.bpc)) return;
+      if (
+        loading ||
+        (state.nodes === previous.nodes &&
+          state.edges === previous.edges &&
+          state.theme === previous.theme &&
+          state.colorMode === previous.colorMode &&
+          state.cpm === previous.cpm &&
+          state.bpc === previous.bpc &&
+          state.name === previous.name &&
+          state.author === previous.author &&
+          state.description === previous.description)
+      )
+        return;
       clearTimeout(timer);
       timer = setTimeout(save, 200);
     });
-    const flush = () => { if (timer !== undefined) save(); };
-    const onVisibilityChange = () => { if (document.hidden) flush(); };
+    const flush = () => {
+      if (timer !== undefined) save();
+    };
+    const onVisibilityChange = () => {
+      if (document.hidden) flush();
+    };
     window.addEventListener('hashchange', load);
     window.addEventListener('popstate', load);
     window.addEventListener('pagehide', flush);

@@ -1,4 +1,4 @@
-import { getNodeStrudelOutput } from '@/lib/strudel';
+import { nodeDefinitions } from '../registry';
 import { useAppStore } from '@/store/app-store';
 
 export default function PatternPopup({
@@ -14,7 +14,7 @@ export default function PatternPopup({
     state.nodes.find((node) => node.id === id),
   );
   const strudelPattern = node
-    ? getNodeStrudelOutput(node.type)?.(node.data, '')
+    ? nodeDefinitions[node.type]?.generatePattern(node.data, '')
     : '';
 
   return (

@@ -1,13 +1,8 @@
 import { scopeIdForGroup } from '@/components/nodes/effects/scope/scope';
 import { Edge } from '@xyflow/react';
 import { AppNode } from '@/components/nodes/registry';
-import nodesConfig, { nodeDefinitions } from '@/components/nodes/registry';
+import { nodeDefinitions } from '@/components/nodes/registry';
 import { findConnectedComponents } from './graph-utils';
-
-export function getNodeStrudelOutput(nodeType: string) {
-  return nodeDefinitions[nodeType as keyof typeof nodeDefinitions]
-    ?.generatePattern;
-}
 
 function optimizeSoundCalls(strudelString: string): string {
   let optimized = strudelString;
@@ -27,7 +22,7 @@ function optimizeSoundCalls(strudelString: string): string {
   return optimized;
 }
 function isSoundSource(node: AppNode): boolean {
-  const category = nodesConfig[node.type]?.category;
+  const category = nodeDefinitions[node.type]?.category;
   return category === 'Instruments';
 }
 
@@ -37,9 +32,11 @@ export function generateOutput(
   cpm: string,
   bpc: string,
 ): string {
+  const nodesById = new Map(nodes.map((node) => [node.id, node]));
   const nodePatterns: Record<string, string> = {};
   for (const node of nodes) {
-    const strudelOutput = getNodeStrudelOutput(node.type);
+    if (!isSoundSource(node)) continue;
+    const strudelOutput = nodeDefinitions[node.type]?.generatePattern;
     if (!strudelOutput) continue;
 
     try {
@@ -57,8 +54,8 @@ export function generateOutput(
 
   for (const componentNodeIds of components) {
     const componentNodes = componentNodeIds
-      .map((id) => nodes.find((n) => n.id === id))
-      .filter(Boolean) as AppNode[];
+      .map((id) => nodesById.get(id))
+      .filter((node): node is AppNode => node !== undefined);
 
     const [sources, effects] = componentNodes.reduce<[AppNode[], AppNode[]]>(
       ([src, eff], node) => {
@@ -89,7 +86,7 @@ export function generateOutput(
         : `stack(${activePatterns.join(', ')})`;
 
     for (const effect of effects) {
-      const strudelOutput = getNodeStrudelOutput(effect.type);
+      const strudelOutput = nodeDefinitions[effect.type]?.generatePattern;
       if (strudelOutput && pattern) {
         pattern = strudelOutput(
           effect.data,
@@ -121,12 +118,7 @@ export function generateOutput(
     })
     .join('\n');
 
-  // Always add setcpm if there's sound (like other node outputs)
-  if (result) {
-    const bpm = parseInt(cpm) || 120;
-    const beatsPerCycle = parseInt(bpc) || 4;
-    return `setcpm(${bpm}/${beatsPerCycle})\n${result}`;
-  }
-
-  return result;
+  const bpm = parseInt(cpm) || 120;
+  const beatsPerCycle = parseInt(bpc) || 4;
+  return `setcpm(${bpm}/${beatsPerCycle})\n${result}`;
 }

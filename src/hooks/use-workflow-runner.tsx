@@ -8,18 +8,23 @@ import { generateOutput } from '@/lib/strudel';
 import { initStrudel, evaluate, hush, samples } from '@strudel/web';
 import { setSchedulerNow } from '@/lib/strudel-clock';
 
-
 type StrudelSession = {
   scheduler: { now: () => number };
   state: { evalError?: unknown };
 };
 
-const ready: Promise<StrudelSession> = initStrudel().then((session: StrudelSession) => {
-  setSchedulerNow(() => session.scheduler.now());
-  return session;
-});
+const ready: Promise<StrudelSession> = initStrudel().then(
+  (session: StrudelSession) => {
+    setSchedulerNow(() => session.scheduler.now());
+    return session;
+  },
+);
 void ready.catch((error: unknown) => {
-  useAppStore.getState().setError(error instanceof Error ? error.message : 'Audio could not start.');
+  useAppStore
+    .getState()
+    .setError(
+      error instanceof Error ? error.message : 'Audio could not start.',
+    );
 });
 samples('github:tidalcycles/dirt-samples');
 
@@ -28,10 +33,6 @@ async function evaluateAudio(pattern: string) {
   await evaluate(pattern);
   // Strudel records evaluation failures rather than rejecting its promise.
   if (session.state.evalError) throw session.state.evalError;
-}
-
-function stopAudio() {
-  hush();
 }
 
 type PlaybackAdapter = {
@@ -100,7 +101,7 @@ function createPlaybackEngine(adapter: PlaybackAdapter) {
   };
 }
 
-// Mounted once by Workflow. UI components read playback state from the app store.
+// Mounted once by the editor. UI components read playback state from the app store.
 export function useWorkflowRunner() {
   useKeyboardShortcuts();
   const engine = useRef<ReturnType<typeof createPlaybackEngine> | null>(null);
@@ -116,15 +117,19 @@ export function useWorkflowRunner() {
     try {
       return { pattern: generateOutput(nodes, edges, cpm, bpc), error: null };
     } catch (error) {
-      return { pattern: '', error: error instanceof Error ? error.message : String(error) };
+      return {
+        pattern: '',
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }, [nodes, edges, cpm, bpc]);
 
   useEffect(() => {
     const instance = createPlaybackEngine({
       evaluate: evaluateAudio,
-      hush: stopAudio,
-      onError: (error) => setError(error instanceof Error ? error.message : String(error)),
+      hush,
+      onError: (error) =>
+        setError(error instanceof Error ? error.message : String(error)),
     });
     engine.current = instance;
     return () => {
@@ -148,8 +153,10 @@ export function useWorkflowRunner() {
       engine.current?.setPattern(null);
       return;
     }
-    const timer = window.setTimeout(() => engine.current?.setPattern(activePattern), 40);
+    const timer = window.setTimeout(
+      () => engine.current?.setPattern(activePattern),
+      40,
+    );
     return () => window.clearTimeout(timer);
   }, [compiled.pattern, compiled.error, isPlaying]);
-
 }
