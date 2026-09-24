@@ -1,0 +1,86 @@
+{
+  "name": "Abbey's Flow",
+  "author": "printer_scanner",
+  "description": "A smooth melody for fireside listening.",
+  "nodes": [
+    {
+      "id": "padNode_1",
+      "type": "pad-node",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "title": "Pad",
+        "icon": "Grid3x3",
+        "state": "running",
+        "steps": 8,
+        "octave": 3,
+        "grid": [
+          [true, false, false, false, false, false, false, false],
+          [false, false, true, false, false, false, false, false],
+          [false, false, false, false, true, false, false, false],
+          [false, false, false, false, false, false, true, false],
+          [false, false, false, false, true, false, false, false],
+          [false, false, true, false, false, false, false, false],
+          [false, true, false, false, false, false, false, false],
+          [false, false, false, false, true, false, false, false],
+          [false, false, false, false, false, false, false, false],
+          [false, false, false, false, false, false, false, false],
+          [false, false, false, false, false, false, false, false],
+          [false, false, false, false, false, false, false, false],
+          [false, false, false, false, false, false, false, false],
+          [false, false, false, false, false, false, false, false],
+          [false, false, false, false, false, false, false, false],
+          [false, false, false, false, false, false, false, false]
+        ]
+      }
+    },
+    {
+      "id": "synthSelectNode_1",
+      "type": "synth-select-node",
+      "position": {
+        "x": 560,
+        "y": 25
+      },
+      "data": {
+        "title": "Voice",
+        "icon": "Waves",
+        "state": "running",
+        "sound": "triangle"
+      }
+    },
+    {
+      "id": "filter_1",
+      "type": "lpf-node",
+      "position": {
+        "x": 560,
+        "y": 255
+      },
+      "data": {
+        "title": "Filter",
+        "icon": "Filter",
+        "state": "running",
+        "lpf": "1500 1"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_1",
+      "source": "padNode_1",
+      "target": "synthSelectNode_1",
+      "type": "default"
+    },
+    {
+      "id": "edge_2",
+      "source": "synthSelectNode_1",
+      "target": "filter_1",
+      "type": "default"
+    }
+  ],
+  "theme": "mono",
+  "colorMode": "dark",
+  "cpm": "120",
+  "bpc": "4"
+}

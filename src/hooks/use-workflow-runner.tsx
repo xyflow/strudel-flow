@@ -1,141 +1,160 @@
-import { useEffect, useRef, useCallback, useMemo } from 'react';
-import { useStrudelStore } from '@/store/strudel-store';
+import '@/lib/strudel-scope';
+import { useEffect, useMemo, useRef } from 'react';
 import { useAppStore } from '@/store/app-store';
 import { generateOutput } from '@/lib/strudel';
+
 // @ts-expect-error - Missing type declarations for @strudel/web
-import { evaluate, hush } from '@strudel/web';
+import { initStrudel, evaluate, hush, samples } from '@strudel/web';
+import { setSchedulerNow } from '@/lib/strudel-clock';
 
+type StrudelSession = {
+  scheduler: { now: () => number };
+  state: { evalError?: unknown };
+};
+
+const ready: Promise<StrudelSession> = initStrudel().then(
+  (session: StrudelSession) => {
+    setSchedulerNow(() => session.scheduler.now());
+    return session;
+  },
+);
+void ready.catch((error: unknown) => {
+  useAppStore
+    .getState()
+    .setError(
+      error instanceof Error ? error.message : 'Audio could not start.',
+    );
+});
+samples('github:tidalcycles/dirt-samples');
+
+async function evaluateAudio(pattern: string) {
+  const session = await ready;
+  await evaluate(pattern);
+  // Strudel records evaluation failures rather than rejecting its promise.
+  if (session.state.evalError) throw session.state.evalError;
+}
+
+type PlaybackAdapter = {
+  evaluate: (pattern: string) => unknown | Promise<unknown>;
+  hush: () => void;
+  onError: (error: unknown) => void;
+};
+
+// A single queue prevents a slow evaluation from overwriting a newer edit.
+function createPlaybackEngine(adapter: PlaybackAdapter) {
+  let desired: string | null = null;
+  let applied: string | null = null;
+  let busy = false;
+  let disposed = false;
+  let revision = 0;
+  let stopGeneration = 0;
+
+  async function drain() {
+    if (busy || disposed) return;
+    busy = true;
+    try {
+      while (!disposed && desired !== null && desired !== applied) {
+        const pattern = desired;
+        const startedAt = revision;
+        const generation = stopGeneration;
+        try {
+          await adapter.evaluate(pattern);
+          applied = generation === stopGeneration ? pattern : null;
+        } catch (error) {
+          if (startedAt === revision && !disposed) {
+            desired = null;
+            applied = null;
+            adapter.hush();
+            adapter.onError(error);
+          }
+        }
+        // An in-flight evaluation may finish after the user presses pause.
+        if (disposed || desired === null) {
+          adapter.hush();
+          applied = null;
+        }
+      }
+    } finally {
+      busy = false;
+    }
+  }
+
+  return {
+    setPattern(pattern: string | null) {
+      if (disposed) return;
+      revision += 1;
+      desired = pattern;
+      if (pattern === null) {
+        stopGeneration += 1;
+        applied = null;
+        adapter.hush();
+      } else {
+        void drain();
+      }
+    },
+    dispose() {
+      disposed = true;
+      desired = null;
+      adapter.hush();
+    },
+  };
+}
+
+// Mounted once by the editor. UI components read playback state from the app store.
 export function useWorkflowRunner() {
-  const isRunning = useRef(false);
-  const lastEvaluatedPattern = useRef<string>('');
-  const debounceTimerId = useRef<number | null>(null);
-  const pattern = useStrudelStore((s) => s.pattern);
-  const setPattern = useStrudelStore((s) => s.setPattern);
-  const cpm = useStrudelStore((s) => s.cpm);
-  const bpc = useStrudelStore((s) => s.bpc);
-
+  const engine = useRef<ReturnType<typeof createPlaybackEngine> | null>(null);
   const nodes = useAppStore((state) => state.nodes);
   const edges = useAppStore((state) => state.edges);
+  const cpm = useAppStore((state) => state.cpm);
+  const bpc = useAppStore((state) => state.bpc);
+  const setPattern = useAppStore((state) => state.setPattern);
+  const isPlaying = useAppStore((state) => state.isPlaying);
+  const setError = useAppStore((state) => state.setError);
 
-  const generatedPattern = useMemo(
-    () => generateOutput(nodes, edges, cpm, bpc),
-    [nodes, edges, cpm, bpc],
-  );
+  const compiled = useMemo(() => {
+    try {
+      return { pattern: generateOutput(nodes, edges, cpm, bpc), error: null };
+    } catch (error) {
+      return {
+        pattern: '',
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }, [nodes, edges, cpm, bpc]);
 
   useEffect(() => {
-    setPattern(generatedPattern);
-  }, [generatedPattern, setPattern]);
+    const instance = createPlaybackEngine({
+      evaluate: evaluateAudio,
+      hush,
+      onError: (error) =>
+        setError(error instanceof Error ? error.message : String(error)),
+    });
+    engine.current = instance;
+    return () => {
+      instance.dispose();
+      engine.current = null;
+    };
+  }, [setError]);
 
-  const getActivePattern = useCallback((p: string) => {
-    return p
+  useEffect(() => {
+    setPattern(compiled.pattern);
+    if (compiled.error) setError(compiled.error);
+  }, [compiled, setPattern, setError]);
+
+  useEffect(() => {
+    const activePattern = compiled.pattern
       .split('\n')
       .filter((line) => !line.trim().startsWith('//'))
       .join('\n');
-  }, []);
-
-  const evaluatePattern = useCallback(
-    (patternToEvaluate: string) => {
-      const activePattern = getActivePattern(patternToEvaluate);
-      const hasContent = activePattern
-        .replace(/setcpm\([^)]+\)\s*/g, '')
-        .trim();
-
-      if (!hasContent) {
-        if (isRunning.current) {
-          hush();
-          isRunning.current = false;
-        }
-        lastEvaluatedPattern.current = '';
-        return;
-      }
-
-      if (activePattern === lastEvaluatedPattern.current) return;
-
-      isRunning.current = true;
-      lastEvaluatedPattern.current = activePattern;
-
-      try {
-        evaluate(activePattern);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        const isKnownWarning =
-          errorMessage.includes('got "undefined" instead of pattern') ||
-          errorMessage.includes('Cannot read properties of undefined');
-
-        if (isKnownWarning) {
-          console.warn('Strudel pattern warning (suppressed):', errorMessage);
-        } else {
-          console.error('Strudel evaluation error:', err);
-        }
-      }
-    },
-    [getActivePattern],
-  );
-
-  const debouncedEvaluate = useCallback(
-    (patternToEvaluate: string) => {
-      if (debounceTimerId.current !== null) {
-        window.clearTimeout(debounceTimerId.current);
-      }
-
-      // Tempo and scale changes evaluate immediately; everything else is debounced
-      if (
-        patternToEvaluate.includes('setcpm(') ||
-        patternToEvaluate.includes('scale(')
-      ) {
-        evaluatePattern(patternToEvaluate);
-        return;
-      }
-
-      debounceTimerId.current = window.setTimeout(() => {
-        evaluatePattern(patternToEvaluate);
-        debounceTimerId.current = null;
-      }, 50);
-    },
-    [evaluatePattern],
-  );
-
-  useEffect(() => {
-    if (!pattern?.trim()) {
-      if (debounceTimerId.current !== null) {
-        window.clearTimeout(debounceTimerId.current);
-        debounceTimerId.current = null;
-      }
-      if (isRunning.current) {
-        hush();
-        isRunning.current = false;
-      }
-      lastEvaluatedPattern.current = '';
+    const hasNotes = activePattern.replace(/setcpm\([^)]+\)/g, '').trim();
+    if (!isPlaying || !hasNotes || compiled.error) {
+      engine.current?.setPattern(null);
       return;
     }
-
-    debouncedEvaluate(pattern);
-  }, [pattern, debouncedEvaluate]);
-
-  const forceEvaluate = useCallback(() => {
-    const { nodes: currentNodes, edges: currentEdges } = useAppStore.getState();
-    const { cpm: currentCpm, bpc: currentBpc } = useStrudelStore.getState();
-    const freshPattern = generateOutput(
-      currentNodes,
-      currentEdges,
-      currentCpm,
-      currentBpc,
+    const timer = window.setTimeout(
+      () => engine.current?.setPattern(activePattern),
+      40,
     );
-    evaluatePattern(freshPattern);
-  }, [evaluatePattern]);
-
-  return {
-    runWorkflow: () => debouncedEvaluate(pattern),
-    forceEvaluate,
-    stopWorkflow: () => {
-      if (debounceTimerId.current !== null) {
-        window.clearTimeout(debounceTimerId.current);
-        debounceTimerId.current = null;
-      }
-      isRunning.current = false;
-      lastEvaluatedPattern.current = '';
-      hush();
-    },
-    isRunning: () => isRunning.current,
-  };
+    return () => window.clearTimeout(timer);
+  }, [compiled.pattern, compiled.error, isPlaying]);
 }

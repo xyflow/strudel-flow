@@ -1,16 +1,8 @@
+import { scopeIdForGroup } from '@/components/nodes/effects/scope/scope';
 import { Edge } from '@xyflow/react';
-import { AppNode } from '@/components/nodes';
-import nodesConfig, { nodeTypes } from '@/components/nodes';
+import { AppNode } from '@/components/nodes/registry';
+import { nodeDefinitions } from '@/components/nodes/registry';
 import { findConnectedComponents } from './graph-utils';
-
-type NodeWithStrudelOutput = {
-  strudelOutput?: (node: AppNode, strudelString: string) => string;
-};
-
-export function getNodeStrudelOutput(nodeType: string) {
-  const NodeComponent = nodeTypes[nodeType as keyof typeof nodeTypes] as NodeWithStrudelOutput;
-  return NodeComponent?.strudelOutput;
-}
 
 function optimizeSoundCalls(strudelString: string): string {
   let optimized = strudelString;
@@ -23,14 +15,14 @@ function optimizeSoundCalls(strudelString: string): string {
     // This regex matches: .sound("something").sound("something else")
     optimized = optimized.replace(
       /\.sound\("([^"]+)"\)\.sound\("([^"]+)"\)/g,
-      '.sound("$1 $2")'
+      '.sound("$1 $2")',
     );
   }
 
   return optimized;
 }
 function isSoundSource(node: AppNode): boolean {
-  const category = nodesConfig[node.type]?.category;
+  const category = nodeDefinitions[node.type]?.category;
   return category === 'Instruments';
 }
 
@@ -38,15 +30,17 @@ export function generateOutput(
   nodes: AppNode[],
   edges: Edge[],
   cpm: string,
-  bpc: string
+  bpc: string,
 ): string {
+  const nodesById = new Map(nodes.map((node) => [node.id, node]));
   const nodePatterns: Record<string, string> = {};
   for (const node of nodes) {
-    const strudelOutput = getNodeStrudelOutput(node.type);
+    if (!isSoundSource(node)) continue;
+    const strudelOutput = nodeDefinitions[node.type]?.generatePattern;
     if (!strudelOutput) continue;
 
     try {
-      const pattern = strudelOutput(node, '');
+      const pattern = strudelOutput(node.data, '');
       if (pattern?.trim()) {
         nodePatterns[node.id] = pattern;
       }
@@ -60,21 +54,21 @@ export function generateOutput(
 
   for (const componentNodeIds of components) {
     const componentNodes = componentNodeIds
-      .map((id) => nodes.find((n) => n.id === id))
-      .filter(Boolean) as AppNode[];
+      .map((id) => nodesById.get(id))
+      .filter((node): node is AppNode => node !== undefined);
 
     const [sources, effects] = componentNodes.reduce<[AppNode[], AppNode[]]>(
       ([src, eff], node) => {
         isSoundSource(node) ? src.push(node) : eff.push(node);
         return [src, eff];
       },
-      [[], []]
+      [[], []],
     );
 
     if (sources.length === 0) continue;
 
     const allSourcesPaused = sources.every(
-      (node) => node.data.state === 'paused'
+      (node) => node.data.state === 'paused',
     );
     const activePatterns = (
       allSourcesPaused
@@ -92,9 +86,13 @@ export function generateOutput(
         : `stack(${activePatterns.join(', ')})`;
 
     for (const effect of effects) {
-      const strudelOutput = getNodeStrudelOutput(effect.type);
+      const strudelOutput = nodeDefinitions[effect.type]?.generatePattern;
       if (strudelOutput && pattern) {
-        pattern = strudelOutput(effect, pattern);
+        pattern = strudelOutput(
+          effect.data,
+          pattern,
+          scopeIdForGroup(componentNodeIds[0]),
+        );
       }
     }
 
@@ -111,16 +109,16 @@ export function generateOutput(
   const result = finalPatterns
     .map(({ pattern, paused }) => {
       const line = `$: ${pattern}`;
-      return paused ? `// ${line}` : line;
+      return paused
+        ? line
+            .split('\n')
+            .map((part) => `// ${part}`)
+            .join('\n')
+        : line;
     })
     .join('\n');
 
-  // Always add setcpm if there's sound (like other node outputs)
-  if (result) {
-    const bpm = parseInt(cpm) || 120;
-    const beatsPerCycle = parseInt(bpc) || 4;
-    return `setcpm(${bpm}/${beatsPerCycle})\n${result}`;
-  }
-
-  return result;
+  const bpm = parseInt(cpm) || 120;
+  const beatsPerCycle = parseInt(bpc) || 4;
+  return `setcpm(${bpm}/${beatsPerCycle})\n${result}`;
 }

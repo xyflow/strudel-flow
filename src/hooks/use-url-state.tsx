@@ -1,54 +1,75 @@
-/**
- * Hook to load workflow state from URL parameters
- */
 import { useEffect } from 'react';
+import { getShareUrl, loadFromUrl } from '@/lib/project-state';
+import { applyPatch, capturePatch } from '@/lib/patch-state';
 import { useAppStore } from '@/store/app-store';
-import { loadFromUrl } from '@/lib/project-state';
-import { AppNode } from '@/components/nodes';
-import { useStrudelStore } from '@/store/strudel-store';
 
-/**
- * Hook to load state from URL parameters on app startup
- */
-export function useUrlStateLoader() {
-  const { setNodes, setEdges, setTheme, setColorMode } = useAppStore(
-    (state) => state
-  );
-  const setCpm = useStrudelStore((state) => state.setCpm);
-  const setBpc = useStrudelStore((state) => state.setBpc);
-
+export function useUrlState() {
   useEffect(() => {
-    const urlState = loadFromUrl();
-
-    if (urlState) {
-      // Restore theme settings FIRST to ensure CSS loads before nodes render
-      if (urlState.theme) {
-        setTheme(urlState.theme);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let loading = false;
+    let lastPatch = '';
+    const save = () => {
+      clearTimeout(timer);
+      timer = undefined;
+      const patch = capturePatch();
+      const serialized = JSON.stringify(patch);
+      if (serialized === lastPatch) return;
+      window.history.replaceState(window.history.state, '', getShareUrl(patch));
+      lastPatch = serialized;
+    };
+    const load = () => {
+      clearTimeout(timer);
+      timer = undefined;
+      loading = true;
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('state') || url.hash.startsWith('#patch=')) {
+        const state = loadFromUrl();
+        if (!state || !applyPatch(state)) {
+          useAppStore
+            .getState()
+            .setError(
+              'This patch link is invalid or uses an unsupported module.',
+            );
+        }
       }
-      if (urlState.colorMode) {
-        setColorMode(urlState.colorMode);
-      }
-      if (urlState.cpm) {
-        setCpm(urlState.cpm);
-      }
-      if (urlState.bpc) {
-        setBpc(urlState.bpc);
-      }
-
-      // Small delay to ensure theme CSS loads on mobile before nodes render
-      setTimeout(() => {
-        // Set all nodes to paused state on load
-        const nodes = (urlState.nodes as AppNode[]).map((node) => ({
-          ...node,
-          data: {
-            ...node.data,
-            state: 'paused' as const,
-          },
-        }));
-
-        setNodes(nodes);
-        setEdges(urlState.edges);
-      }, 50); // Small delay for mobile CSS loading
-    }
-  }, [setNodes, setEdges, setTheme, setColorMode, setCpm, setBpc]);
+      lastPatch = JSON.stringify(capturePatch());
+      loading = false;
+    };
+    load();
+    const unsubscribe = useAppStore.subscribe((state, previous) => {
+      if (
+        loading ||
+        (state.nodes === previous.nodes &&
+          state.edges === previous.edges &&
+          state.theme === previous.theme &&
+          state.colorMode === previous.colorMode &&
+          state.cpm === previous.cpm &&
+          state.bpc === previous.bpc &&
+          state.name === previous.name &&
+          state.author === previous.author &&
+          state.description === previous.description)
+      )
+        return;
+      clearTimeout(timer);
+      timer = setTimeout(save, 200);
+    });
+    const flush = () => {
+      if (timer !== undefined) save();
+    };
+    const onVisibilityChange = () => {
+      if (document.hidden) flush();
+    };
+    window.addEventListener('hashchange', load);
+    window.addEventListener('popstate', load);
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      flush();
+      unsubscribe();
+      window.removeEventListener('hashchange', load);
+      window.removeEventListener('popstate', load);
+      window.removeEventListener('pagehide', flush);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  }, []);
 }

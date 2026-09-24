@@ -1,0 +1,69 @@
+import { ReactFlow } from '@xyflow/react';
+import { useShallow } from 'zustand/react/shallow';
+
+import { nodeTypes } from '@/components/nodes/registry';
+import deleteEdge from '@/components/edges/delete-edge';
+import { useAppStore } from '@/store/app-store';
+import { EditorToolbar } from './toolbar';
+import { useDragAndDrop } from '@/hooks/use-drag-and-drop';
+import { useUrlState } from '@/hooks/use-url-state';
+import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
+import { useThemeCss } from '@/hooks/use-theme-css';
+
+const edgeTypes = { default: deleteEdge };
+
+export default function Editor() {
+  useUrlState();
+  useWorkflowRunner();
+  useKeyboardShortcuts();
+
+  const {
+    nodes,
+    edges,
+    colorMode,
+    theme,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+  } = useAppStore(
+    useShallow((state) => ({
+      nodes: state.nodes,
+      edges: state.edges,
+      colorMode: state.colorMode,
+      theme: state.theme,
+      onNodesChange: state.onNodesChange,
+      onEdgesChange: state.onEdgesChange,
+      onConnect: state.onConnect,
+    })),
+  );
+
+  // Load theme CSS at the app level - fixes mobile color loading
+  useThemeCss(theme);
+
+  const { onDragOver, onDrop } = useDragAndDrop();
+
+  return (
+    <div className="reactflow-wrapper">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+        nodeDragThreshold={30}
+        colorMode={colorMode}
+        panActivationKeyCode={null}
+        minZoom={0.2}
+        fitView
+        fitViewOptions={{ padding: 0.3, maxZoom: 1 }}
+      >
+        <EditorToolbar />
+      </ReactFlow>
+    </div>
+  );
+}

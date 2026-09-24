@@ -2,158 +2,96 @@
 
 A visual drum machine and pattern sequencer built with [Strudel.cc](https://strudel.cc), [React Flow](https://reactflow.dev), and styled using [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/). Create complex musical patterns by connecting instrument nodes to effect nodes with a drag-and-drop interface.
 
-[Live Demo](https://xyflow.com/strudel-flow)
+## Play locally
 
-## Table of Contents
-
-- [Getting Started](#getting-started)
-- [Tech Stack](#tech-stack)
-- [Node Types](#node-types)
-- [Usage Guide](#usage-guide)
-- [Pattern Syntax](#pattern-syntax)
-- [Development](#development)
-- [Contributing](#contributing)
-
-## Getting Started
-
-To get started, follow these steps:
-
-1. **Install dependencies**:
-
-   ```bash
-   npm install
-   # or
-   yarn install
-   # or
-   pnpm install
-   # or
-   bun install
-   ```
-
-2. **Run the development server**:
-
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   # or
-   pnpm dev
-   # or
-   bun dev
-   ```
-
-## Tech Stack
-
-- **Audio Engine**: [Strudel.cc](https://strudel.cc) - Web-based live coding environment
-
-- **React Flow Components**: The project uses [React Flow Components](https://reactflow.dev/components) to build nodes. These components are designed to help you quickly get up to speed on projects.
-
-- **shadcn CLI**: The project uses the [shadcn CLI](https://ui.shadcn.com/docs/cli) to manage UI components. This tool builds on top of [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/) components, making it easy to add and customize UI elements.
-
-- **State Management with Zustand**: The application uses Zustand for state management, providing a simple and efficient way to manage the state of nodes, edges, and other workflow-related data.
-
-## Node Types
-
-### 🎵 Instruments
-
-- **Pad Node** - Grid-based step sequencer with scales and modifiers
-- **Beat Machine** - Classic drum machine with multiple instrument tracks
-- **Arpeggiator** - Pattern-based arpeggiated sequences with visual feedback
-- **Chord Node** - Interactive chord player with scale selection
-- **Polyrhythm** - Multiple overlapping rhythmic patterns
-- **Custom Node** - Direct Strudel pattern input
-
-### 🎛️ Synths
-
-- **Drum Sounds** - Sample-based drum sound selection
-- **Sample Select** - Custom sample playback and selection
-
-### 🎚️ Audio Effects
-
-- **Gain** - Volume control and amplification
-- **PostGain** - Secondary gain stage
-- **Distortion** - Saturation and harmonic distortion
-- **LPF** - Low-pass filtering with cutoff control
-- **Pan** - Stereo positioning and width
-- **Phaser** - Sweeping phase modulation effect
-- **Crush** - Bit-crushing and sample rate reduction
-- **Jux** - Alternating left/right channel effects
-- **FM** - Frequency modulation synthesis
-- **Room** - Realistic acoustic space simulation with size, fade, and filtering controls
-
-### ⏱️ Time Effects
-
-- **Fast** - Speed multiplication (×2, ×3, ×4)
-- **Slow** - Speed division (÷2, ÷3, ÷4)
-- **Late** - Pattern delay and offset timing
-- **ASDR** - Manages Attack, Release, Sustain and Decay controls
-- **Reverse** - Reverse pattern playback
-- **Palindrome** - Bidirectional pattern playback
-- **Mask** - Probabilistic pattern masking
-- **Ply** - Pattern subdivision and multiplication
-
-## Usage Guide
-
-### Creating Patterns
-
-1. **Basic Pattern**:
-   - Add a drum machine or pad node
-   - Click buttons to activate steps
-   - Adjust tempo with BPM control
-
-2. **Complex Patterns**:
-   - Use Shift+click to select multiple notes for grouping
-   - Apply row modifiers for per-step effects
-   - Chain multiple nodes for layered sounds
-
-### Connecting Nodes
-
-- **Source to Effect**: Drag from sound source to effect node
-- **Effect Chaining**: Connect multiple effects in series
-- **Multiple Sources**: Connect multiple sources to the same effect
-
-### Pattern Modifiers
-
-Each step can have modifiers applied:
-
-- **Normal**: Standard playback
-- **Fast (×2, ×3, ×4)**: Speed multiplication
-- **Slow (/2, /3, /4)**: Speed division
-- **Replicate (!2, !3, !4)**: Note repetition
-- **Elongate (@2, @3, @4)**: Note duration extension
-
-### Performance Controls
-
-- **Global Play/Pause**: Press spacebar to pause/resume all active patterns
-- **Group Controls**: Pause/resume connected node groups independently
-- **Live Pattern Editing**: Modify patterns while playing with real-time updates
-- **Pattern Preview**: View generated Strudel code for each node
-
-### Keyboard Shortcuts
-
-- **Spacebar**: Global play/pause toggle
-- **Shift + Click**: Multi-select grid cells for grouping (in Pad nodes)
-- **Right-click**: Context menu for pattern modifiers
-
-## Development
-
-### Project Structure
-
+```sh
+pnpm install
+pnpm dev
 ```
-src/
-├── components/          # React components
-│   ├── nodes/          # Flow node components
-│   │   ├── instruments/ # Instrument node implementations
-│   │   ├── effects/    # Effect node implementations
-│   │   └── synths/     # Synthesizer node implementations
-│   ├── ui/             # shadcn/ui components
-│   ├── workflow/       # Flow editor components
-│   └── edges/          # Custom edge components
-├── data/               # Static data and configurations
-├── hooks/              # Custom React hooks
-├── lib/                # Utility libraries and core logic
-├── store/              # Zustand state management
+
+## Share your patch with us
+
+Have you made something cool that you'd like others to use? Export your patch and [add it to `patches/`](patches/README.md) in a pull request. Accepted patches appear in the searchable community gallery.
+
+## Adding new nodes
+
+Want to add a new node? Strudel has endless features and combinations to explore, and we'd love if you wanted to help contribute to Strudel Flow. We've defined a small API to make it easy to turn them into nodes for everyone to use.
+
+You provide the controls and the Strudel code. The app handles the menu entry, UI, and saved settings.
+
+### Create a file
+
+Add a file named `your-name.node.ts` inside `src/components/nodes/`:
+
+- `instruments/` for nodes that create patterns.
+- `sounds/` for nodes that choose sounds.
+- `effects/` for nodes that modify patterns.
+
+The app discovers `.node.ts` files automatically. No registry edits needed. A single-file node can live directly in its category folder; use a folder when you have several related files.
+
+### Copy the boilerplate
+
+Paste this into your file, then change it to match what you want to build:
+
+```ts
+import { defineNode } from '@/components/nodes/define-node';
+
+export default defineNode({
+  id: 'your-name-node',
+  title: 'Your node',
+  category: 'Audio Effects',
+  icon: 'Waves',
+  parameters: {
+    amount: {
+      control: 'knob',
+      label: 'Amount',
+      default: 0.3,
+      min: 0,
+      max: 1,
+      step: 0.01,
+    },
+  },
+  generate: ({ amount }, input) => (input ? `${input}.delay(${amount})` : ''),
+});
 ```
+
+This example adds a delay control. Replace `.delay(...)` with the Strudel code for your node, and add whatever parameters it needs.
+
+### Customize your node
+
+### Name and menu
+
+- **`id`** is the unique identifier used in saved patches. Keep it stable once your node is published.
+- **`title`** is the name people see.
+- **`category`** is `'Instruments'`, `'Synths'` (displayed as Sounds), or `'Audio Effects'` (displayed as Effects).
+- **`icon`** is a name from [icon-mapping.ts](../src/data/icon-mapping.ts).
+
+### Controls
+
+Each entry in `parameters` creates a control. Its key becomes a value you can use in `generate`.
+
+- **`knob`** takes a numeric `default`, `min`, `max`, and `step`. You can also add a `unit` or `format(value)` function.
+- **`text`** takes a string `default`.
+- **`select`** takes a string `default` and an `options` array of `{ value, label }` entries.
+
+All controls have a `label`. The app handles updating and saving their values.
+
+### Strudel code
+
+**`generate(values, input)`** returns a string of Strudel code. `values` contains your current parameter values; `input` contains the connected pattern.
+
+Effects and sounds usually append to `input`. Instruments create a pattern of their own. For example, an instrument could use:
+
+```ts
+parameters: {
+  notes: { control: 'text', label: 'Notes', default: 'c4 e4 g4' },
+},
+generate: ({ notes }) => `note(${JSON.stringify(notes)})`,
+```
+
+### Custom interfaces
+
+Need a grid, keyboard, or something beyond the built-in controls? All you need to do is pass a React **`component`**.
 
 ## Acknowledgments
 
@@ -161,8 +99,6 @@ src/
 - [tweakcn](https://tweakcn.com)
 - [React Flow](https://reactflow.dev)
 - [shadcn/ui](https://ui.shadcn.com)
-
----
 
 ## Contact Us
 
