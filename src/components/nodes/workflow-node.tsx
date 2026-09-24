@@ -5,7 +5,6 @@ import { WorkflowNodeData, AppNodeType } from '@/components/nodes/';
 import nodesConfig from '@/components/nodes/';
 import { BaseNode } from '@/components/base-node';
 import { useAppStore } from '@/store/app-store';
-import { usePlaybackStore } from '@/store/playback-store';
 import PatternPopup from '@/components/pattern-popup';
 import { BaseHandle } from '@/components/base-handle';
 import {
@@ -32,7 +31,7 @@ function WorkflowNode({
   const nodeType = useAppStore(
     (state) => state.nodes.find((node) => node.id === id)?.type,
   );
-  const isPlaying = usePlaybackStore((state) => state.isPlaying);
+  const isPlaying = useAppStore((state) => state.isPlaying);
   const removeNode = useAppStore((state) => state.removeNode);
   const setGroupState = useAppStore((state) => state.setGroupState);
   const category = nodesConfig[type ?? nodeType ?? 'pad-node']?.category;

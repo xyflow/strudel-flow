@@ -6,14 +6,14 @@ import deleteEdge from '@/components/delete-edge';
 import { useAppStore } from '@/store/app-store';
 import { WorkflowControls } from './controls';
 import { useDragAndDrop } from '@/hooks/use-drag-and-drop';
-import { useUrlStateLoader } from '@/hooks/use-url-state';
+import { useUrlState } from '@/hooks/use-url-state';
 import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
 import { useThemeCss } from '@/hooks/use-theme-css';
 
 const edgeTypes = { default: deleteEdge };
 
 export default function Workflow() {
-  useUrlStateLoader();
+  useUrlState();
   useWorkflowRunner();
 
   const {

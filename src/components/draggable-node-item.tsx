@@ -68,6 +68,7 @@ export function DraggableNodeItem({
     <div
       className={cn(
         arc ? 'group/arc absolute inset-0 size-full cursor-grab text-foreground active:cursor-grabbing focus-visible:outline-none' : 'relative flex aspect-square w-[4.5rem] flex-col items-center justify-center gap-1 rounded-md border-2 bg-card p-2 text-center active:scale-[.99] cursor-grab active:cursor-grabbing hover:bg-accent/50 transition-colors sm:w-20',
+        'touch-manipulation select-none',
         isDragging ? 'border-green-500' : 'border-border',
         className,
       )}
@@ -103,7 +104,7 @@ export function DraggableNodeItem({
       {arc ? <span className="pointer-events-none absolute flex w-[14cqw] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 text-center"
         style={{ left: `${arc.x / 480 * 100}%`, top: `${arc.y / 240 * 100}%` }}>
         {IconComponent ? <IconComponent className="size-[4cqw] shrink-0" aria-hidden="true" /> : null}
-        <span className="text-[clamp(8px,2.1cqw,10px)] leading-tight tracking-normal">{config.title}</span>
+        <span className="text-[clamp(9px,2.3cqw,11px)] leading-tight tracking-normal">{config.title}</span>
       </span> : <>
         {IconComponent ? <IconComponent className="size-5 shrink-0" aria-hidden="true" /> : null}
         <span className="text-[10px] leading-tight line-clamp-2 sm:text-xs">{config.title}</span>

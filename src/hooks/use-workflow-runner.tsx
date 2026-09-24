@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { useStrudelStore } from '@/store/strudel-store';
+import { useKeyboardShortcuts } from './use-keyboard-shortcuts';
 import { useAppStore } from '@/store/app-store';
-import { usePlaybackStore } from '@/store/playback-store';
 import { generateOutput } from '@/lib/strudel';
 
 // @ts-expect-error - Missing type declarations for @strudel/web
@@ -19,7 +18,7 @@ const ready: Promise<StrudelSession> = initStrudel().then((session: StrudelSessi
   return session;
 });
 void ready.catch((error: unknown) => {
-  usePlaybackStore.getState().setError(error instanceof Error ? error.message : 'Audio could not start.');
+  useAppStore.getState().setError(error instanceof Error ? error.message : 'Audio could not start.');
 });
 samples('github:tidalcycles/dirt-samples');
 
@@ -100,16 +99,17 @@ function createPlaybackEngine(adapter: PlaybackAdapter) {
   };
 }
 
-// Mounted once by Workflow. UI components only read the playback store.
+// Mounted once by Workflow. UI components read playback state from the app store.
 export function useWorkflowRunner() {
+  useKeyboardShortcuts();
   const engine = useRef<ReturnType<typeof createPlaybackEngine> | null>(null);
   const nodes = useAppStore((state) => state.nodes);
   const edges = useAppStore((state) => state.edges);
-  const cpm = useStrudelStore((state) => state.cpm);
-  const bpc = useStrudelStore((state) => state.bpc);
-  const setPattern = useStrudelStore((state) => state.setPattern);
-  const isPlaying = usePlaybackStore((state) => state.isPlaying);
-  const setError = usePlaybackStore((state) => state.setError);
+  const cpm = useAppStore((state) => state.cpm);
+  const bpc = useAppStore((state) => state.bpc);
+  const setPattern = useAppStore((state) => state.setPattern);
+  const isPlaying = useAppStore((state) => state.isPlaying);
+  const setError = useAppStore((state) => state.setError);
 
   const compiled = useMemo(() => {
     try {
@@ -151,18 +151,4 @@ export function useWorkflowRunner() {
     return () => window.clearTimeout(timer);
   }, [compiled.pattern, compiled.error, isPlaying]);
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      const target = event.target;
-      if (event.code !== 'Space' || event.repeat || event.defaultPrevented ||
-        event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
-      if (target instanceof Element && target.closest(
-        'input, textarea, select, button, a, [contenteditable]:not([contenteditable="false"]), [role="button"], [role="slider"], [role="combobox"], [role="menuitem"], [role="dialog"]',
-      )) return;
-      event.preventDefault();
-      usePlaybackStore.getState().toggle();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
 }

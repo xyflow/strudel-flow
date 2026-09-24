@@ -4,19 +4,18 @@ import { Settings2, X } from 'lucide-react';
 import { SettingsDialog } from '@/components/settings-dialog';
 import { AppInfoPopover } from './app-info-popover';
 import { ControlButton } from './control-button';
-import { usePlaybackStore } from '@/store/playback-store';
-import { useStrudelStore } from '@/store/strudel-store';
+import { useAppStore } from '@/store/app-store';
 import { PlayPauseButton } from './play-pause-button';
 import { ZoomSlider } from './zoom-slider';
 import { PresetPopover } from './preset-popover';
 
 export function WorkflowControls() {
-  const cpm = useStrudelStore((state) => state.cpm);
-  const setCpm = useStrudelStore((state) => state.setCpm);
-  const bpc = useStrudelStore((state) => state.bpc);
-  const setBpc = useStrudelStore((state) => state.setBpc);
-  const error = usePlaybackStore((state) => state.error);
-  const setError = usePlaybackStore((state) => state.setError);
+  const cpm = useAppStore((state) => state.cpm);
+  const setCpm = useAppStore((state) => state.setCpm);
+  const bpc = useAppStore((state) => state.bpc);
+  const setBpc = useAppStore((state) => state.setBpc);
+  const error = useAppStore((state) => state.error);
+  const setError = useAppStore((state) => state.setError);
 
   return (
     <>

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { usePlaybackStore } from '@/store/playback-store';
 import { useAppStore } from '@/store/app-store';
 import { getSchedulerNow } from '@/lib/strudel-clock';
 import WorkflowNode from '@/components/nodes/workflow-node';
@@ -18,7 +17,7 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
   const [activeStep, setActiveStep] = useState(-1);
   const updateNodeData = useAppStore((state) => state.updateNodeData);
 
-  const isPlaying = usePlaybackStore((state) => state.isPlaying);
+  const isPlaying = useAppStore((state) => state.isPlaying);
   const steps = data.steps || 5;
 
   useEffect(() => {

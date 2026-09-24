@@ -7,10 +7,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useStrudelStore } from '@/store/strudel-store';
+import { useAppStore } from '@/store/app-store';
 
 export function PatternPanel() {
-  const pattern = useStrudelStore((s) => s.pattern) || 'No pattern.';
+  const pattern = useAppStore((s) => s.pattern) || 'No pattern.';
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopy = async () => {

@@ -13,7 +13,6 @@ import {
 
 import type { AppNode } from '@/components/nodes';
 import { initialEdges, initialNodes } from '@/data/workflow-data';
-import { themeNames } from '@/data/css/themes';
 import { findConnectedComponents } from '@/lib/graph-utils';
 
 export type AppState = {
@@ -21,9 +20,20 @@ export type AppState = {
   edges: Edge[];
   colorMode: ColorMode;
   theme: string;
+  cpm: string;
+  bpc: string;
+  pattern: string;
+  isPlaying: boolean;
+  error: string | null;
 };
 
 export type AppActions = {
+  setCpm: (cpm: string) => void;
+  setBpc: (bpc: string) => void;
+  setPattern: (pattern: string) => void;
+  pause: () => void;
+  toggle: () => void;
+  setError: (error: string | null) => void;
   setColorMode: (colorMode: ColorMode) => void;
   onNodesChange: OnNodesChange<AppNode>;
   addNode: (node: AppNode) => void;
@@ -37,29 +47,23 @@ export type AppActions = {
 
 export type AppStore = AppState & AppActions;
 
-const appearanceStorageKey = 'strudel-flow-appearance';
-const initialAppearance: Pick<AppState, 'theme' | 'colorMode'> = {
-  theme: 'mono',
-  colorMode: 'dark',
-};
-try {
-  const saved = JSON.parse(localStorage.getItem(appearanceStorageKey) ?? 'null');
-  if (saved && typeof saved === 'object') {
-    const savedTheme = typeof saved.theme === 'string' ? saved.theme.replace(/^tweakcn\//, '') : '';
-    if (themeNames.includes(savedTheme)) initialAppearance.theme = savedTheme;
-    if (saved.colorMode === 'light' || saved.colorMode === 'dark' || saved.colorMode === 'system') {
-      initialAppearance.colorMode = saved.colorMode;
-    }
-  }
-} catch {
-  // Use the defaults when browser storage is unavailable or invalid.
-}
-
 export const useAppStore = create<AppStore>()(
   subscribeWithSelector((set, get) => ({
     nodes: initialNodes,
     edges: initialEdges,
-    ...initialAppearance,
+    theme: 'mono',
+    colorMode: 'dark',
+    cpm: '120',
+    bpc: '4',
+    pattern: '',
+    isPlaying: false,
+    error: null,
+    setCpm: (cpm) => set({ cpm }),
+    setBpc: (bpc) => set({ bpc }),
+    setPattern: (pattern) => set({ pattern }),
+    pause: () => set({ isPlaying: false }),
+    toggle: () => set((state) => ({ isPlaying: !state.isPlaying, error: null })),
+    setError: (error) => set({ error, ...(error ? { isPlaying: false } : {}) }),
 
     onNodesChange: (changes) => {
       set({ nodes: applyNodeChanges(changes, get().nodes) });
@@ -129,15 +133,3 @@ systemAppearance.addEventListener('change', applyColorMode);
 if (import.meta.hot) {
   import.meta.hot.dispose(() => systemAppearance.removeEventListener('change', applyColorMode));
 }
-
-useAppStore.subscribe(
-  (state) => [state.theme, state.colorMode] as const,
-  ([theme, colorMode]) => {
-    try {
-      localStorage.setItem(appearanceStorageKey, JSON.stringify({ theme, colorMode }));
-    } catch {
-      // Appearance changes still work when storage is disabled.
-    }
-  },
-  { equalityFn: (previous, next) => previous[0] === next[0] && previous[1] === next[1] },
-);

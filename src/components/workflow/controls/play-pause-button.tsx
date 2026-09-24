@@ -1,10 +1,10 @@
 import { Play, Pause } from 'lucide-react';
-import { usePlaybackStore } from '@/store/playback-store';
+import { useAppStore } from '@/store/app-store';
 import { ControlButton } from './control-button';
 
 export function PlayPauseButton() {
-  const isPlaying = usePlaybackStore(state => state.isPlaying);
-  const toggle = usePlaybackStore(state => state.toggle);
+  const isPlaying = useAppStore(state => state.isPlaying);
+  const toggle = useAppStore(state => state.toggle);
   return (
     <ControlButton
       onClick={toggle}

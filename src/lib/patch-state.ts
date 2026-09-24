@@ -1,12 +1,9 @@
 import { useAppStore } from '@/store/app-store';
-import { useStrudelStore } from '@/store/strudel-store';
-import { usePlaybackStore } from '@/store/playback-store';
 import { nodeTypes, type AppNode } from '@/components/nodes';
 import type { ProjectState } from './project-state';
 
 export function capturePatch(): ProjectState {
-  const { nodes, edges, theme, colorMode } = useAppStore.getState();
-  const { cpm, bpc } = useStrudelStore.getState();
+  const { nodes, edges, theme, colorMode, cpm, bpc } = useAppStore.getState();
   return {
     nodes: nodes.map(({ id, type, position, data }) => ({ id, type, position, data })),
     edges: edges.map(({ id, source, target, sourceHandle, targetHandle, type }) => ({ id, source, target, sourceHandle, targetHandle, type })),
@@ -16,8 +13,11 @@ export function capturePatch(): ProjectState {
 
 export function applyPatch(state: ProjectState): boolean {
   if (state.nodes.some(node => !Object.prototype.hasOwnProperty.call(nodeTypes, node.type ?? ''))) return false;
-  usePlaybackStore.getState().pause();
-  useAppStore.setState({ nodes: state.nodes as AppNode[], edges: state.edges, theme: state.theme, colorMode: state.colorMode });
-  useStrudelStore.setState({ cpm: state.cpm, bpc: state.bpc ?? '4' });
+  useAppStore.setState({
+    nodes: state.nodes as AppNode[], edges: state.edges,
+    theme: state.theme, colorMode: state.colorMode,
+    cpm: state.cpm, bpc: state.bpc ?? '4',
+    isPlaying: false, error: null,
+  });
   return true;
 }
