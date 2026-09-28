@@ -1,9 +1,8 @@
 import { Panel } from '@xyflow/react';
 import logo from '@/assets/logo.svg?raw';
-import { Settings2, X } from 'lucide-react';
-import { SettingsDialog } from '@/components/editor/settings-dialog';
+import { X } from 'lucide-react';
+import { AppearancePopover } from './appearance-popover';
 import { AppInfoPopover } from './app-info-popover';
-import { ControlButton } from './control-button';
 import { useAppStore } from '@/store/app-store';
 import { PlayPauseButton } from './play-pause-button';
 import { ZoomSlider } from './zoom-slider';
@@ -112,11 +111,7 @@ export function EditorToolbar() {
         className="m-4! flex gap-1 rounded-md border border-border/60 bg-card p-1 sm:m-6!"
       >
         <PresetPopover />
-        <SettingsDialog>
-          <ControlButton title="Appearance settings">
-            <Settings2 className="size-4" />
-          </ControlButton>
-        </SettingsDialog>
+        <AppearancePopover />
         <AppInfoPopover />
       </Panel>
     </>
