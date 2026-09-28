@@ -10,6 +10,9 @@ export function codeSyntaxError(code: string): string | null {
   try {
     // Parse without invoking the function or running the user's expression.
     new Function(`return (\n${codeExpression(code)}\n);`);
+    // Strudel strings have their own grammar; valid JavaScript can still be
+    // an unfinished mini-notation pattern. Compile it without playing it.
+    transpiler(`(\n${codeExpression(code)}\n)`, { emitWidgets: false });
     return null;
   } catch (error) {
     return `${error instanceof Error ? error.message : 'Invalid syntax'}. Use one pattern expression, or stack(...) for layers.`;
@@ -22,3 +25,5 @@ export function generatePattern(data: CustomData, strudelString: string) {
   const pattern = `(\n${expression}\n)`;
   return strudelString ? `stack(${strudelString}, ${pattern})` : pattern;
 }
+// @ts-expect-error - Missing type declarations for @strudel/web
+import { transpiler } from '@strudel/web';

@@ -62,10 +62,13 @@ function createPlaybackEngine(adapter: PlaybackAdapter) {
           applied = generation === stopGeneration ? pattern : null;
         } catch (error) {
           if (startedAt === revision && !disposed) {
-            desired = null;
-            applied = null;
-            adapter.hush();
-            adapter.onError(error);
+            // Strudel leaves its previous pattern running on evaluation errors.
+            // A half-written live edit should not stop a working patch.
+            desired = applied;
+            if (applied === null) {
+              adapter.hush();
+              adapter.onError(error);
+            }
           }
         }
         // An in-flight evaluation may finish after the user presses pause.
