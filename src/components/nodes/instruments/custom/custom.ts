@@ -1,6 +1,7 @@
 export type CustomData = { customPattern?: string; customDraft?: string };
 
-export const DEFAULT_CODE = 'sound("bd sd hh sd")';
+export const DEFAULT_CODE =
+  'n("<[0,2,4,6] [5,7,9,11]>")\n  .scale("C3:major")\n  .sound("triangle").slow(2).room(0.4)';
 function codeExpression(code: string) {
   return code.trim().replace(/;+\s*$/, '');
 }
