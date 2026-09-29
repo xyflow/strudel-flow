@@ -46,7 +46,7 @@ export default function Editor() {
 
   return (
     <NodeContextMenu>{(connectionHandlers) => (
-    <div className="reactflow-wrapper" tabIndex={0} aria-label="Patch canvas. Right-click to add nodes.">
+    <div className="reactflow-wrapper" tabIndex={0} aria-label="Patch canvas. Right-click or tap empty space to add nodes.">
       <ReactFlow
         {...connectionHandlers}
         nodes={nodes}

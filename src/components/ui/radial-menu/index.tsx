@@ -15,6 +15,7 @@ export function RadialMenu({ children, trigger, onPositionChange, menuRef }: {
 }) {
   const triggerRef = useRef<HTMLSpanElement>(null);
   const fromHandle = useRef(false);
+  const touchTap = useRef<{ x: number; y: number; moved: boolean } | null>(null);
   useImperativeHandle(menuRef, () => ({
     openAt: ({ x, y }) => {
       fromHandle.current = true;
@@ -33,7 +34,8 @@ export function RadialMenu({ children, trigger, onPositionChange, menuRef }: {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const items = menuChildren(children);
-  const size = Math.min(380, window.innerWidth - 16, window.innerHeight - 16);
+  const compact = window.innerWidth <= 640 || window.innerHeight <= 500;
+  const size = Math.min(compact ? 280 : 380, window.innerWidth - 16, window.innerHeight - 16);
   // Radix anchors at the pointer's bottom-right. Center the circle and keep it onscreen.
   const left = Math.max(8, Math.min(position.x - size / 2, window.innerWidth - size - 8));
   const top = Math.max(8, Math.min(position.y - size / 2, window.innerHeight - size - 8));
@@ -52,6 +54,28 @@ export function RadialMenu({ children, trigger, onPositionChange, menuRef }: {
       <ContextMenuTrigger
         ref={triggerRef}
         asChild
+        onPointerDownCapture={(event) => {
+          // Capture before React Flow consumes the gesture for canvas panning.
+          touchTap.current = event.pointerType !== 'mouse' && event.isPrimary &&
+            (event.target as HTMLElement).classList.contains('react-flow__pane')
+            ? { x: event.clientX, y: event.clientY, moved: false }
+            : null;
+        }}
+        onPointerMoveCapture={(event) => {
+          const tap = touchTap.current;
+          if (tap && Math.hypot(event.clientX - tap.x, event.clientY - tap.y) > 8) tap.moved = true;
+        }}
+        onPointerCancelCapture={() => { touchTap.current = null; }}
+        onClickCapture={(event) => {
+          const tap = touchTap.current;
+          touchTap.current = null;
+          if (!tap || tap.moved || open || !(event.target as HTMLElement).classList.contains('react-flow__pane')) return;
+          event.preventDefault();
+          event.stopPropagation();
+          triggerRef.current?.dispatchEvent(new MouseEvent('contextmenu', {
+            bubbles: true, cancelable: true, clientX: event.clientX, clientY: event.clientY,
+          }));
+        }}
         onContextMenu={(event) => {
           const target = event.target as HTMLElement;
           if (target !== event.currentTarget && !target.classList.contains('react-flow__pane')) {

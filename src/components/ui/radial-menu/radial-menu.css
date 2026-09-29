@@ -111,3 +111,8 @@
     animation: radial-menu-expand 180ms ease-out;
   }
 }
+
+@media (max-width: 640px), (max-height: 500px) {
+  .radial-menu__category text { font-size: 17px; }
+  .radial-menu__item-label > svg { width: 14px; height: 14px; }
+}
