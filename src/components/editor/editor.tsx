@@ -1,3 +1,4 @@
+import { NodeContextMenu } from './node-context-menu';
 import { ReactFlow } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -44,8 +45,10 @@ export default function Editor() {
   const { onDragOver, onDrop } = useDragAndDrop();
 
   return (
-    <div className="reactflow-wrapper">
+    <NodeContextMenu>{(connectionHandlers) => (
+    <div className="reactflow-wrapper" tabIndex={0} aria-label="Patch canvas. Right-click to add nodes.">
       <ReactFlow
+        {...connectionHandlers}
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
@@ -65,5 +68,6 @@ export default function Editor() {
         <EditorToolbar />
       </ReactFlow>
     </div>
+    )}</NodeContextMenu>
   );
 }

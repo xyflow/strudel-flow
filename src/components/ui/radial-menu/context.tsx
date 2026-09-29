@@ -9,12 +9,8 @@ import {
 } from 'react';
 
 export const MenuContext = createContext<{
-  expanded: boolean;
   activeId: string | null;
   activate: (id: string) => void;
-  hover: (id: string) => void;
-  cancelHover: () => void;
-  select: () => void;
 } | null>(null);
 
 export const PositionContext = createContext<{

@@ -8,8 +8,8 @@ export function point(radius: number, angle: number) {
 
 // Rounded ring segments with consistent spacing along their shared edges.
 export function sector(index: number, count = 4, outer = 130, inner = 46) {
-  const slice = 180 / count;
-  const start = 180 - index * slice;
+  const slice = 360 / count;
+  const start = 150 - index * slice;
   const end = start - slice;
   const halfGap = 4.5;
   const inset = (radius: number) =>
@@ -34,10 +34,10 @@ export function sector(index: number, count = 4, outer = 130, inner = 46) {
   };
   return `M ${at(outer - outerCorner, start - inset(outer - outerCorner))}
     Q ${at(outer, outerStart)} ${at(outer, outerStart - outerInset)}
-    A ${outer} ${outer} 0 0 1 ${at(outer, outerEnd + outerInset)}
+    A ${outer} ${outer} 0 ${outerStart - outerEnd - 2 * outerInset > 180 ? 1 : 0} 1 ${at(outer, outerEnd + outerInset)}
     Q ${at(outer, outerEnd)} ${at(outer - outerCorner, end + inset(outer - outerCorner))}
     L ${at(inner + innerCorner, end + inset(inner + innerCorner))}
     Q ${at(inner, innerEnd)} ${at(inner, innerEnd + innerInset)}
-    A ${inner} ${inner} 0 0 0 ${at(inner, innerStart - innerInset)}
+    A ${inner} ${inner} 0 ${innerStart - innerEnd - 2 * innerInset > 180 ? 1 : 0} 0 ${at(inner, innerStart - innerInset)}
     Q ${at(inner, innerStart)} ${at(inner + innerCorner, start - inset(inner + innerCorner))} Z`;
 }

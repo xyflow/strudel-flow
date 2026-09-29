@@ -1,40 +1,21 @@
 .radial-menu {
   --radial-card: var(--card, #fff);
   --radial-accent: var(--accent, #e8e8ed);
-  --radial-foreground: var(--foreground, #202024);
-  --radial-muted: var(--muted-foreground, #62626b);
-  --radial-accent-foreground: var(--accent-foreground, #202024);
   --radial-border: var(--border, #d4d4dc);
-  --radial-primary: var(--primary, #5555da);
-  --radial-primary-foreground: var(--primary-foreground, #fff);
   --radial-ring: var(--ring, #7777f0);
   position: relative;
-  width: 56px;
-  color: var(--radial-foreground);
+  z-index: 50;
+  container-type: inline-size;
+  color: var(--foreground, #202024);
   font-family: Arial, Helvetica, sans-serif;
   letter-spacing: normal;
+  outline: none;
 }
-
 .radial-menu *,
 .radial-menu *::before,
 .radial-menu *::after {
   box-sizing: border-box;
 }
-.radial-menu button {
-  font: inherit;
-  letter-spacing: inherit;
-  touch-action: manipulation;
-}
-.radial-menu__rings {
-  position: absolute;
-  bottom: 28px;
-  left: 50%;
-  width: min(var(--radial-width, 440px), calc(100vw - 16px));
-  aspect-ratio: 2 / 1;
-  container-type: inline-size;
-  transform: translateX(-50%);
-}
-.radial-menu__categories,
 .radial-menu__items,
 .radial-menu__item,
 .radial-menu__item-visual,
@@ -44,37 +25,10 @@
   width: 100%;
   height: 100%;
 }
-.radial-menu__categories {
-  overflow: visible;
-  pointer-events: none;
-}
 .radial-menu__items,
 .radial-menu__item-visual,
-.radial-menu__item-svg,
-.radial-menu__category-visual {
+.radial-menu__item-svg {
   pointer-events: none;
-}
-.radial-menu__category-surface {
-  stroke: var(--radial-border);
-  transition: fill 150ms;
-}
-.radial-menu__category-label {
-  color: var(--radial-muted);
-}
-.radial-menu [data-active='true'] .radial-menu__category-label {
-  color: var(--radial-accent-foreground);
-}
-.radial-menu__category-target {
-  cursor: pointer;
-  pointer-events: auto;
-  touch-action: manipulation;
-  fill: transparent;
-  stroke: transparent;
-  outline: none;
-}
-.radial-menu__category-target:focus-visible {
-  stroke: var(--radial-ring);
-  stroke-width: 2;
 }
 .radial-menu__item {
   padding: 0;
@@ -85,26 +39,21 @@
   pointer-events: auto;
   user-select: none;
   outline: none;
-}
-.radial-menu__item[draggable='true'] {
-  cursor: grab;
-}
-.radial-menu__item[draggable='true']:active {
-  cursor: grabbing;
+  touch-action: manipulation;
+  font: inherit;
 }
 .radial-menu__item-surface {
   fill: var(--radial-card);
   stroke: var(--radial-border);
-  transition:
-    fill 150ms,
-    stroke 150ms;
+  transition: fill 150ms, stroke 150ms;
 }
-.radial-menu__item:not(:disabled):hover .radial-menu__item-surface {
+.radial-menu__item[data-highlighted] .radial-menu__item-surface,
+.radial-menu__category[data-active='true'] .radial-menu__item-surface {
   fill: var(--radial-accent);
 }
 .radial-menu__item:focus-visible .radial-menu__item-surface {
   stroke: var(--radial-ring);
-  stroke-width: 4;
+  stroke-width: 3;
 }
 .radial-menu__item-label {
   position: absolute;
@@ -123,71 +72,42 @@
   height: 4cqw;
   flex-shrink: 0;
 }
-.radial-menu__trigger {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  padding: 0;
-  border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--radial-primary) 50%, transparent);
-  background: var(--radial-primary);
-  color: var(--radial-primary-foreground);
-  cursor: pointer;
-  transition: background-color 150ms;
-}
-.radial-menu__trigger:hover {
-  background: color-mix(in srgb, var(--radial-primary) 90%, transparent);
-}
-.radial-menu__trigger:focus-visible {
-  outline: 2px solid var(--radial-ring);
-  outline-offset: 2px;
-}
-.radial-menu__trigger-icon {
-  width: 26px;
-  height: 26px;
-  transition: transform 150ms;
-}
-.radial-menu[data-expanded='true'] .radial-menu__trigger-icon {
-  transform: rotate(45deg);
-}
-
-/* Animate only the artwork; pointer targets remain stationary and fully opaque. */
 @keyframes radial-menu-reveal {
-  from {
-    transform: scale(0.88);
-  }
-  to {
-    transform: scale(1);
-  }
+  from { transform: scale(0.92); }
+  to { transform: scale(1); }
 }
 .radial-menu__item-visual {
-  transform-origin: 50% 100%;
-  animation: radial-menu-reveal 240ms cubic-bezier(0.2, 1.35, 0.4, 1) both;
-}
-.radial-menu__category-visual {
-  transform-box: fill-box;
   transform-origin: center;
-  transition: transform 180ms cubic-bezier(0.2, 1.1, 0.4, 1);
-}
-.radial-menu [data-active='true'] > .radial-menu__category-visual {
-  transform: scale(1.025);
+  animation: radial-menu-reveal 180ms ease-out both;
 }
 @media (prefers-reduced-motion: reduce) {
-  .radial-menu__item-visual {
-    animation: none;
-  }
-  .radial-menu__category-visual,
-  .radial-menu__trigger-icon,
-  .radial-menu__trigger,
-  .radial-menu__category-surface,
-  .radial-menu__item-surface {
-    transition: none;
-  }
+  .radial-menu__item-visual { animation: none; }
+  .radial-menu__item-surface { transition: none; }
 }
 
-.radial-menu__item:disabled {
-  cursor: not-allowed;
-  color: var(--radial-muted);
+.radial-menu__drag-hint {
+  position: fixed;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  transform: translate(-50%, -50%);
+  color: var(--primary-foreground);
+  filter: drop-shadow(0 2px 4px #0003);
+  pointer-events: none;
+}
+.radial-menu__body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+@keyframes radial-menu-expand {
+  from { transform: scale(0.15); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .radial-menu[data-from-handle='true'] .radial-menu__body {
+    animation: radial-menu-expand 180ms ease-out;
+  }
 }
