@@ -1,5 +1,5 @@
 import { Edge } from '@xyflow/react';
-import { AppNode } from '@/components/nodes';
+import { AppNode } from '@/components/nodes/registry';
 
 export function findConnectedComponents(
   nodes: AppNode[],
