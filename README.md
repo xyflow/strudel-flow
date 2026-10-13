@@ -59,25 +59,6 @@ This example adds a delay control. Replace `.delay(...)` with the Strudel code f
 
 ### Customize your node
 
-### Name and menu
-
-- **`id`** is the unique identifier used in saved patches. Keep it stable once your node is published.
-- **`title`** is the name people see.
-- **`category`** is `'Instruments'`, `'Synths'` (displayed as Sounds), or `'Audio Effects'` (displayed as Effects).
-- **`icon`** is a name from [icon-mapping.ts](../src/data/icon-mapping.ts).
-
-### Controls
-
-Each entry in `parameters` creates a control. Its key becomes a value you can use in `generate`.
-
-- **`knob`** takes a numeric `default`, `min`, `max`, and `step`. You can also add a `unit` or `format(value)` function.
-- **`text`** takes a string `default`.
-- **`select`** takes a string `default` and an `options` array of `{ value, label }` entries.
-
-All controls have a `label`. The app handles updating and saving their values.
-
-### Strudel code
-
 **`generate(values, input)`** returns a string of Strudel code. `values` contains your current parameter values; `input` contains the connected pattern.
 
 Effects and sounds usually append to `input`. Instruments create a pattern of their own. For example, an instrument could use:
