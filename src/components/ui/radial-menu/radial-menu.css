@@ -105,18 +105,6 @@
   }
 }
 
-.radial-menu__drag-hint {
-  position: fixed;
-  z-index: 50;
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  transform: translate(-50%, -50%);
-  color: var(--primary-foreground);
-  filter: drop-shadow(0 2px 4px #0003);
-  pointer-events: none;
-}
 .radial-menu__body {
   position: relative;
   width: 100%;

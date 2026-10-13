@@ -13,7 +13,7 @@ import {
   usePositionContext,
 } from './context';
 import { sector } from './geometry';
-import { RadialCategoryVisual } from './radial-menu-preview';
+import { RadialCategoryVisual } from './radial-category-visual';
 
 export type RadialMenuItemProps = {
   label: string;

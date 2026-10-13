@@ -1,4 +1,3 @@
-import { RadialMenuPreview } from '@/components/ui/radial-menu/radial-menu-preview';
 import {
   useRef,
   useState,
@@ -8,7 +7,6 @@ import {
 import {
   addEdge,
   reconnectEdge,
-  useConnection,
   useReactFlow,
   type Edge,
   type OnConnectEnd,
@@ -79,7 +77,6 @@ export function NodeContextMenu({
   const { screenToFlowPosition, getViewport } = useReactFlow();
   return (
     <>
-      <ConnectionMenuPreview />
       <RadialMenu
         ariaLabel="Add nodes"
         openOnTouchTap
@@ -183,17 +180,3 @@ export function NodeContextMenu({
   );
 }
 
-function ConnectionMenuPreview() {
-  const connection = useConnection();
-  const { flowToScreenPosition } = useReactFlow();
-  if (!connection.inProgress || connection.toNode || connection.toHandle)
-    return null;
-  const position = flowToScreenPosition(connection.to);
-  if (
-    !document
-      .elementFromPoint(position.x, position.y)
-      ?.classList.contains('react-flow__pane')
-  )
-    return null;
-  return <RadialMenuPreview position={position} />;
-}
