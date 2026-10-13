@@ -45,10 +45,10 @@
 .radial-menu__item-surface {
   fill: var(--radial-card);
   stroke: var(--radial-border);
-  transition: fill 150ms, stroke 150ms;
+  transition: stroke 150ms;
 }
-.radial-menu__item[data-highlighted] .radial-menu__item-surface,
-.radial-menu__category[data-active='true'] .radial-menu__item-surface {
+.radial-menu__item:hover .radial-menu__item-surface,
+.radial-menu__item:focus-visible .radial-menu__item-surface {
   fill: var(--radial-accent);
 }
 .radial-menu__item:focus-visible .radial-menu__item-surface {
@@ -116,3 +116,22 @@
   .radial-menu__category text { font-size: 17px; }
   .radial-menu__item-label > svg { width: 14px; height: 14px; }
 }
+
+.radial-menu__close {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 14%;
+  height: 14%;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--radial-card);
+  color: inherit;
+  cursor: pointer;
+}
+.radial-menu__close:hover { background: var(--radial-accent); }
+.radial-menu__close:focus-visible { outline: 2px solid var(--radial-ring); }
+.radial-menu__close svg { width: 14px; height: 14px; }

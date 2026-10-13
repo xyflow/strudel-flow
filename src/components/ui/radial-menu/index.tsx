@@ -3,9 +3,10 @@ import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '../context-
 import { MenuContext, PositionContext, menuChildren } from './context';
 export { RadialMenuItem } from './radial-menu-item';
 export { RadialMenuSubItem } from './radial-menu-sub-item';
+import { X } from 'lucide-react';
 import './radial-menu.css';
 
-export type RadialMenuHandle = { openAt: (position: { x: number; y: number }) => void };
+export type RadialMenuHandle = { openAt: (position: { x: number; y: number }, fromConnection?: boolean) => void };
 
 export function RadialMenu({ children, trigger, onPositionChange, menuRef }: {
   menuRef?: Ref<RadialMenuHandle>;
@@ -17,8 +18,8 @@ export function RadialMenu({ children, trigger, onPositionChange, menuRef }: {
   const fromHandle = useRef(false);
   const touchTap = useRef<{ x: number; y: number; moved: boolean } | null>(null);
   useImperativeHandle(menuRef, () => ({
-    openAt: ({ x, y }) => {
-      fromHandle.current = true;
+    openAt: ({ x, y }, fromConnection = false) => {
+      fromHandle.current = fromConnection;
       try {
         triggerRef.current?.dispatchEvent(new MouseEvent('contextmenu', {
           bubbles: true, cancelable: true, clientX: x, clientY: y,
@@ -111,6 +112,12 @@ export function RadialMenu({ children, trigger, onPositionChange, menuRef }: {
         data-from-handle={openedFromHandle || undefined}
         loop
         avoidCollisions={false}
+        onClick={(event) => {
+          if (!(event.target as Element).closest('button')) {
+            setOpen(false);
+            setActiveId(null);
+          }
+        }}
         style={{ width: size, height: size, transform: `translate(${left - position.x - 2}px, ${top - position.y}px)` }}
       >
         <div className="radial-menu__body">
@@ -122,6 +129,15 @@ export function RadialMenu({ children, trigger, onPositionChange, menuRef }: {
             >{item}</PositionContext.Provider>
           ))}
         </MenuContext.Provider>
+        <button
+          type="button"
+          className="radial-menu__close"
+          aria-label="Close add node menu"
+          title="Close menu"
+          onClick={() => { setOpen(false); setActiveId(null); }}
+        >
+          <X aria-hidden="true" />
+        </button>
         </div>
       </ContextMenuContent>
     </ContextMenu>

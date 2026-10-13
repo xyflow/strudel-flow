@@ -1,6 +1,8 @@
 import { Panel } from '@xyflow/react';
 import logo from '@/assets/logo.svg?raw';
-import { X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
+import type { MouseEventHandler } from 'react';
+import { ControlButton } from './control-button';
 import { AppearancePopover } from './appearance-popover';
 import { AppInfoPopover } from './app-info-popover';
 import { useAppStore } from '@/store/app-store';
@@ -8,7 +10,7 @@ import { PlayPauseButton } from './play-pause-button';
 import { ZoomSlider } from './zoom-slider';
 import { PresetPopover } from './preset-popover';
 
-export function EditorToolbar() {
+export function EditorToolbar({ onAddNode }: { onAddNode: MouseEventHandler<HTMLButtonElement> }) {
   const cpm = useAppStore((state) => state.cpm);
   const setCpm = useAppStore((state) => state.setCpm);
   const bpc = useAppStore((state) => state.bpc);
@@ -110,6 +112,13 @@ export function EditorToolbar() {
         position="top-right"
         className="m-4! flex gap-1 rounded-md border border-border/60 bg-card p-1 sm:m-6!"
       >
+        <ControlButton
+          title="Add node"
+          onClick={onAddNode}
+          className="nokey nodrag nopan rounded-full"
+        >
+          <Plus className="size-4" aria-hidden="true" />
+        </ControlButton>
         <PresetPopover />
         <AppearancePopover />
         <AppInfoPopover />

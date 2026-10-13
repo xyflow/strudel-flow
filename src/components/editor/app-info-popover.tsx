@@ -21,15 +21,23 @@ export function AppInfoPopover() {
       >
         <h3 className="mb-2 text-sm font-semibold">Strudel Flow</h3>
         <p className="mb-3 text-muted-foreground">
-          A visual music playground. Connect instruments, sounds, and effects to
-          build repeating patterns, then change them while they play.
+          Connect instruments, sounds, and effects to build repeating patterns,
+          then change them while they play.
         </p>
         <ul className="space-y-2 text-muted-foreground">
           <li>Tap the pads, then press play.</li>
-          <li>Click + to add an instrument, sound, or effect.</li>
-          <li>Connect the round jacks to build your patch.</li>
-          <li>Drag a dial up or down. Hold Shift for fine control.</li>
-          <li>Space plays or pauses. Shift-click pads to group notes.</li>
+          <li>
+            Click +, or right-click empty canvas space. Choose a category, then
+            a node.
+          </li>
+          <li>
+            Drag between round jacks to connect nodes. Drop a cable on empty
+            space to add a connected node.
+          </li>
+          <li>
+            Drag a dial up or down to change effects . Hold Shift for fine
+            control.
+          </li>
         </ul>
         <p className="mt-4 border-t pt-3 text-muted-foreground">
           Powered by{' '}

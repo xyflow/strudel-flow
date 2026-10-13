@@ -45,7 +45,7 @@ export default function Editor() {
   const { onDragOver, onDrop } = useDragAndDrop();
 
   return (
-    <NodeContextMenu>{(connectionHandlers) => (
+    <NodeContextMenu>{(connectionHandlers, onAddNode) => (
     <div className="reactflow-wrapper" tabIndex={0} aria-label="Patch canvas. Right-click or tap empty space to add nodes.">
       <ReactFlow
         {...connectionHandlers}
@@ -65,7 +65,7 @@ export default function Editor() {
         fitView
         fitViewOptions={{ padding: 0.3, maxZoom: 1 }}
       >
-        <EditorToolbar />
+        <EditorToolbar onAddNode={onAddNode} />
       </ReactFlow>
     </div>
     )}</NodeContextMenu>

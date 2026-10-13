@@ -45,7 +45,7 @@ export function ParameterKnob({
         aria-valuemax={max}
         aria-valuenow={clamped}
         aria-valuetext={format(clamped)}
-        className="nodrag nopan relative grid size-20 touch-none cursor-ns-resize place-items-center rounded-full outline-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-card"
+        className="nokey nodrag nopan relative grid size-20 touch-none cursor-ns-resize place-items-center rounded-full outline-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-card"
         onPointerDown={(event) => {
           if (event.button !== 0) return;
           event.preventDefault();
@@ -57,10 +57,11 @@ export function ParameterKnob({
           if (!drag.current) return;
           const distance =
             drag.current.y - event.clientY + event.clientX - drag.current.x;
-          update(
-            drag.current.value +
-              (distance * (max - min)) / (event.shiftKey ? 1200 : 180),
-          );
+          const next = Math.min(max, Math.max(min,
+            drag.current.value + (distance * (max - min)) / (event.shiftKey ? 1200 : 180),
+          ));
+          drag.current = { x: event.clientX, y: event.clientY, value: next };
+          update(next);
         }}
         onPointerUp={(event) => {
           drag.current = null;

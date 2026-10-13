@@ -31,7 +31,6 @@ function WorkflowNode({
   const nodeType = useAppStore(
     (state) => state.nodes.find((node) => node.id === id)?.type,
   );
-  const isPlaying = useAppStore((state) => state.isPlaying);
   const removeNode = useAppStore((state) => state.removeNode);
   const setGroupState = useAppStore((state) => state.setGroupState);
   const category = nodesConfig[type ?? nodeType ?? 'pad-node']?.category;
@@ -49,20 +48,15 @@ function WorkflowNode({
         position={Position.Left}
         type="target"
         aria-label="Patch input"
+        style={{ top: 28 }}
       />
       <BaseHandle
         position={Position.Right}
         type="source"
         aria-label="Patch output"
+        style={{ top: 28 }}
       />
-      <header className="flex items-center gap-3 px-3 pt-2 pb-4">
-        <span
-          aria-hidden
-          className={cn(
-            'size-1.5 rounded-full',
-            isPlaying && !isPaused ? 'bg-primary ' : 'bg-muted-foreground/30',
-          )}
-        />
+      <header className="mb-1 flex h-12 items-center gap-3 px-3">
         <h3 className="flex-1 text-[11px] font-semibold tracking-[.16em] uppercase">
           {data.title}
         </h3>

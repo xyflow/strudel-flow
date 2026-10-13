@@ -8,8 +8,6 @@ export type PadData = {
   selectedScaleType?: string;
   grid?: boolean[][];
   columnModifiers?: Record<number, CellState>;
-  selectedButtons?: string[];
-  noteGroups?: Record<number, number[][]>;
 };
 
 export const NOTES = ['0', '1', '2', '3', '4', '5', '6', '7'];
@@ -31,23 +29,16 @@ export const createDefaultGrid = (): boolean[][] =>
 export function generatePattern(data: PadData, strudelString: string) {
   const grid = data.grid || createDefaultGrid();
   const columnModifiers = data.columnModifiers || {};
-  const noteGroups = data.noteGroups || {};
 
   const generateStepPattern = (row: boolean[], stepIdx: number) => {
     const individualNotes = row
       .map((on, noteIdx) => (on ? NOTES[noteIdx] : null))
       .filter(Boolean);
 
-    const stepGroups = noteGroups[stepIdx] || [];
-    const groupPatterns = stepGroups.map(
-      (group) => `<${group.map((noteIdx) => NOTES[noteIdx]).join(' ')}>`,
-    );
-
-    const allPatterns = [...individualNotes, ...groupPatterns];
-    if (allPatterns.length === 0) return '';
+    if (individualNotes.length === 0) return '';
 
     const separator = (data.mode || DEFAULTS.mode) === 'arp' ? ' ' : ', ';
-    const stepPattern = `[${allPatterns.join(separator)}]`;
+    const stepPattern = `[${individualNotes.join(separator)}]`;
 
     const columnModifier = columnModifiers[stepIdx];
     if (columnModifier && columnModifier.type !== 'off') {

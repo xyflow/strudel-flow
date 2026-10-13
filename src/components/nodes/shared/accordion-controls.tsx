@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
 import { KEY_OPTIONS, SCALE_TYPE_OPTIONS } from '@/data/sounds';
 
 export interface KeyScaleOctaveControlsProps {
@@ -31,10 +30,6 @@ export interface PadControlsProps {
   onStepsChange: (steps: number) => void;
   mode: 'arp' | 'chord';
   onModeChange: (mode: 'arp' | 'chord') => void;
-  noteGroups: Record<number, number[][]>;
-  onClearGroups: () => void;
-  selectedButtons: Set<string>;
-  onClearSelection: () => void;
 }
 
 const fieldLabel = 'text-[11px] font-medium text-muted-foreground';
@@ -159,10 +154,6 @@ function PadControls({
   onStepsChange,
   mode,
   onModeChange,
-  noteGroups,
-  onClearGroups,
-  selectedButtons,
-  onClearSelection,
 }: PadControlsProps) {
   return (
     <div className="space-y-3">
@@ -197,31 +188,7 @@ function PadControls({
           </div>
         </div>
       </div>
-      {(Object.values(noteGroups).some((groups) => groups.length > 0) ||
-        selectedButtons.size > 0) && (
-        <div className="flex flex-wrap gap-2">
-          {Object.values(noteGroups).some((groups) => groups.length > 0) && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 px-2 text-xs text-muted-foreground"
-              onClick={onClearGroups}
-            >
-              Clear groups
-            </Button>
-          )}
-          {selectedButtons.size > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 px-2 text-xs text-muted-foreground"
-              onClick={onClearSelection}
-            >
-              Clear selection
-            </Button>
-          )}
-        </div>
-      )}
+
     </div>
   );
 }

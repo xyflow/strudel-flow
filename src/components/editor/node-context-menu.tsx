@@ -1,5 +1,5 @@
 import { RadialMenuPreview } from '@/components/ui/radial-menu/radial-menu-preview';
-import { useRef, useState, type ReactElement } from 'react';
+import { useRef, useState, type ReactElement, type MouseEventHandler } from 'react';
 import { addEdge, reconnectEdge, useConnection, useReactFlow, type Edge, type OnConnectEnd, type ReactFlowProps } from '@xyflow/react';
 import type { RadialMenuHandle } from '@/components/ui/radial-menu';
 import { AudioLines, Piano, SlidersHorizontal } from 'lucide-react';
@@ -25,7 +25,7 @@ const categories = [
 
 type ConnectionHandlers = Pick<ReactFlowProps, 'onConnectEnd' | 'onReconnect' | 'onReconnectEnd'>;
 
-export function NodeContextMenu({ children }: { children: (handlers: ConnectionHandlers) => ReactElement }) {
+export function NodeContextMenu({ children }: { children: (handlers: ConnectionHandlers, onAddNode: MouseEventHandler<HTMLButtonElement>) => ReactElement }) {
   const menuRef = useRef<RadialMenuHandle>(null);
   const pending = useRef<{ nodeId: string; handleId: string | null; type: 'source' | 'target'; edge?: Edge } | null>(null);
   const openFromHandle: OnConnectEnd = (event, state) => {
@@ -34,7 +34,7 @@ export function NodeContextMenu({ children }: { children: (handlers: ConnectionH
     const point = 'changedTouches' in event ? event.changedTouches[0] : event;
     if (!point || !document.elementFromPoint(point.clientX, point.clientY)?.classList.contains('react-flow__pane')) return;
     pending.current = { nodeId: state.fromNode.id, handleId: state.fromHandle.id ?? null, type: state.fromHandle.type };
-    menuRef.current?.openAt({ x: point.clientX, y: point.clientY });
+    menuRef.current?.openAt({ x: point.clientX, y: point.clientY }, true);
   };
   const handlers: ConnectionHandlers = {
     onConnectEnd: openFromHandle,
@@ -49,7 +49,12 @@ export function NodeContextMenu({ children }: { children: (handlers: ConnectionH
   return (
     <>
     <ConnectionMenuPreview />
-    <RadialMenu menuRef={menuRef} trigger={children(handlers)} onPositionChange={(point, fromHandle) => {
+    <RadialMenu menuRef={menuRef} trigger={children(handlers, (event) => {
+      const toolbar = event.currentTarget.parentElement!.getBoundingClientRect();
+      const compact = window.innerWidth <= 640 || window.innerHeight <= 500;
+      const size = Math.min(compact ? 280 : 380, window.innerWidth - 16, window.innerHeight - 16);
+      menuRef.current?.openAt({ x: toolbar.right - size / 2, y: toolbar.bottom + 12 + size / 2 });
+    })} onPositionChange={(point, fromHandle) => {
       setPosition(point);
       if (!fromHandle) pending.current = null;
     }}>

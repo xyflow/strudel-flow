@@ -1,4 +1,4 @@
-import { isValidElement, useId, type ReactNode } from 'react';
+import { isValidElement, useEffect, useId, useRef, type ReactNode } from 'react';
 import { ContextMenuItem } from '../context-menu';
 import { menuChildren, PositionContext, useMenuContext, usePositionContext } from './context';
 import { sector } from './geometry';
@@ -14,6 +14,12 @@ export function RadialMenuItem({ label, icon, children }: RadialMenuItemProps) {
   const active = menu.activeId === id;
   const path = sector(index, count);
   const items = menuChildren(children);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelHover = () => {
+    if (hoverTimer.current !== null) clearTimeout(hoverTimer.current);
+    hoverTimer.current = null;
+  };
+  useEffect(() => cancelHover, []);
 
   return <>
     <ContextMenuItem asChild textValue={label} onSelect={(event) => {
@@ -28,6 +34,19 @@ export function RadialMenuItem({ label, icon, children }: RadialMenuItemProps) {
         aria-expanded={active}
         aria-controls={active ? `${id}-items` : undefined}
         data-active={active}
+        onPointerEnter={(event) => {
+          if (event.pointerType !== 'mouse' || active) return;
+          cancelHover();
+          hoverTimer.current = setTimeout(() => {
+            hoverTimer.current = null;
+            menu.activate(id);
+          }, 200);
+        }}
+        onPointerLeave={cancelHover}
+        onPointerMove={(event) => {
+          // Radix normally focuses on hover, which would bypass the delay.
+          if (event.pointerType === 'mouse') event.preventDefault();
+        }}
         onFocus={() => menu.activate(id)}
       >
         <svg viewBox="0 0 480 480" className="radial-menu__item-svg" aria-hidden="true">
