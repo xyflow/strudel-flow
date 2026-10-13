@@ -5,7 +5,7 @@ import {
   useRef,
   type ReactNode,
 } from 'react';
-import { ContextMenuItem } from '../context-menu';
+import { ContextMenuItem } from './context-menu';
 import {
   menuChildren,
   PositionContext,
@@ -60,7 +60,7 @@ export function RadialMenuItem({ label, icon, children }: RadialMenuItemProps) {
             hoverTimer.current = setTimeout(() => {
               hoverTimer.current = null;
               menu.activate(id);
-            }, 50);
+            }, menu.hoverDelay);
           }}
           onPointerLeave={cancelHover}
           onPointerMove={(event) => {

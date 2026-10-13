@@ -1,5 +1,6 @@
 import {
   isValidElement,
+  useEffect,
   useImperativeHandle,
   useRef,
   useState,
@@ -11,11 +12,10 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuTrigger,
-} from '../context-menu';
+} from './context-menu';
 import { MenuContext, PositionContext, menuChildren } from './context';
 export { RadialMenuItem } from './radial-menu-item';
 export { RadialMenuSubItem } from './radial-menu-sub-item';
-import { X } from 'lucide-react';
 import './radial-menu.css';
 
 export type RadialMenuHandle = {
@@ -25,20 +25,27 @@ export type RadialMenuHandle = {
   ) => void;
 };
 
+export type RadialMenuProps = {
+  menuRef?: Ref<RadialMenuHandle>;
+  children: ReactNode;
+  trigger: ReactElement;
+  onPositionChange?: (position: { x: number; y: number }, fromProgrammaticOpen: boolean) => void;
+  isTriggerTarget?: (target: HTMLElement, trigger: HTMLElement) => boolean;
+  openOnTouchTap?: boolean;
+  ariaLabel?: string;
+  hoverDelay?: number;
+};
+
 export function RadialMenu({
   children,
   trigger,
   onPositionChange,
   menuRef,
-}: {
-  menuRef?: Ref<RadialMenuHandle>;
-  children: ReactNode;
-  trigger: ReactElement;
-  onPositionChange: (
-    position: { x: number; y: number },
-    fromHandle: boolean,
-  ) => void;
-}) {
+  isTriggerTarget = () => true,
+  openOnTouchTap = false,
+  ariaLabel = "Radial menu",
+  hoverDelay = 50,
+}: RadialMenuProps) {
   const triggerRef = useRef<HTMLSpanElement>(null);
   const fromHandle = useRef(false);
   const touchTap = useRef<{ x: number; y: number; moved: boolean } | null>(
@@ -71,25 +78,32 @@ export function RadialMenu({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const items = menuChildren(children);
-  const compact = window.innerWidth <= 640 || window.innerHeight <= 500;
+  const [viewport, setViewport] = useState({ width: 1024, height: 768 });
+  useEffect(() => {
+    const update = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+  const compact = viewport.width <= 640 || viewport.height <= 500;
   const size = Math.min(
     compact ? 280 : 380,
-    window.innerWidth - 16,
-    window.innerHeight - 16,
+    viewport.width - 16,
+    viewport.height - 16,
   );
   // Radix anchors at the pointer's bottom-right. Center the circle and keep it onscreen.
   const left = Math.max(
     8,
-    Math.min(position.x - size / 2, window.innerWidth - size - 8),
+    Math.min(position.x - size / 2, viewport.width - size - 8),
   );
   const top = Math.max(
     8,
-    Math.min(position.y - size / 2, window.innerHeight - size - 8),
+    Math.min(position.y - size / 2, viewport.height - size - 8),
   );
   const rememberPosition = (x: number, y: number) => {
     setOpenedFromHandle(fromHandle.current);
     setPosition({ x, y });
-    onPositionChange({ x, y }, fromHandle.current);
+    onPositionChange?.({ x, y }, fromHandle.current);
   };
 
   return (
@@ -105,11 +119,11 @@ export function RadialMenu({
         ref={triggerRef}
         asChild
         onPointerDownCapture={(event) => {
-          // Capture before React Flow consumes the gesture for canvas panning.
+          // Capture before the host surface consumes touch gestures.
           touchTap.current =
-            event.pointerType !== 'mouse' &&
+            openOnTouchTap && event.pointerType !== 'mouse' &&
             event.isPrimary &&
-            (event.target as HTMLElement).classList.contains('react-flow__pane')
+            isTriggerTarget(event.target as HTMLElement, event.currentTarget)
               ? { x: event.clientX, y: event.clientY, moved: false }
               : null;
         }}
@@ -131,9 +145,7 @@ export function RadialMenu({
             !tap ||
             tap.moved ||
             open ||
-            !(event.target as HTMLElement).classList.contains(
-              'react-flow__pane',
-            )
+            !isTriggerTarget(event.target as HTMLElement, event.currentTarget)
           )
             return;
           event.preventDefault();
@@ -151,7 +163,7 @@ export function RadialMenu({
           const target = event.target as HTMLElement;
           if (
             target !== event.currentTarget &&
-            !target.classList.contains('react-flow__pane')
+            !isTriggerTarget(target, event.currentTarget)
           ) {
             event.preventDefault();
             return;
@@ -161,9 +173,7 @@ export function RadialMenu({
         }}
         onPointerDown={(event) => {
           if (event.pointerType === 'mouse') return;
-          allowOpen.current = (event.target as HTMLElement).classList.contains(
-            'react-flow__pane',
-          );
+          allowOpen.current = isTriggerTarget(event.target as HTMLElement, event.currentTarget);
           if (!allowOpen.current) return;
           rememberPosition(event.clientX, event.clientY);
         }}
@@ -189,7 +199,7 @@ export function RadialMenu({
         {trigger}
       </ContextMenuTrigger>
       <ContextMenuContent
-        aria-label="Add nodes"
+        aria-label={ariaLabel}
         className="radial-menu"
         data-from-handle={openedFromHandle || undefined}
         loop
@@ -207,7 +217,7 @@ export function RadialMenu({
         }}
       >
         <div className="radial-menu__body">
-          <MenuContext.Provider value={{ activeId, activate: setActiveId }}>
+          <MenuContext.Provider value={{ activeId, activate: setActiveId, hoverDelay }}>
             {items.map((item, index) => (
               <PositionContext.Provider
                 key={isValidElement(item) ? (item.key ?? index) : index}
@@ -220,14 +230,14 @@ export function RadialMenu({
           <button
             type="button"
             className="radial-menu__close"
-            aria-label="Close add node menu"
+            aria-label="Close menu"
             title="Close menu"
             onClick={() => {
               setOpen(false);
               setActiveId(null);
             }}
           >
-            <X aria-hidden="true" />
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
           </button>
         </div>
       </ContextMenuContent>

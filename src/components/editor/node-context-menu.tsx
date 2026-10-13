@@ -76,11 +76,14 @@ export function NodeContextMenu({
     },
   };
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, getViewport } = useReactFlow();
   return (
     <>
       <ConnectionMenuPreview />
       <RadialMenu
+        ariaLabel="Add nodes"
+        openOnTouchTap
+        isTriggerTarget={(target) => target.classList.contains('react-flow__pane')}
         menuRef={menuRef}
         trigger={children(handlers, (event) => {
           const toolbar =
@@ -92,7 +95,7 @@ export function NodeContextMenu({
             window.innerHeight - 16,
           );
           menuRef.current?.openAt({
-            x: toolbar.right - size / 2,
+            x: toolbar.left - 24 - size / 2,
             y: toolbar.bottom + 12 + size / 2,
           });
         })}
@@ -115,9 +118,19 @@ export function NodeContextMenu({
                   aria-label={`Add ${node.title}`}
                   icon={<NodeIcon aria-hidden="true" />}
                   onSelect={() => {
+                    const canvas = document.querySelector('.reactflow-wrapper')!.getBoundingClientRect();
+                    const zoom = getViewport().zoom;
+                    const existing = useAppStore.getState().nodes.find((item) => item.type === node.id);
+                    const width = (existing?.measured?.width ?? 500) * zoom;
+                    const height = (existing?.measured?.height ?? 500) * zoom;
+                    const inset = 24;
+                    const spawn = {
+                      x: Math.max(canvas.left + inset, Math.min(position.x, canvas.right - width - inset)),
+                      y: Math.max(canvas.top + inset, Math.min(position.y, canvas.bottom - height - inset)),
+                    };
                     const newNode = createNodeByType({
                       type: node.id,
-                      position: screenToFlowPosition(position),
+                      position: screenToFlowPosition(spawn),
                     });
                     const origin = pending.current;
                     useAppStore.setState((state) => {

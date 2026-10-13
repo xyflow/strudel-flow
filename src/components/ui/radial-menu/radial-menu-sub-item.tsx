@@ -1,5 +1,5 @@
 import { useId, type ReactNode } from 'react';
-import { ContextMenuItem } from '../context-menu';
+import { ContextMenuItem } from './context-menu';
 import { usePositionContext } from './context';
 import { point, sector } from './geometry';
 

@@ -10,6 +10,7 @@ import {
 
 export const MenuContext = createContext<{
   activeId: string | null;
+  hoverDelay: number;
   activate: (id: string) => void;
 } | null>(null);
 
