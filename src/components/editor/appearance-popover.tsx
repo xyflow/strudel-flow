@@ -42,7 +42,11 @@ export function AppearancePopover() {
           ))}
         </div>
         <h3 className="mb-3 border-t pt-3 text-sm font-medium">Color theme</h3>
-        <div role="group" aria-label="Color theme" className="grid grid-cols-2 gap-2">
+        <div
+          role="group"
+          aria-label="Color theme"
+          className="grid grid-cols-2 gap-2"
+        >
           {themes.map((option) => (
             <button
               key={option.value}
@@ -57,7 +61,12 @@ export function AppearancePopover() {
                 style={{ backgroundColor: option.color }}
               />
               <span className="min-w-0 flex-1">{option.label}</span>
-              {theme === option.value && <Check aria-hidden="true" className="size-3.5 shrink-0 text-primary" />}
+              {theme === option.value && (
+                <Check
+                  aria-hidden="true"
+                  className="size-3.5 shrink-0 text-primary"
+                />
+              )}
             </button>
           ))}
         </div>

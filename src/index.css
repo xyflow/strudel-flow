@@ -198,3 +198,8 @@ body,
 .reactflow-wrapper .react-flow.dark {
   --xy-background-color: color-mix(in oklch, var(--accent) 20%, var(--background));
 }
+
+.dark {
+  --patch-border: color-mix(in srgb, var(--secondary-foreground) 14%, var(--border));
+  --patch-border-hover: color-mix(in srgb, var(--secondary-foreground) 21%, var(--border));
+}

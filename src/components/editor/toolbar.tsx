@@ -10,7 +10,11 @@ import { PlayPauseButton } from './play-pause-button';
 import { ZoomSlider } from './zoom-slider';
 import { PresetPopover } from './preset-popover';
 
-export function EditorToolbar({ onAddNode }: { onAddNode: MouseEventHandler<HTMLButtonElement> }) {
+export function EditorToolbar({
+  onAddNode,
+}: {
+  onAddNode: MouseEventHandler<HTMLButtonElement>;
+}) {
   const cpm = useAppStore((state) => state.cpm);
   const setCpm = useAppStore((state) => state.setCpm);
   const bpc = useAppStore((state) => state.bpc);

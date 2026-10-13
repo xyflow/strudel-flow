@@ -1,4 +1,3 @@
-
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative h-screen w-full overflow-hidden">

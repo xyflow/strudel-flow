@@ -45,29 +45,35 @@ export default function Editor() {
   const { onDragOver, onDrop } = useDragAndDrop();
 
   return (
-    <NodeContextMenu>{(connectionHandlers, onAddNode) => (
-    <div className="reactflow-wrapper" tabIndex={0} aria-label="Patch canvas. Right-click or tap empty space to add nodes.">
-      <ReactFlow
-        {...connectionHandlers}
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        onDragOver={onDragOver}
-        onDrop={onDrop}
-        nodeDragThreshold={30}
-        colorMode={colorMode}
-        panActivationKeyCode={null}
-        minZoom={0.2}
-        fitView
-        fitViewOptions={{ padding: 0.3, maxZoom: 1 }}
-      >
-        <EditorToolbar onAddNode={onAddNode} />
-      </ReactFlow>
-    </div>
-    )}</NodeContextMenu>
+    <NodeContextMenu>
+      {(connectionHandlers, onAddNode) => (
+        <div
+          className="reactflow-wrapper"
+          tabIndex={0}
+          aria-label="Patch canvas. Right-click or tap empty space to add nodes."
+        >
+          <ReactFlow
+            {...connectionHandlers}
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            nodeDragThreshold={30}
+            colorMode={colorMode}
+            panActivationKeyCode={null}
+            minZoom={0.2}
+            fitView
+            fitViewOptions={{ padding: 0.3, maxZoom: 1 }}
+          >
+            <EditorToolbar onAddNode={onAddNode} />
+          </ReactFlow>
+        </div>
+      )}
+    </NodeContextMenu>
   );
 }

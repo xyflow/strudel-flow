@@ -21,7 +21,7 @@ export function sector(index: number, count = 4, outer = 130, inner = 46) {
   // Keep rounded corners from crossing on the narrower inner edge.
   const corner = (radius: number) =>
     Math.min(
-      20,
+      12,
       (((slice - 2 * inset(radius)) * Math.PI) / 180) * radius * 0.4,
     );
   const outerCorner = corner(outer);

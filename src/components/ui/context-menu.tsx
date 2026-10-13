@@ -5,7 +5,9 @@ export const ContextMenu = ContextMenuPrimitive.Root;
 export const ContextMenuTrigger = ContextMenuPrimitive.Trigger;
 export const ContextMenuItem = ContextMenuPrimitive.Item;
 
-export function ContextMenuContent(props: ComponentProps<typeof ContextMenuPrimitive.Content>) {
+export function ContextMenuContent(
+  props: ComponentProps<typeof ContextMenuPrimitive.Content>,
+) {
   return (
     <ContextMenuPrimitive.Portal>
       <ContextMenuPrimitive.Content {...props} />

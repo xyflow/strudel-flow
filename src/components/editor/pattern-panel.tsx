@@ -14,7 +14,11 @@ export function PatternPanel() {
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopy = async () => {
-    try { await navigator.clipboard.writeText(pattern); } catch { return; }
+    try {
+      await navigator.clipboard.writeText(pattern);
+    } catch {
+      return;
+    }
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
@@ -25,7 +29,12 @@ export function PatternPanel() {
         <span className="text-sm font-medium">Strudel code</span>
         <Popover>
           <PopoverTrigger asChild>
-            <Button aria-label="Copy code" variant="ghost" size="sm" onClick={handleCopy}>
+            <Button
+              aria-label="Copy code"
+              variant="ghost"
+              size="sm"
+              onClick={handleCopy}
+            >
               <Copy className="size-4" />
             </Button>
           </PopoverTrigger>
