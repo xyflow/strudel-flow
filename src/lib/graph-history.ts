@@ -2,18 +2,20 @@ import type { Edge } from '@xyflow/react';
 import type { AppNode } from '@/components/nodes/types';
 
 export type GraphSnapshot = { nodes: AppNode[]; edges: Edge[] };
-
-// React Flow's selection and layout bookkeeping are not document edits.
 function graphKey(graph: GraphSnapshot) {
   return JSON.stringify({
     nodes: graph.nodes.map((node) => {
-      const { selected, measured, dragging, resizing, ...document } = node;
-      void selected; void measured; void dragging; void resizing;
+      const document = { ...node };
+      delete document.selected;
+      delete document.measured;
+      delete document.dragging;
+      delete document.resizing;
       return document;
     }),
-    edges: graph.edges.map(({ selected, ...edge }) => {
-      void selected;
-      return edge;
+    edges: graph.edges.map((edge) => {
+      const document = { ...edge };
+      delete document.selected;
+      return document;
     }),
   });
 }

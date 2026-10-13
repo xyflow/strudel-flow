@@ -5,14 +5,16 @@ import type { WorkflowNodeProps } from '../types';
 import { type NodeDefinition } from '../define-node';
 
 export function createDefinitionComponent(definition: NodeDefinition) {
-  return function DefinitionNode({ id, data, type }: WorkflowNodeProps) {
+  return function DefinitionNode({ id, data }: WorkflowNodeProps) {
     const update = useAppStore((state) => state.updateNodeData);
     const isPlaying = useAppStore((state) => state.isPlaying);
     const values = definition.getValues(data);
     const updateValues = (updates: Record<string, unknown>) =>
       update(id, updates);
+    const updateParameter = (key: string, value: string | number) =>
+      updateValues(definition.updateValues(data, { [key]: value }));
     return (
-      <WorkflowNode id={id} data={data} type={type}>
+      <WorkflowNode id={id} data={data} type={definition.id}>
         {definition.renderControls ? (
           definition.renderControls(data, updateValues, {
             id,
@@ -42,11 +44,7 @@ export function createDefinitionComponent(definition: NodeDefinition) {
                       ((value) =>
                         `${Number(value.toFixed(2))}${parameter.unit ?? ''}`)
                     }
-                    onChange={(value) =>
-                      updateValues(
-                        definition.updateValues(data, { [key]: value }),
-                      )
-                    }
+                    onChange={(value) => updateParameter(key, value)}
                   />
                 ) : parameter.control === 'select' ? (
                   <label
@@ -58,11 +56,7 @@ export function createDefinitionComponent(definition: NodeDefinition) {
                       className="nodrag rounded border border-input bg-background p-2 text-foreground"
                       value={String(values[key])}
                       onChange={(event) =>
-                        updateValues(
-                          definition.updateValues(data, {
-                            [key]: event.target.value,
-                          }),
-                        )
+                        updateParameter(key, event.target.value)
                       }
                     >
                       {parameter.options.map((option) => (
@@ -82,11 +76,7 @@ export function createDefinitionComponent(definition: NodeDefinition) {
                       className="nodrag rounded border border-input bg-background p-2 text-foreground"
                       value={String(values[key])}
                       onChange={(event) =>
-                        updateValues(
-                          definition.updateValues(data, {
-                            [key]: event.target.value,
-                          }),
-                        )
+                        updateParameter(key, event.target.value)
                       }
                     />
                   </label>

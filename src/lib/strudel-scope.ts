@@ -1,7 +1,4 @@
-// @ts-expect-error - Missing type declarations for @strudel/web
 import { Pattern, analysers, drawTimeScope } from '@strudel/web';
-
-// Keep pasted REPL patterns playable. Scope nodes provide the visualization.
 Pattern.prototype._scope = function ({ id = 1 } = {}) {
   return this.analyze(id);
 };

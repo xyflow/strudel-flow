@@ -1,7 +1,11 @@
 import { SelectItem } from '@/components/ui/select';
 import { SoundCategory } from '@/data/sounds';
 
-export function CategorySelectItems({ categories }: { categories: SoundCategory[] }) {
+export function CategorySelectItems({
+  categories,
+}: {
+  categories: SoundCategory[];
+}) {
   return (
     <>
       {categories.map((cat) => (

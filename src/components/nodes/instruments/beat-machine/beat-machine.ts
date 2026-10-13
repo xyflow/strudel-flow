@@ -49,8 +49,6 @@ export function generatePattern(data: BeatMachineData, strudelString: string) {
     typeof data.modifiersEnabled === 'boolean' ? data.modifiersEnabled : false;
   const steps = typeof data.steps === 'number' ? data.steps : DEFAULT_STEPS;
   const rows = data.rows || createDefaultRows(steps);
-
-  // If modifiers are disabled, ignore them in output
   const patterns = rows
     .filter((row) => row.pattern.some(Boolean))
     .map(

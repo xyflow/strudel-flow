@@ -27,7 +27,6 @@ export default defineNode({
       format: (value) => value.toFixed(1),
     },
   },
-  // Existing patches store both controls in one field.
   read: (data) => {
     const [cutoff = 1000, resonance = 1] = String(data.lpf || '1000 1')
       .split(' ')

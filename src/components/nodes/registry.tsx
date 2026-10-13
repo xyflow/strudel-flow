@@ -9,8 +9,6 @@ export type {
   WorkflowNodeData,
   WorkflowNodeProps,
 } from './types';
-
-// New nodes register themselves by exporting a definition from a *.node.ts(x) file.
 const discovered = import.meta.glob<NodeDefinition>('./**/*.node.{ts,tsx}', {
   eager: true,
   import: 'default',
@@ -63,5 +61,3 @@ export function createNodeByType({
     },
   };
 }
-
-export default nodeDefinitions;

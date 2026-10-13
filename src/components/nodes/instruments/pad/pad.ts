@@ -47,8 +47,6 @@ export function generatePattern(data: PadData, strudelString: string) {
 
     return stepPattern;
   };
-
-  // Only use the first `steps` rows of the grid
   const steps = data.steps || DEFAULTS.steps;
   const stepPatternsWithEmpty = grid.slice(0, steps).map((row, stepIdx) => {
     const step = generateStepPattern(row, stepIdx);
@@ -59,8 +57,6 @@ export function generatePattern(data: PadData, strudelString: string) {
   if (!pattern || !pattern.trim() || /^[~\s]*$/.test(pattern.trim())) {
     return strudelString;
   }
-
-  // Legacy patches without an octave intentionally omit it in the pattern.
   const octavePart = data.octave ? data.octave : '';
   const scale = `${data.selectedKey || DEFAULTS.selectedKey}${octavePart}:${data.selectedScaleType || DEFAULTS.selectedScaleType}`;
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCopyText } from '@/hooks/use-copy-text';
 import { Check, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { nodeDefinitions } from '../registry';
@@ -19,23 +19,9 @@ export default function PatternPopup({
   const strudelPattern = node
     ? nodeDefinitions[node.type]?.generatePattern(node.data, '')
     : '';
-  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
-
-  useEffect(() => {
-    if (copyStatus === 'idle') return;
-    const timer = window.setTimeout(() => setCopyStatus('idle'), 2000);
-    return () => window.clearTimeout(timer);
-  }, [copyStatus]);
-
-  const copyCode = async () => {
-    if (!strudelPattern) return;
-    try {
-      await navigator.clipboard.writeText(strudelPattern);
-      setCopyStatus('copied');
-    } catch {
-      setCopyStatus('error');
-    }
-  };
+  const { copy: copyCode, status: copyStatus } = useCopyText(
+    strudelPattern ?? '',
+  );
 
   return (
     <div
@@ -52,8 +38,14 @@ export default function PatternPopup({
           disabled={!strudelPattern}
           onClick={copyCode}
         >
-          {copyStatus === 'copied' ? <Check className="size-3" /> : <Copy className="size-3" />}
-          <span aria-live="polite">{copyStatus === 'copied' ? 'Copied!' : 'Copy'}</span>
+          {copyStatus === 'copied' ? (
+            <Check className="size-3" />
+          ) : (
+            <Copy className="size-3" />
+          )}
+          <span aria-live="polite">
+            {copyStatus === 'copied' ? 'Copied!' : 'Copy'}
+          </span>
         </Button>
       </div>
       {copyStatus === 'error' && (

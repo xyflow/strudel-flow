@@ -6,7 +6,6 @@ import { nodeTypes } from '@/components/nodes/registry';
 import deleteEdge from '@/components/edges/delete-edge';
 import { useAppStore } from '@/store/app-store';
 import { EditorToolbar } from './toolbar';
-import { useDragAndDrop } from '@/hooks/use-drag-and-drop';
 import { useUrlState } from '@/hooks/use-url-state';
 import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
@@ -38,11 +37,7 @@ export default function Editor() {
       onConnect: state.onConnect,
     })),
   );
-
-  // Load theme CSS at the app level - fixes mobile color loading
   useThemeCss(theme);
-
-  const { onDragOver, onDrop } = useDragAndDrop();
 
   return (
     <NodeContextMenu>
@@ -61,8 +56,6 @@ export default function Editor() {
             onConnect={onConnect}
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
-            onDragOver={onDragOver}
-            onDrop={onDrop}
             nodeDragThreshold={30}
             colorMode={colorMode}
             panActivationKeyCode={null}

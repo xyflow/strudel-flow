@@ -57,9 +57,14 @@ export function ParameterKnob({
           if (!drag.current) return;
           const distance =
             drag.current.y - event.clientY + event.clientX - drag.current.x;
-          const next = Math.min(max, Math.max(min,
-            drag.current.value + (distance * (max - min)) / (event.shiftKey ? 1200 : 180),
-          ));
+          const next = Math.min(
+            max,
+            Math.max(
+              min,
+              drag.current.value +
+                (distance * (max - min)) / (event.shiftKey ? 1200 : 180),
+            ),
+          );
           drag.current = { x: event.clientX, y: event.clientY, value: next };
           update(next);
         }}

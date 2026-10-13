@@ -35,7 +35,6 @@ function chordDegrees(
 }
 
 export function chordProgression(data: ChordData) {
-  // Old patches retain their selected chords; new instruments start with a progression.
   return (
     data.chordNotes?.map((notes) => (notes[0] ?? 0) % 7) ??
     data.chordProgression ??

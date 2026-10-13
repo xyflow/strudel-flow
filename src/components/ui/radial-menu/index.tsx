@@ -14,22 +14,23 @@ import {
   ContextMenuTrigger,
 } from './context-menu';
 import { MenuContext, PositionContext, menuChildren } from './context';
-export { RadialMenuItem } from './radial-menu-item';
-export { RadialMenuSubItem } from './radial-menu-sub-item';
+import { getMenuSize, type MenuPosition } from './geometry';
+export { RadialMenuItem, type RadialMenuItemProps } from './radial-menu-item';
+export {
+  RadialMenuSubItem,
+  type RadialMenuSubItemProps,
+} from './radial-menu-sub-item';
 import './radial-menu.css';
 
 export type RadialMenuHandle = {
-  openAt: (
-    position: { x: number; y: number },
-    fromConnection?: boolean,
-  ) => void;
+  openAt: (position: MenuPosition, animated?: boolean) => void;
 };
 
 export type RadialMenuProps = {
   menuRef?: Ref<RadialMenuHandle>;
   children: ReactNode;
   trigger: ReactElement;
-  onPositionChange?: (position: { x: number; y: number }, fromProgrammaticOpen: boolean) => void;
+  onPositionChange?: (position: MenuPosition, animated: boolean) => void;
   isTriggerTarget?: (target: HTMLElement, trigger: HTMLElement) => boolean;
   openOnTouchTap?: boolean;
   ariaLabel?: string;
@@ -43,30 +44,23 @@ export function RadialMenu({
   menuRef,
   isTriggerTarget = () => true,
   openOnTouchTap = false,
-  ariaLabel = "Radial menu",
+  ariaLabel = 'Radial menu',
   hoverDelay = 50,
 }: RadialMenuProps) {
   const triggerRef = useRef<HTMLSpanElement>(null);
-  const fromHandle = useRef(false);
+  const animateNextOpen = useRef(false);
   const touchTap = useRef<{ x: number; y: number; moved: boolean } | null>(
     null,
   );
   useImperativeHandle(
     menuRef,
     () => ({
-      openAt: ({ x, y }, fromConnection = false) => {
-        fromHandle.current = fromConnection;
+      openAt: ({ x, y }, animate = false) => {
+        animateNextOpen.current = animate;
         try {
-          triggerRef.current?.dispatchEvent(
-            new MouseEvent('contextmenu', {
-              bubbles: true,
-              cancelable: true,
-              clientX: x,
-              clientY: y,
-            }),
-          );
+          dispatchContextMenu(triggerRef.current, { x, y });
         } finally {
-          fromHandle.current = false;
+          animateNextOpen.current = false;
         }
       },
     }),
@@ -74,24 +68,19 @@ export function RadialMenu({
   );
   const allowOpen = useRef(true);
   const [open, setOpen] = useState(false);
-  const [openedFromHandle, setOpenedFromHandle] = useState(false);
+  const [animated, setAnimated] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const items = menuChildren(children);
   const [viewport, setViewport] = useState({ width: 1024, height: 768 });
   useEffect(() => {
-    const update = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
+    const update = () =>
+      setViewport({ width: window.innerWidth, height: window.innerHeight });
     update();
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
   }, []);
-  const compact = viewport.width <= 640 || viewport.height <= 500;
-  const size = Math.min(
-    compact ? 280 : 380,
-    viewport.width - 16,
-    viewport.height - 16,
-  );
-  // Radix anchors at the pointer's bottom-right. Center the circle and keep it onscreen.
+  const size = getMenuSize(viewport.width, viewport.height);
   const left = Math.max(
     8,
     Math.min(position.x - size / 2, viewport.width - size - 8),
@@ -101,9 +90,14 @@ export function RadialMenu({
     Math.min(position.y - size / 2, viewport.height - size - 8),
   );
   const rememberPosition = (x: number, y: number) => {
-    setOpenedFromHandle(fromHandle.current);
+    setAnimated(animateNextOpen.current);
     setPosition({ x, y });
-    onPositionChange?.({ x, y }, fromHandle.current);
+    onPositionChange?.({ x, y }, animateNextOpen.current);
+  };
+
+  const closeMenu = () => {
+    setOpen(false);
+    setActiveId(null);
   };
 
   return (
@@ -119,9 +113,9 @@ export function RadialMenu({
         ref={triggerRef}
         asChild
         onPointerDownCapture={(event) => {
-          // Capture before the host surface consumes touch gestures.
           touchTap.current =
-            openOnTouchTap && event.pointerType !== 'mouse' &&
+            openOnTouchTap &&
+            event.pointerType !== 'mouse' &&
             event.isPrimary &&
             isTriggerTarget(event.target as HTMLElement, event.currentTarget)
               ? { x: event.clientX, y: event.clientY, moved: false }
@@ -150,14 +144,10 @@ export function RadialMenu({
             return;
           event.preventDefault();
           event.stopPropagation();
-          triggerRef.current?.dispatchEvent(
-            new MouseEvent('contextmenu', {
-              bubbles: true,
-              cancelable: true,
-              clientX: event.clientX,
-              clientY: event.clientY,
-            }),
-          );
+          dispatchContextMenu(triggerRef.current, {
+            x: event.clientX,
+            y: event.clientY,
+          });
         }}
         onContextMenu={(event) => {
           const target = event.target as HTMLElement;
@@ -173,7 +163,10 @@ export function RadialMenu({
         }}
         onPointerDown={(event) => {
           if (event.pointerType === 'mouse') return;
-          allowOpen.current = isTriggerTarget(event.target as HTMLElement, event.currentTarget);
+          allowOpen.current = isTriggerTarget(
+            event.target as HTMLElement,
+            event.currentTarget,
+          );
           if (!allowOpen.current) return;
           rememberPosition(event.clientX, event.clientY);
         }}
@@ -186,14 +179,10 @@ export function RadialMenu({
             return;
           event.preventDefault();
           const bounds = event.currentTarget.getBoundingClientRect();
-          event.currentTarget.dispatchEvent(
-            new MouseEvent('contextmenu', {
-              bubbles: true,
-              cancelable: true,
-              clientX: bounds.left + bounds.width / 2,
-              clientY: bounds.top + bounds.height / 2,
-            }),
-          );
+          dispatchContextMenu(event.currentTarget, {
+            x: bounds.left + bounds.width / 2,
+            y: bounds.top + bounds.height / 2,
+          });
         }}
       >
         {trigger}
@@ -201,13 +190,12 @@ export function RadialMenu({
       <ContextMenuContent
         aria-label={ariaLabel}
         className="radial-menu"
-        data-from-handle={openedFromHandle || undefined}
+        data-animated={animated || undefined}
         loop
         avoidCollisions={false}
         onClick={(event) => {
           if (!(event.target as Element).closest('button')) {
-            setOpen(false);
-            setActiveId(null);
+            closeMenu();
           }
         }}
         style={{
@@ -217,7 +205,9 @@ export function RadialMenu({
         }}
       >
         <div className="radial-menu__body">
-          <MenuContext.Provider value={{ activeId, activate: setActiveId, hoverDelay }}>
+          <MenuContext.Provider
+            value={{ activeId, activate: setActiveId, hoverDelay }}
+          >
             {items.map((item, index) => (
               <PositionContext.Provider
                 key={isValidElement(item) ? (item.key ?? index) : index}
@@ -232,15 +222,34 @@ export function RadialMenu({
             className="radial-menu__close"
             aria-label="Close menu"
             title="Close menu"
-            onClick={() => {
-              setOpen(false);
-              setActiveId(null);
-            }}
+            onClick={closeMenu}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
           </button>
         </div>
       </ContextMenuContent>
     </ContextMenu>
+  );
+}
+
+function dispatchContextMenu(
+  target: HTMLElement | null,
+  position: MenuPosition,
+) {
+  target?.dispatchEvent(
+    new MouseEvent('contextmenu', {
+      bubbles: true,
+      cancelable: true,
+      clientX: position.x,
+      clientY: position.y,
+    }),
   );
 }

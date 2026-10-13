@@ -17,7 +17,6 @@ export function useGraphHistory() {
       interacting.current = true;
     };
     const end = () => {
-      // Keep React Flow's final position update in the same gesture.
       queueMicrotask(() => {
         gesture = undefined;
         interacting.current = false;
@@ -30,10 +29,13 @@ export function useGraphHistory() {
         history.current?.reset(graph);
         return;
       }
-      if (state.nodes === previous.nodes && state.edges === previous.edges) return;
+      if (state.nodes === previous.nodes && state.edges === previous.edges)
+        return;
       if (!batch) {
         batch = {};
-        queueMicrotask(() => { batch = undefined; });
+        queueMicrotask(() => {
+          batch = undefined;
+        });
       }
       history.current?.record(graph, gesture ?? batch);
     });
@@ -57,7 +59,11 @@ export function useGraphHistory() {
     restoring.current = true;
     try {
       useAppStore.setState({
-        nodes: graph.nodes.map((node) => ({ ...node, dragging: false, resizing: false })),
+        nodes: graph.nodes.map((node) => ({
+          ...node,
+          dragging: false,
+          resizing: false,
+        })),
         edges: graph.edges,
       });
     } finally {

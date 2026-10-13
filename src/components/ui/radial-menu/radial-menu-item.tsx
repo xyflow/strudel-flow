@@ -64,7 +64,6 @@ export function RadialMenuItem({ label, icon, children }: RadialMenuItemProps) {
           }}
           onPointerLeave={cancelHover}
           onPointerMove={(event) => {
-            // Radix normally focuses on hover, which would bypass the delay.
             if (event.pointerType === 'mouse') event.preventDefault();
           }}
           onFocus={() => menu.activate(id)}

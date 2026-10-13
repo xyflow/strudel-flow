@@ -34,8 +34,6 @@ function NoteShape({ notes }: { notes: number[] }) {
     </svg>
   );
 }
-
-// Drag state stays local to the chart; the patch updates only when a note is dropped.
 function ChordEditor({
   notes,
   noteSlots,

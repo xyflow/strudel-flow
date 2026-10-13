@@ -28,7 +28,11 @@ export function useNodeClipboard() {
     if (!clipboard.current) return false;
     pasteCount.current += 1;
     useAppStore.setState(
-      pasteNodes(useAppStore.getState(), clipboard.current, pasteCount.current * 40),
+      pasteNodes(
+        useAppStore.getState(),
+        clipboard.current,
+        pasteCount.current * 40,
+      ),
     );
     return true;
   }, []);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCopyText } from '@/hooks/use-copy-text';
 import { Copy } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -11,17 +11,7 @@ import { useAppStore } from '@/store/app-store';
 
 export function PatternPanel() {
   const pattern = useAppStore((s) => s.pattern) || 'No pattern.';
-  const [isCopied, setIsCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(pattern);
-    } catch {
-      return;
-    }
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
-  };
+  const { copy: handleCopy, status } = useCopyText(pattern);
 
   return (
     <div className="flex w-full min-w-0 flex-col ">
@@ -38,7 +28,7 @@ export function PatternPanel() {
               <Copy className="size-4" />
             </Button>
           </PopoverTrigger>
-          {isCopied && (
+          {status === 'copied' && (
             <PopoverContent
               align="center"
               sideOffset={10}

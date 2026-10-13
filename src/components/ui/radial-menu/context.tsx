@@ -36,8 +36,6 @@ export function usePositionContext() {
     );
   return context;
 }
-
-// Fragments and conditional children do not consume extra slots in the ring.
 export function menuChildren(children: ReactNode, prefix = ''): ReactNode[] {
   return Children.toArray(children).flatMap((child, index) => {
     if (!isValidElement<{ children?: ReactNode }>(child)) return [child];

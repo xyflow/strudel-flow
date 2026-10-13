@@ -16,10 +16,18 @@
   outline: none;
 }
 .dark .radial-menu {
-  --radial-border: color-mix(in srgb, var(--secondary-foreground, #eee) 14%, var(--border, #444));
+  --radial-border: color-mix(
+    in srgb,
+    var(--secondary-foreground, #eee) 14%,
+    var(--border, #444)
+  );
 }
 .dark .radial-menu__item:hover .radial-menu__item-surface {
-  stroke: color-mix(in srgb, var(--secondary-foreground, #eee) 21%, var(--border, #444));
+  stroke: color-mix(
+    in srgb,
+    var(--secondary-foreground, #eee) 21%,
+    var(--border, #444)
+  );
 }
 .radial-menu *,
 .radial-menu *::before,
@@ -121,7 +129,7 @@
   }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .radial-menu[data-from-handle='true'] .radial-menu__body {
+  .radial-menu[data-animated='true'] .radial-menu__body {
     animation: radial-menu-expand 180ms ease-out;
   }
 }

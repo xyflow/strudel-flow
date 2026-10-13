@@ -1,18 +1,13 @@
 import { scopeIdForGroup } from '@/components/nodes/effects/scope/scope';
 import { Edge } from '@xyflow/react';
-import { AppNode } from '@/components/nodes/registry';
-import { nodeDefinitions } from '@/components/nodes/registry';
+import { nodeDefinitions, type AppNode } from '@/components/nodes/registry';
 import { findConnectedComponents } from './graph-utils';
 
 function optimizeSoundCalls(strudelString: string): string {
   let optimized = strudelString;
   let previousLength = 0;
-
-  // Keep applying optimization until no more changes are made
   while (optimized.length !== previousLength) {
     previousLength = optimized.length;
-    // Replace consecutive .sound() calls with combined ones
-    // This regex matches: .sound("something").sound("something else")
     optimized = optimized.replace(
       /\.sound\("([^"]+)"\)\.sound\("([^"]+)"\)/g,
       '.sound("$1 $2")',
@@ -57,13 +52,8 @@ export function generateOutput(
       .map((id) => nodesById.get(id))
       .filter((node): node is AppNode => node !== undefined);
 
-    const [sources, effects] = componentNodes.reduce<[AppNode[], AppNode[]]>(
-      ([src, eff], node) => {
-        isSoundSource(node) ? src.push(node) : eff.push(node);
-        return [src, eff];
-      },
-      [[], []],
-    );
+    const sources = componentNodes.filter(isSoundSource);
+    const effects = componentNodes.filter((node) => !isSoundSource(node));
 
     if (sources.length === 0) continue;
 

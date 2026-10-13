@@ -7,11 +7,17 @@ export function copySelectedNodes(graph: GraphSnapshot): GraphSnapshot | null {
   const ids = new Set(nodes.map((node) => node.id));
   return structuredClone({
     nodes,
-    edges: graph.edges.filter((edge) => ids.has(edge.source) && ids.has(edge.target)),
+    edges: graph.edges.filter(
+      (edge) => ids.has(edge.source) && ids.has(edge.target),
+    ),
   });
 }
 
-export function pasteNodes(graph: GraphSnapshot, clipboard: GraphSnapshot, offset: number): GraphSnapshot {
+export function pasteNodes(
+  graph: GraphSnapshot,
+  clipboard: GraphSnapshot,
+  offset: number,
+): GraphSnapshot {
   const ids = new Map(clipboard.nodes.map((node) => [node.id, nanoid()]));
   const copy = structuredClone(clipboard);
   return {

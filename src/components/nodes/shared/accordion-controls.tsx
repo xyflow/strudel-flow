@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/select';
 import { KEY_OPTIONS, SCALE_TYPE_OPTIONS } from '@/data/sounds';
 
-export interface KeyScaleOctaveControlsProps {
+interface KeyScaleOctaveControlsProps {
   selectedKey: string;
   onKeyChange: (key: string) => void;
   selectedScale: string;
@@ -25,7 +25,7 @@ export interface KeyScaleOctaveControlsProps {
   allowedScales?: string[];
 }
 
-export interface PadControlsProps {
+interface PadControlsProps {
   steps: number;
   onStepsChange: (steps: number) => void;
   mode: 'arp' | 'chord';
@@ -188,7 +188,6 @@ function PadControls({
           </div>
         </div>
       </div>
-
     </div>
   );
 }

@@ -1,3 +1,10 @@
+export type MenuPosition = { x: number; y: number };
+
+export function getMenuSize(width: number, height: number) {
+  const compact = width <= 640 || height <= 500;
+  return Math.max(0, Math.min(compact ? 280 : 380, width - 16, height - 16));
+}
+
 export function point(radius: number, angle: number) {
   const radians = (angle * Math.PI) / 180;
   return {
@@ -5,8 +12,6 @@ export function point(radius: number, angle: number) {
     y: 240 - radius * Math.sin(radians),
   };
 }
-
-// Rounded ring segments with consistent spacing along their shared edges.
 export function sector(index: number, count = 4, outer = 130, inner = 46) {
   const slice = 360 / count;
   const start = 150 - index * slice;
@@ -18,7 +23,6 @@ export function sector(index: number, count = 4, outer = 130, inner = 46) {
   const outerEnd = end + inset(outer);
   const innerStart = start - inset(inner);
   const innerEnd = end + inset(inner);
-  // Keep rounded corners from crossing on the narrower inner edge.
   const corner = (radius: number) =>
     Math.min(
       12,

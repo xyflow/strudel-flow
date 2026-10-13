@@ -18,13 +18,11 @@ export interface ProjectState {
   bpc?: string;
 }
 
-// --- URL (compressed for sharing) ---
-
-export function encodeState(state: ProjectState): string {
+function encodeState(state: ProjectState): string {
   return compressToEncodedURIComponent(JSON.stringify(state));
 }
 
-export function decodeState(encoded: string): ProjectState | null {
+function decodeState(encoded: string): ProjectState | null {
   try {
     const json =
       decompressFromEncodedURIComponent(encoded) ||
@@ -111,9 +109,7 @@ function validateState(value: unknown): ProjectState | null {
   return { ...state, cpm: String(state.cpm), bpc: String(state.bpc ?? '4') };
 }
 
-// --- File (readable JSON for saving/loading) ---
-
-export function stateToJson(state: ProjectState): string {
+function stateToJson(state: ProjectState): string {
   return JSON.stringify(state, null, 2);
 }
 

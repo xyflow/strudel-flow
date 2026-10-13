@@ -3,7 +3,7 @@ import { AppNode } from '@/components/nodes/registry';
 
 export function findConnectedComponents(
   nodes: AppNode[],
-  edges: Edge[]
+  edges: Edge[],
 ): string[][] {
   const visited = new Set<string>();
   const components: string[][] = [];
@@ -25,7 +25,7 @@ function dfs(
   nodeId: string,
   visited: Set<string>,
   component: string[],
-  edges: Edge[]
+  edges: Edge[],
 ) {
   visited.add(nodeId);
   component.push(nodeId);

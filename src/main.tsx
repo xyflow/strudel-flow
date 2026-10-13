@@ -13,5 +13,5 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <Editor />
       </AppLayout>
     </ReactFlowProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

@@ -1,14 +1,10 @@
-import {
-  useRef,
-  useState,
-  type ReactElement,
-  type MouseEventHandler,
-} from 'react';
+import { useRef, type ReactElement, type MouseEventHandler } from 'react';
 import {
   addEdge,
   reconnectEdge,
   useReactFlow,
   type Edge,
+  type Connection,
   type OnConnectEnd,
   type ReactFlowProps,
 } from '@xyflow/react';
@@ -18,11 +14,14 @@ import {
   RadialMenuItem,
   RadialMenuSubItem,
 } from '@/components/ui/radial-menu';
-import { createNodeByType } from '@/components/nodes/registry';
+import {
+  createNodeByType,
+  type AppNodeType,
+} from '@/components/nodes/registry';
 import { iconMapping } from '@/data/icon-mapping';
 import { radialMenuItems } from '@/data/radial-menu';
 import { useAppStore } from '@/store/app-store';
-
+import { getMenuSize } from '@/components/ui/radial-menu/geometry';
 
 type ConnectionHandlers = Pick<
   ReactFlowProps,
@@ -38,12 +37,7 @@ export function NodeContextMenu({
   ) => ReactElement;
 }) {
   const menuRef = useRef<RadialMenuHandle>(null);
-  const pending = useRef<{
-    nodeId: string;
-    handleId: string | null;
-    type: 'source' | 'target';
-    edge?: Edge;
-  } | null>(null);
+  const pending = useRef<PendingConnection | null>(null);
   const openFromHandle: OnConnectEnd = (event, state) => {
     pending.current = null;
     if (state.isValid || !state.fromNode || !state.fromHandle) return;
@@ -73,110 +67,119 @@ export function NodeContextMenu({
       if (pending.current) pending.current.edge = edge;
     },
   };
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const position = useRef({ x: 0, y: 0 });
   const { screenToFlowPosition, getViewport } = useReactFlow();
+  const openFromToolbar: MouseEventHandler<HTMLButtonElement> = (event) => {
+    const toolbar = event.currentTarget.parentElement?.getBoundingClientRect();
+    if (!toolbar) return;
+    const size = getMenuSize(window.innerWidth, window.innerHeight);
+    menuRef.current?.openAt({
+      x: toolbar.left - 24 - size / 2,
+      y: toolbar.bottom + 12 + size / 2,
+    });
+  };
+
+  const addNode = (type: AppNodeType) => {
+    const canvas = document
+      .querySelector('.reactflow-wrapper')
+      ?.getBoundingClientRect();
+    if (!canvas) return;
+    const { zoom } = getViewport();
+    const existing = useAppStore
+      .getState()
+      .nodes.find((node) => node.type === type);
+    const width = (existing?.measured?.width ?? 500) * zoom;
+    const height = (existing?.measured?.height ?? 500) * zoom;
+    const inset = 24;
+    const spawn = {
+      x: Math.max(
+        canvas.left + inset,
+        Math.min(position.current.x, canvas.right - width - inset),
+      ),
+      y: Math.max(
+        canvas.top + inset,
+        Math.min(position.current.y, canvas.bottom - height - inset),
+      ),
+    };
+    const newNode = createNodeByType({
+      type,
+      position: screenToFlowPosition(spawn),
+    });
+    const origin = pending.current;
+    useAppStore.setState((state) => {
+      let edges = state.edges;
+      if (origin && state.nodes.some((node) => node.id === origin.nodeId)) {
+        const connection = connectionToNode(origin, newNode.id);
+        edges = origin.edge
+          ? reconnectEdge(origin.edge, connection, edges)
+          : addEdge({ ...connection, type: 'default' }, edges);
+      }
+      return { nodes: [...state.nodes, newNode], edges };
+    });
+    pending.current = null;
+  };
+
   return (
-    <>
-      <RadialMenu
-        ariaLabel="Add nodes"
-        openOnTouchTap
-        isTriggerTarget={(target) => target.classList.contains('react-flow__pane')}
-        menuRef={menuRef}
-        trigger={children(handlers, (event) => {
-          const toolbar =
-            event.currentTarget.parentElement!.getBoundingClientRect();
-          const compact = window.innerWidth <= 640 || window.innerHeight <= 500;
-          const size = Math.min(
-            compact ? 280 : 380,
-            window.innerWidth - 16,
-            window.innerHeight - 16,
-          );
-          menuRef.current?.openAt({
-            x: toolbar.left - 24 - size / 2,
-            y: toolbar.bottom + 12 + size / 2,
-          });
-        })}
-        onPositionChange={(point, fromHandle) => {
-          setPosition(point);
-          if (!fromHandle) pending.current = null;
-        }}
-      >
-        {radialMenuItems.map(({ label, category, icon: Icon, items }) => (
-          <RadialMenuItem
-            key={category}
-            label={label}
-            icon={<Icon strokeWidth={1.7} />}
-          >
-            {items.map((node) => {
-              const NodeIcon = iconMapping[node.icon];
-              return (
-                <RadialMenuSubItem
-                  key={node.id}
-                  aria-label={`Add ${node.title}`}
-                  icon={<NodeIcon aria-hidden="true" />}
-                  onSelect={() => {
-                    const canvas = document.querySelector('.reactflow-wrapper')!.getBoundingClientRect();
-                    const zoom = getViewport().zoom;
-                    const existing = useAppStore.getState().nodes.find((item) => item.type === node.id);
-                    const width = (existing?.measured?.width ?? 500) * zoom;
-                    const height = (existing?.measured?.height ?? 500) * zoom;
-                    const inset = 24;
-                    const spawn = {
-                      x: Math.max(canvas.left + inset, Math.min(position.x, canvas.right - width - inset)),
-                      y: Math.max(canvas.top + inset, Math.min(position.y, canvas.bottom - height - inset)),
-                    };
-                    const newNode = createNodeByType({
-                      type: node.id,
-                      position: screenToFlowPosition(spawn),
-                    });
-                    const origin = pending.current;
-                    useAppStore.setState((state) => {
-                      const connection =
-                        origin &&
-                        state.nodes.some(
-                          (existing) => existing.id === origin.nodeId,
-                        )
-                          ? origin.type === 'source'
-                            ? {
-                                source: origin.nodeId,
-                                sourceHandle: origin.handleId,
-                                target: newNode.id,
-                                targetHandle: null,
-                              }
-                            : {
-                                source: newNode.id,
-                                sourceHandle: null,
-                                target: origin.nodeId,
-                                targetHandle: origin.handleId,
-                              }
-                          : null;
-                      return {
-                        nodes: [...state.nodes, newNode],
-                        edges: connection
-                          ? origin?.edge
-                            ? reconnectEdge(
-                                origin.edge,
-                                connection,
-                                state.edges,
-                              )
-                            : addEdge(
-                                { ...connection, type: 'default' },
-                                state.edges,
-                              )
-                          : state.edges,
-                      };
-                    });
-                    pending.current = null;
-                  }}
-                >
-                  {node.title}
-                </RadialMenuSubItem>
-              );
-            })}
-          </RadialMenuItem>
-        ))}
-      </RadialMenu>
-    </>
+    <RadialMenu
+      ariaLabel="Add nodes"
+      openOnTouchTap
+      isTriggerTarget={(target) =>
+        target.classList.contains('react-flow__pane')
+      }
+      menuRef={menuRef}
+      trigger={children(handlers, openFromToolbar)}
+      onPositionChange={(point, fromHandle) => {
+        position.current = point;
+        if (!fromHandle) pending.current = null;
+      }}
+    >
+      {radialMenuItems.map(({ label, category, icon: Icon, items }) => (
+        <RadialMenuItem
+          key={category}
+          label={label}
+          icon={<Icon strokeWidth={1.7} />}
+        >
+          {items.map((node) => {
+            const NodeIcon = iconMapping[node.icon];
+            return (
+              <RadialMenuSubItem
+                key={node.id}
+                aria-label={`Add ${node.title}`}
+                icon={<NodeIcon aria-hidden="true" />}
+                onSelect={() => addNode(node.id)}
+              >
+                {node.title}
+              </RadialMenuSubItem>
+            );
+          })}
+        </RadialMenuItem>
+      ))}
+    </RadialMenu>
   );
 }
 
+type PendingConnection = {
+  nodeId: string;
+  handleId: string | null;
+  type: 'source' | 'target';
+  edge?: Edge;
+};
+
+function connectionToNode(
+  origin: PendingConnection,
+  nodeId: string,
+): Connection {
+  return origin.type === 'source'
+    ? {
+        source: origin.nodeId,
+        sourceHandle: origin.handleId,
+        target: nodeId,
+        targetHandle: null,
+      }
+    : {
+        source: nodeId,
+        sourceHandle: null,
+        target: origin.nodeId,
+        targetHandle: origin.handleId,
+      };
+}

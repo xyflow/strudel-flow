@@ -4,11 +4,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-
-// Simple type - just track what modifier is selected
-export type CellState = { type: 'off' } | { type: 'modifier'; value: string }; // value like "!2", "/3", "@4", "*2"
-
-// Default modifier groups (used by all nodes unless overridden)
+export type CellState = { type: 'off' } | { type: 'modifier'; value: string };
 const DEFAULT_MODIFIER_GROUPS = {
   Replicate: [
     { value: '!2', label: '!2' },
@@ -32,7 +28,7 @@ const DEFAULT_MODIFIER_GROUPS = {
   ],
 };
 
-export interface ModifierDropdownProps {
+interface ModifierDropdownProps {
   currentState: CellState;
   onModifierSelect: (modifier: CellState) => void;
   modifierGroups?: Record<string, { value: string; label: string }[]>;

@@ -35,7 +35,7 @@ export type NodeControlsProps<
 };
 export type CustomControlsProps<D extends Record<string, unknown>> =
   NodeControlsProps<Record<never, never>, D>;
-export type ControlsContext = Pick<
+type ControlsContext = Pick<
   CustomControlsProps<Record<never, never>>,
   'id' | 'isPlaying' | 'isMuted'
 >;
@@ -64,7 +64,7 @@ export type NodeDefinition = {
   ) => ReactNode;
 };
 
-export function parameterValues<P extends Parameters>(
+function parameterValues<P extends Parameters>(
   parameters: P,
   data: Record<string, unknown>,
 ): ParameterValues<P> {
@@ -163,8 +163,6 @@ export function defineNode<
       : undefined,
   };
 }
-
-// For effects whose parameter names match their Strudel methods.
 export function generateParameterEffects(
   values: Record<string, number>,
   input: string,

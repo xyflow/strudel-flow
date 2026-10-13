@@ -15,7 +15,7 @@ import type { AppNode } from '@/components/nodes/registry';
 import { initialEdges, initialNodes } from '@/data/workflow-data';
 import { findConnectedComponents } from '@/lib/graph-utils';
 
-export type AppState = {
+type AppState = {
   name: string;
   author: string;
   description: string;
@@ -31,16 +31,14 @@ export type AppState = {
   error: string | null;
 };
 
-export type AppActions = {
+type AppActions = {
   setCpm: (cpm: string) => void;
   setBpc: (bpc: string) => void;
   setPattern: (pattern: string) => void;
-  pause: () => void;
   toggle: () => void;
   setError: (error: string | null) => void;
   setColorMode: (colorMode: ColorMode) => void;
   onNodesChange: OnNodesChange<AppNode>;
-  addNode: (node: AppNode) => void;
   removeNode: (nodeId: string) => void;
   setGroupState: (nodeId: string, state: 'running' | 'paused') => void;
   updateNodeData: (nodeId: string, updates: Record<string, unknown>) => void;
@@ -49,7 +47,7 @@ export type AppActions = {
   onEdgesChange: OnEdgesChange<Edge>;
 };
 
-export type AppStore = AppState & AppActions;
+type AppStore = AppState & AppActions;
 
 export const useAppStore = create<AppStore>()(
   subscribeWithSelector((set, get) => ({
@@ -69,7 +67,6 @@ export const useAppStore = create<AppStore>()(
     setCpm: (cpm) => set({ cpm }),
     setBpc: (bpc) => set({ bpc }),
     setPattern: (pattern) => set({ pattern }),
-    pause: () => set({ isPlaying: false }),
     toggle: () =>
       set((state) => ({ isPlaying: !state.isPlaying, error: null })),
     setError: (error) => set({ error, ...(error ? { isPlaying: false } : {}) }),
@@ -77,8 +74,6 @@ export const useAppStore = create<AppStore>()(
     onNodesChange: (changes) => {
       set({ nodes: applyNodeChanges(changes, get().nodes) });
     },
-
-    addNode: (node) => set({ nodes: [...get().nodes, node] }),
 
     removeNode: (nodeId) =>
       set((state) => ({
@@ -149,12 +144,17 @@ function applyColorMode() {
       (colorMode === 'system' && systemAppearance.matches),
   );
 }
-useAppStore.subscribe((state) => state.colorMode, applyColorMode, {
-  fireImmediately: true,
-});
+const unsubscribeAppearance = useAppStore.subscribe(
+  (state) => state.colorMode,
+  applyColorMode,
+  {
+    fireImmediately: true,
+  },
+);
 systemAppearance.addEventListener('change', applyColorMode);
 if (import.meta.hot) {
-  import.meta.hot.dispose(() =>
-    systemAppearance.removeEventListener('change', applyColorMode),
-  );
+  import.meta.hot.dispose(() => {
+    unsubscribeAppearance();
+    systemAppearance.removeEventListener('change', applyColorMode);
+  });
 }

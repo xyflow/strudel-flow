@@ -2,15 +2,14 @@ import '@/lib/strudel-scope';
 import { useEffect, useMemo, useRef } from 'react';
 import { useAppStore } from '@/store/app-store';
 import { generateOutput } from '@/lib/strudel';
-
-// @ts-expect-error - Missing type declarations for @strudel/web
-import { initStrudel, evaluate, hush, samples } from '@strudel/web';
+import {
+  initStrudel,
+  evaluate,
+  hush,
+  samples,
+  type StrudelSession,
+} from '@strudel/web';
 import { setSchedulerNow } from '@/lib/strudel-clock';
-
-type StrudelSession = {
-  scheduler: { now: () => number };
-  state: { evalError?: unknown };
-};
 
 const ready: Promise<StrudelSession> = initStrudel().then(
   (session: StrudelSession) => {
@@ -30,7 +29,6 @@ samples('github:tidalcycles/dirt-samples');
 async function evaluateAudio(pattern: string) {
   const session = await ready;
   await evaluate(pattern);
-  // Strudel records evaluation failures rather than rejecting its promise.
   if (session.state.evalError) throw session.state.evalError;
 }
 
@@ -39,8 +37,6 @@ type PlaybackAdapter = {
   hush: () => void;
   onError: (error: unknown) => void;
 };
-
-// A single queue prevents a slow evaluation from overwriting a newer edit.
 function createPlaybackEngine(adapter: PlaybackAdapter) {
   let desired: string | null = null;
   let applied: string | null = null;
@@ -62,8 +58,6 @@ function createPlaybackEngine(adapter: PlaybackAdapter) {
           applied = generation === stopGeneration ? pattern : null;
         } catch (error) {
           if (startedAt === revision && !disposed) {
-            // Strudel leaves its previous pattern running on evaluation errors.
-            // A half-written live edit should not stop a working patch.
             desired = applied;
             if (applied === null) {
               adapter.hush();
@@ -71,7 +65,6 @@ function createPlaybackEngine(adapter: PlaybackAdapter) {
             }
           }
         }
-        // An in-flight evaluation may finish after the user presses pause.
         if (disposed || desired === null) {
           adapter.hush();
           applied = null;
@@ -102,8 +95,6 @@ function createPlaybackEngine(adapter: PlaybackAdapter) {
     },
   };
 }
-
-// Mounted once by the editor. UI components read playback state from the app store.
 export function useWorkflowRunner() {
   const engine = useRef<ReturnType<typeof createPlaybackEngine> | null>(null);
   const nodes = useAppStore((state) => state.nodes);

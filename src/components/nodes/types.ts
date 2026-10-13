@@ -8,8 +8,6 @@ export type WorkflowNodeData = {
   icon?: keyof typeof iconMapping;
   state?: 'running' | 'paused' | 'stopped';
 } & Record<string, unknown>;
-
-// Dynamically discovered IDs are checked against the registry when loading patches.
 export type AppNodeType = string;
 export type AppNode = Node<WorkflowNodeData, AppNodeType>;
 export type WorkflowNodeProps = NodeProps<AppNode> & { children?: ReactNode };

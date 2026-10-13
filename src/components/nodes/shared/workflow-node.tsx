@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Code2, Ellipsis, Trash2, Volume2, VolumeX } from 'lucide-react';
 import { Position } from '@xyflow/react';
 import { WorkflowNodeData, AppNodeType } from '@/components/nodes/registry';
-import nodesConfig from '@/components/nodes/registry';
+import { nodeDefinitions } from '@/components/nodes/registry';
 import { BaseNode } from '@/components/nodes/shared/base-node';
 import { useAppStore } from '@/store/app-store';
 import PatternPopup from '@/components/nodes/shared/pattern-popup';
@@ -24,16 +24,13 @@ function WorkflowNode({
 }: {
   id: string;
   data: WorkflowNodeData;
-  type?: AppNodeType;
+  type: AppNodeType;
   children?: React.ReactNode;
 }) {
   const [showCode, setShowCode] = useState(false);
-  const nodeType = useAppStore(
-    (state) => state.nodes.find((node) => node.id === id)?.type,
-  );
   const removeNode = useAppStore((state) => state.removeNode);
   const setGroupState = useAppStore((state) => state.setGroupState);
-  const category = nodesConfig[type ?? nodeType ?? 'pad-node']?.category;
+  const category = nodeDefinitions[type]?.category;
   const isInstrument = category === 'Instruments';
   const isPaused = data.state === 'paused';
 

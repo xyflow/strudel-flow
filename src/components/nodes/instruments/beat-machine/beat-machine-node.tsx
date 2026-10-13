@@ -49,7 +49,6 @@ function SequencerRow({
       </Select>
       <div className="flex gap-1">
         {row.pattern.map((isActive, step) => {
-          // Leave a little more space between groups of four steps.
           const startsBeat = step > 0 && step % 4 === 0;
           return (
             <div
@@ -117,7 +116,6 @@ export function BeatMachineNode({
 
   const setSteps = (newSteps: number) => {
     if (newSteps < 1 || newSteps > 32) return;
-    // Adjust all row patterns to new length
     const newRows = rows.map((row) => {
       let newPattern = row.pattern.slice(0, newSteps);
       if (newPattern.length < newSteps) {
@@ -125,7 +123,6 @@ export function BeatMachineNode({
           Array(newSteps - newPattern.length).fill(false),
         );
       }
-      // Remove modifiers for steps that no longer exist
       const newModifiers: { [stepIdx: number]: CellState } = {};
       Object.entries(row.modifiers).forEach(([k, v]) => {
         const idx = Number(k);
@@ -209,7 +206,6 @@ export function BeatMachineNode({
 
   return (
     <div className="flex flex-col gap-3 px-4 pt-1 pb-3 w-[min(1040px,90vw)]">
-      {/* Sequencer rows */}
       <div className="nowheel flex flex-col gap-3 overflow-x-auto rounded-md bg-background/40 p-3">
         {rows.map((row, index) => (
           <SequencerRow

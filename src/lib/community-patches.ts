@@ -7,8 +7,6 @@ export type CommunityPatch = {
   description: string;
   state: ProjectState;
 };
-
-// Exported patch files can be contributed without editing a registry.
 const files = import.meta.glob<string>('../../patches/*.json', {
   eager: true,
   query: '?raw',
