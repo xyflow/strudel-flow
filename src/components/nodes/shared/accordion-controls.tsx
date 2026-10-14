@@ -1,5 +1,6 @@
-import React from 'react';
-import { Minus, Plus, SlidersHorizontal } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { SlidersHorizontal } from 'lucide-react';
+import { Stepper } from './stepper';
 import {
   Accordion,
   AccordionContent,
@@ -37,53 +38,6 @@ const fieldTrigger =
   'nodrag h-10! w-full rounded-md border-border bg-background/60 px-3 text-[13px] font-medium tracking-normal hover:border-primary/50 dark:bg-background/40 dark:hover:bg-background/60';
 const optionStyle =
   'rounded-md py-2 text-[13px] tracking-normal data-[state=checked]:bg-primary/10 data-[state=checked]:text-foreground';
-
-function Stepper({
-  label,
-  value,
-  min,
-  max,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <div className={fieldLabel}>{label}</div>
-      <div
-        role="group"
-        aria-label={label}
-        className="flex h-10 items-center rounded-md border border-border bg-background/60 p-1 transition-colors focus-within:border-primary/50"
-      >
-        <button
-          type="button"
-          aria-label={`Decrease ${label.toLowerCase()}`}
-          disabled={value <= min}
-          onClick={() => onChange(Math.max(min, value - 1))}
-          className="nodrag grid size-8 shrink-0 place-items-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-30"
-        >
-          <Minus className="size-3.5" />
-        </button>
-        <output className="min-w-7 flex-1 text-center text-sm font-semibold tabular-nums">
-          {value}
-        </output>
-        <button
-          type="button"
-          aria-label={`Increase ${label.toLowerCase()}`}
-          disabled={value >= max}
-          onClick={() => onChange(Math.min(max, value + 1))}
-          className="nodrag grid size-8 shrink-0 place-items-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-30"
-        >
-          <Plus className="size-3.5" />
-        </button>
-      </div>
-    </div>
-  );
-}
 
 function KeyScaleOctaveControls({
   selectedKey,
@@ -193,16 +147,16 @@ function PadControls({
 }
 
 interface AccordionControlsProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   keyScaleOctaveProps?: KeyScaleOctaveControlsProps;
   padControlsProps?: PadControlsProps;
 }
 
-export const AccordionControls: React.FC<AccordionControlsProps> = ({
+export function AccordionControls({
   children,
   keyScaleOctaveProps,
   padControlsProps,
-}) => {
+}: AccordionControlsProps) {
   return (
     <Accordion
       type="single"
@@ -210,7 +164,7 @@ export const AccordionControls: React.FC<AccordionControlsProps> = ({
       className="w-full font-sans tracking-normal"
     >
       <AccordionItem value="controls" className="border-none">
-        <AccordionTrigger className="nodrag items-center py-3 text-xs font-normal tracking-normal text-muted-foreground hover:text-foreground hover:no-underline">
+        <AccordionTrigger className="nodrag items-center py-2 text-xs font-normal tracking-normal text-muted-foreground hover:text-foreground hover:no-underline">
           <span className="flex min-w-0 items-center gap-2">
             <SlidersHorizontal className="size-3.5 shrink-0" />
             {keyScaleOctaveProps ? (
@@ -236,22 +190,16 @@ export const AccordionControls: React.FC<AccordionControlsProps> = ({
             )}
           </span>
         </AccordionTrigger>
-        <AccordionContent className="overflow-hidden pb-2">
-          <div className="nodrag flex w-0 min-w-full flex-col gap-4 border-t border-border/70 pt-4">
+        <AccordionContent className="pb-2">
+          <div className="nodrag flex w-0 min-w-full flex-col gap-3 border-t border-border/70 pt-3">
             {keyScaleOctaveProps && (
-              <div className="w-0 min-w-full">
-                <KeyScaleOctaveControls {...keyScaleOctaveProps} />
-              </div>
+              <KeyScaleOctaveControls {...keyScaleOctaveProps} />
             )}
-            {padControlsProps && (
-              <div className="w-0 min-w-full">
-                <PadControls {...padControlsProps} />
-              </div>
-            )}
-            {children && <div className="w-0 min-w-full">{children}</div>}
+            {padControlsProps && <PadControls {...padControlsProps} />}
+            {children}
           </div>
         </AccordionContent>
       </AccordionItem>
     </Accordion>
   );
-};
+}

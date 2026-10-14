@@ -42,7 +42,7 @@ const patternToString = (
     .join(' ');
 };
 
-export const DEFAULT_STEPS = 16;
+export const DEFAULT_STEPS = 8;
 
 export function generatePattern(data: BeatMachineData, strudelString: string) {
   const modifiersEnabled =

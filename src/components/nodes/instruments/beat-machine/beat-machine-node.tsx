@@ -1,19 +1,19 @@
-import type { CustomControlsProps } from '../../define-node';
-import type { BeatMachineData } from './beat-machine';
-import { createDefaultRows, DEFAULT_STEPS } from './beat-machine';
-import type { BeatMachineRow } from './beat-machine';
 import {
   Select,
   SelectContent,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { AccordionControls } from '@/components/nodes/shared/accordion-controls';
-import { CellState, ModifierDropdown } from '../../shared/modifiers';
-import { Button } from '@/components/ui/button';
 import { DRUM_CATEGORIES } from '@/data/sounds';
 import { CategorySelectItems } from '@/components/nodes/shared/category-select-items';
+import type { CustomControlsProps } from '../../define-node';
+import type { BeatMachineData } from './beat-machine';
+import { createDefaultRows, DEFAULT_STEPS } from './beat-machine';
+import type { BeatMachineRow } from './beat-machine';
+import { Switch } from '@/components/ui/switch';
+import { AccordionControls } from '@/components/nodes/shared/accordion-controls';
+import { Stepper } from '@/components/nodes/shared/stepper';
+import { CellState, ModifierDropdown } from '../../shared/modifiers';
 
 function SequencerRow({
   row,
@@ -35,12 +35,15 @@ function SequencerRow({
   showModifiers: boolean;
 }) {
   return (
-    <div className="flex w-max items-start gap-3">
+    <div className="relative flex w-max items-start gap-2">
       <Select
         value={row.instrument}
         onValueChange={(instrument) => onInstrumentChange(rowIndex, instrument)}
       >
-        <SelectTrigger className="w-28 shrink-0 h-11! text-xs">
+        <SelectTrigger
+          aria-label={`Track ${rowIndex + 1} instrument`}
+          className="nodrag w-28 shrink-0 h-11! text-xs"
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -57,7 +60,7 @@ function SequencerRow({
             >
               <button
                 type="button"
-                aria-label={`${row.instrument}, step ${step + 1}`}
+                aria-label={`Track ${rowIndex + 1}, step ${step + 1}`}
                 aria-pressed={isActive}
                 onClick={() => onStepClick(rowIndex, step)}
                 className={`nodrag h-11 w-12 shrink-0 rounded-md border font-mono text-[11px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
@@ -101,7 +104,10 @@ export function BeatMachineNode({
   const modifiersEnabled =
     typeof data.modifiersEnabled === 'boolean' ? data.modifiersEnabled : false;
 
-  const steps = typeof data.steps === 'number' ? data.steps : DEFAULT_STEPS;
+  const steps =
+    typeof data.steps === 'number'
+      ? data.steps
+      : data.rows?.[0]?.pattern.length || DEFAULT_STEPS;
 
   const rows = (data.rows || createDefaultRows(steps)).map((row) => {
     return {
@@ -137,7 +143,7 @@ export function BeatMachineNode({
     const newRows = [
       ...rows,
       {
-        instrument: DRUM_CATEGORIES[0].options[0],
+        instrument: 'bd',
         pattern: Array(steps).fill(false),
         modifiers: {},
       },
@@ -168,10 +174,11 @@ export function BeatMachineNode({
   };
 
   const handleInstrumentChange = (rowIndex: number, instrument: string) => {
-    const newRows = rows.map((row, i) =>
-      i === rowIndex ? { ...row, instrument } : row,
-    );
-    onChange({ rows: newRows });
+    onChange({
+      rows: rows.map((row, index) =>
+        index === rowIndex ? { ...row, instrument } : row,
+      ),
+    });
   };
 
   const handleModifierSelect = (
@@ -195,18 +202,9 @@ export function BeatMachineNode({
     onChange({ rows: newRows });
   };
 
-  const clearAll = () => {
-    const newRows = rows.map((row) => ({
-      ...row,
-      pattern: Array(steps).fill(false),
-      modifiers: {},
-    }));
-    onChange({ rows: newRows });
-  };
-
   return (
-    <div className="flex flex-col gap-3 px-4 pt-1 pb-3 w-[min(1040px,90vw)]">
-      <div className="nowheel flex flex-col gap-3 overflow-x-auto rounded-md bg-background/40 p-3">
+    <div className="flex w-max flex-col gap-1 px-2 pt-1 pb-1">
+      <div className="flex flex-col gap-2 rounded-md bg-background/40 p-2">
         {rows.map((row, index) => (
           <SequencerRow
             key={index}
@@ -220,74 +218,35 @@ export function BeatMachineNode({
         ))}
       </div>
       <AccordionControls>
-        <div className="flex flex-wrap gap-4 items-center justify-between">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearAll}
-              className="text-xs"
-            >
-              Clear All
-            </Button>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xs">Steps</span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 px-0 text-xs"
-                onClick={() => setSteps(steps - 1)}
-                disabled={steps <= 1}
-                aria-label="Decrease steps"
-              >
-                -
-              </Button>
-              <span className="text-xs w-5 text-center">{steps}</span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 px-0 text-xs"
-                onClick={() => setSteps(steps + 1)}
-                disabled={steps >= 32}
-                aria-label="Increase steps"
-              >
-                +
-              </Button>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs">Tracks</span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 px-0 text-xs"
-                onClick={removeTrack}
-                disabled={rows.length <= 1}
-                aria-label="Remove track"
-              >
-                -
-              </Button>
-              <span className="text-xs w-5 text-center">{rows.length}</span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 px-0 text-xs"
-                onClick={addTrack}
-                aria-label="Add track"
-              >
-                +
-              </Button>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs">Modifiers</span>
+        <div className="flex flex-wrap items-end gap-3">
+          <Stepper
+            label="Steps"
+            value={steps}
+            min={1}
+            max={32}
+            onChange={setSteps}
+          />
+          <Stepper
+            label="Tracks"
+            value={rows.length}
+            min={1}
+            max={Infinity}
+            onChange={(value) =>
+              value > rows.length ? addTrack() : removeTrack()
+            }
+          />
+          <label className="space-y-1.5">
+            <span className="block text-[11px] font-medium text-muted-foreground">
+              Modifiers
+            </span>
+            <span className="flex h-10 items-center">
               <Switch
                 checked={modifiersEnabled}
                 onCheckedChange={setModifiersEnabled}
                 aria-label="Toggle modifiers"
               />
-            </div>
-          </div>
+            </span>
+          </label>
         </div>
       </AccordionControls>
     </div>
