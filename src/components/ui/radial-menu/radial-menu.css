@@ -1,0 +1,177 @@
+.radial-menu {
+  --radial-card: var(--card, #fff);
+  --radial-accent: var(--secondary, #f0d591);
+  --radial-border: color-mix(
+    in srgb,
+    var(--secondary, #f0d591) 22%,
+    var(--border, #d4d4dc)
+  );
+  --radial-ring: var(--ring, #7777f0);
+  position: relative;
+  z-index: 50;
+  container-type: inline-size;
+  color: var(--foreground, #202024);
+  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: normal;
+  outline: none;
+}
+.dark .radial-menu {
+  --radial-border: color-mix(
+    in srgb,
+    var(--secondary-foreground, #eee) 14%,
+    var(--border, #444)
+  );
+}
+.dark .radial-menu__item:hover .radial-menu__item-surface {
+  stroke: color-mix(
+    in srgb,
+    var(--secondary-foreground, #eee) 21%,
+    var(--border, #444)
+  );
+}
+.radial-menu *,
+.radial-menu *::before,
+.radial-menu *::after {
+  box-sizing: border-box;
+}
+.radial-menu__items,
+.radial-menu__item,
+.radial-menu__item-visual,
+.radial-menu__item-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.radial-menu__items,
+.radial-menu__item-visual,
+.radial-menu__item-svg {
+  pointer-events: none;
+}
+.radial-menu__item {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  outline: none;
+  touch-action: manipulation;
+  font: inherit;
+}
+.radial-menu__item-surface {
+  fill: var(--radial-card);
+  stroke: var(--radial-border);
+  stroke-width: 1;
+  transition: stroke 150ms;
+}
+.radial-menu__item:hover .radial-menu__item-surface,
+.radial-menu__item:focus-visible .radial-menu__item-surface {
+  fill: var(--radial-accent);
+  stroke: var(--secondary, #f0d591);
+}
+.radial-menu__item:focus-visible .radial-menu__item-surface {
+  stroke: var(--radial-ring);
+  stroke-width: 3;
+}
+.radial-menu__item-label {
+  position: absolute;
+  display: flex;
+  width: 14cqw;
+  transform: translate(-50%, -50%);
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  font-size: clamp(9px, 2.3cqw, 11px);
+  line-height: 1.25;
+}
+.radial-menu__item-label > svg {
+  width: 4cqw;
+  height: 4cqw;
+  flex-shrink: 0;
+}
+@keyframes radial-menu-reveal {
+  from {
+    transform: scale(0.92);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.radial-menu__item-visual {
+  transform-origin: center;
+  animation: radial-menu-reveal 180ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .radial-menu__item-visual {
+    animation: none;
+  }
+  .radial-menu__item-surface {
+    transition: none;
+  }
+}
+
+.radial-menu__body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+@keyframes radial-menu-expand {
+  from {
+    transform: scale(0.15);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .radial-menu[data-animated='true'] .radial-menu__body {
+    animation: radial-menu-expand 180ms ease-out;
+  }
+}
+
+@media (max-width: 640px), (max-height: 500px) {
+  .radial-menu__category text {
+    font-size: 17px;
+  }
+  .radial-menu__item-label > svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.radial-menu__close {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 14%;
+  height: 14%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--radial-border);
+  border-radius: 50%;
+  background: var(--radial-accent);
+  color: var(--secondary-foreground, #594029);
+  cursor: pointer;
+}
+.radial-menu__close:hover {
+  background: var(--secondary, #f0d591);
+  color: var(--secondary-foreground, #594029);
+}
+.radial-menu__close:focus-visible {
+  outline: 2px solid var(--radial-ring);
+}
+.radial-menu__close svg {
+  width: 14px;
+  height: 14px;
+}
+
+.radial-menu__item:hover,
+.radial-menu__item:focus-visible {
+  color: var(--secondary-foreground, #594029);
+}

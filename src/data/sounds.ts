@@ -3,8 +3,6 @@ export interface SoundCategory {
   options: string[];
 }
 
-// --- Drum Sounds ---
-
 export const DRUM_CATEGORIES: SoundCategory[] = [
   {
     label: 'Kicks',
@@ -46,11 +44,7 @@ export const DRUM_CATEGORIES: SoundCategory[] = [
   },
 ];
 
-export const DRUM_OPTIONS = DRUM_CATEGORIES.flatMap((cat) => cat.options);
-
-// --- All Sounds ---
-
-export const SOUND_OPTIONS = [
+const SOUND_OPTIONS = [
   'ab',
   'ade',
   'ades2',
@@ -205,8 +199,6 @@ export const SOUND_OPTIONS = [
   'tacscan',
 ];
 
-// --- Synth / Sample Categories ---
-
 const _synthCategorized = [
   {
     label: 'Bass',
@@ -258,8 +250,6 @@ export const SYNTH_CATEGORIES = [
   },
 ];
 
-// --- Musical Options ---
-
 export const KEY_OPTIONS = [
   { value: 'C', label: 'C' },
   { value: 'C#', label: 'C#' },
@@ -291,63 +281,4 @@ export const SCALE_TYPE_OPTIONS = [
   { value: 'diminished', label: 'Diminished' },
   { value: 'harmonic:minor', label: 'Harmonic Minor' },
   { value: 'melodic:minor', label: 'Melodic Minor' },
-];
-
-export const SCALE_OPTIONS = [
-  // Major scales
-  { value: 'C:major', label: 'C Major' },
-  { value: 'D:major', label: 'D Major' },
-  { value: 'E:major', label: 'E Major' },
-  { value: 'F:major', label: 'F Major' },
-  { value: 'G:major', label: 'G Major' },
-  { value: 'A:major', label: 'A Major' },
-  { value: 'B:major', label: 'B Major' },
-
-  // Minor scales
-  { value: 'A:minor', label: 'A Minor' },
-  { value: 'B:minor', label: 'B Minor' },
-  { value: 'C:minor', label: 'C Minor' },
-  { value: 'D:minor', label: 'D Minor' },
-  { value: 'E:minor', label: 'E Minor' },
-  { value: 'F:minor', label: 'F Minor' },
-  { value: 'G:minor', label: 'G Minor' },
-
-  // Modes
-  { value: 'D:dorian', label: 'D Dorian' },
-  { value: 'E:phrygian', label: 'E Phrygian' },
-  { value: 'F:lydian', label: 'F Lydian' },
-  { value: 'G:mixolydian', label: 'G Mixolydian' },
-  { value: 'A:aeolian', label: 'A Aeolian' },
-  { value: 'B:locrian', label: 'B Locrian' },
-
-  // Pentatonic scales
-  { value: 'C:major:pentatonic', label: 'C Major Pentatonic' },
-  { value: 'D:major:pentatonic', label: 'D Major Pentatonic' },
-  { value: 'E:major:pentatonic', label: 'E Major Pentatonic' },
-  { value: 'F:major:pentatonic', label: 'F Major Pentatonic' },
-  { value: 'G:major:pentatonic', label: 'G Major Pentatonic' },
-  { value: 'A:major:pentatonic', label: 'A Major Pentatonic' },
-  { value: 'B:major:pentatonic', label: 'B Major Pentatonic' },
-  { value: 'A:minor:pentatonic', label: 'A Minor Pentatonic' },
-  { value: 'B:minor:pentatonic', label: 'B Minor Pentatonic' },
-  { value: 'C:minor:pentatonic', label: 'C Minor Pentatonic' },
-  { value: 'D:minor:pentatonic', label: 'D Minor Pentatonic' },
-  { value: 'E:minor:pentatonic', label: 'E Minor Pentatonic' },
-  { value: 'F:minor:pentatonic', label: 'F Minor Pentatonic' },
-  { value: 'G:minor:pentatonic', label: 'G Minor Pentatonic' },
-
-  // Blues scales
-  { value: 'C:blues', label: 'C Blues' },
-  { value: 'D:blues', label: 'D Blues' },
-  { value: 'E:blues', label: 'E Blues' },
-  { value: 'F:blues', label: 'F Blues' },
-  { value: 'G:blues', label: 'G Blues' },
-  { value: 'A:blues', label: 'A Blues' },
-  { value: 'B:blues', label: 'B Blues' },
-
-  // Other scales
-  { value: 'C:chromatic', label: 'C Chromatic' },
-  { value: 'C:diminished', label: 'C Diminished' },
-  { value: 'C:harmonic:minor', label: 'C Harmonic Minor' },
-  { value: 'C:melodic:minor', label: 'C Melodic Minor' },
 ];
