@@ -56,7 +56,6 @@ export default function Editor() {
             onConnect={onConnect}
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
-            nodeDragThreshold={30}
             colorMode={colorMode}
             panActivationKeyCode={null}
             minZoom={0.2}
