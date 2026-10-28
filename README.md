@@ -9,6 +9,12 @@ pnpm install
 pnpm dev
 ```
 
+## Convert Strudel code
+
+Paste a pattern into a Code node and choose **Convert to nodes**. Sound calls use the existing Sound node, notes use the existing Pad grid, and sample libraries get their own Samples nodes. Nested stacks connect directly into effects. Modulation and callback expressions connect through separate parameter inputs.
+
+A numeric `setcps` sets the top tempo: BPM = cycles per second × 60 × beats per cycle. Imported Pad grids retain the original rhythm; changing the step count starts a new sequence with the chosen number of steps. Conversion is undoable.
+
 ## Share your patch with us
 
 Have you made something cool that you'd like others to use? Export your patch and [add it to `patches/`](patches/README.md) in a pull request. Accepted patches appear in the searchable community gallery.
@@ -28,6 +34,16 @@ Add a file named `your-name.node.ts` inside `src/components/nodes/`:
 - `effects/` for nodes that modify patterns.
 
 The app discovers `.node.ts` files automatically. No registry edits needed. A single-file node can live directly in its category folder; use a folder when you have several related files.
+
+### Simple effects
+
+For a basic effect, export its Strudel function and default value:
+
+```ts
+export default { gain: 0.8 };
+```
+
+Numbers become knobs automatically. Multiple entries create multiple controls, applied in order. Use the API below when you need custom controls or a custom interface.
 
 ### Copy the boilerplate
 

@@ -68,6 +68,11 @@ export function SynthSelectNode({
           <SelectValue placeholder="Choose sound" />
         </SelectTrigger>
         <SelectContent>
+          {sound &&
+            !waveforms.some((wave) => wave.value === sound) &&
+            !SYNTH_CATEGORIES.some((category) =>
+              category.options.includes(sound),
+            ) && <SelectItem value={sound}>{sound}</SelectItem>}
           {waveforms
             .filter(
               (wave) =>

@@ -40,6 +40,7 @@ type ControlsContext = Pick<
   'id' | 'isPlaying' | 'isMuted'
 >;
 export type NodeDefinition = {
+  menuHidden?: boolean;
   id: string;
   title: string;
   category: 'Instruments' | 'Synths' | 'Audio Effects';
@@ -162,14 +163,4 @@ export function defineNode<
           })
       : undefined,
   };
-}
-export function generateParameterEffects(
-  values: Record<string, number>,
-  input: string,
-  { parameters }: { parameters: Parameters },
-) {
-  const calls = Object.entries(parameters).flatMap(([key, parameter]) =>
-    values[key] === parameter.default ? [] : [`${key}(${values[key]})`],
-  );
-  return [input, ...calls].filter(Boolean).join('.');
 }

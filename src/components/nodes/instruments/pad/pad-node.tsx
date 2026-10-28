@@ -37,6 +37,7 @@ export function PadNode({
   const selectedKey = data.selectedKey || DEFAULTS.selectedKey;
   const selectedScaleType =
     data.selectedScaleType || DEFAULTS.selectedScaleType;
+  const notes = data.noteRows ?? NOTES;
   const grid = data.grid || createDefaultGrid();
   const columnModifiers = data.columnModifiers || {};
   const handleToggleCell = (stepIdx: number, noteIdx: number) => {
@@ -65,7 +66,7 @@ export function PadNode({
                 stepIdx === activeStep ? 'bg-primary' : 'bg-card-foreground/20'
               }`}
             />
-            {NOTES.map((_, noteIdx) => {
+            {notes.map((_, noteIdx) => {
               const on = grid[stepIdx]?.[noteIdx] || false;
               return (
                 <button
@@ -90,11 +91,29 @@ export function PadNode({
         <AccordionControls
           keyScaleOctaveProps={{
             selectedKey,
-            onKeyChange: (key) => onChange({ selectedKey: key }),
+            onKeyChange: (key) =>
+              onChange({
+                selectedKey: key,
+                ...(data.noteTemplate !== undefined
+                  ? { importedScale: true }
+                  : {}),
+              }),
             selectedScale: selectedScaleType,
-            onScaleChange: (scale) => onChange({ selectedScaleType: scale }),
+            onScaleChange: (scale) =>
+              onChange({
+                selectedScaleType: scale,
+                ...(data.noteTemplate !== undefined
+                  ? { importedScale: true }
+                  : {}),
+              }),
             octave,
-            onOctaveChange: (oct) => onChange({ octave: oct }),
+            onOctaveChange: (oct) =>
+              onChange({
+                octave: oct,
+                ...(data.noteTemplate !== undefined
+                  ? { importedScale: true }
+                  : {}),
+              }),
           }}
           padControlsProps={{
             steps,

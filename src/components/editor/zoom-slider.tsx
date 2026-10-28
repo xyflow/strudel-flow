@@ -23,7 +23,7 @@ export function ZoomSlider({ className, ...props }: ZoomSliderProps) {
       </ControlButton>
       <ControlButton
         title="Fit patch"
-        onClick={() => fitView({ duration: 300, padding: 0.3, maxZoom: 1 })}
+        onClick={() => fitView({ duration: 300, padding: 0.3, minZoom: 0.05, maxZoom: 1 })}
       >
         <Maximize className="size-4" />
       </ControlButton>

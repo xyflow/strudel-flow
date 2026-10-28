@@ -14,7 +14,15 @@ export function createDefinitionComponent(definition: NodeDefinition) {
     const updateParameter = (key: string, value: string | number) =>
       updateValues(definition.updateValues(data, { [key]: value }));
     return (
-      <WorkflowNode id={id} data={data} type={definition.id}>
+      <WorkflowNode
+        id={id}
+        data={
+          definition.id === 'synth-select-node'
+            ? { ...data, title: 'Sound' }
+            : data
+        }
+        type={definition.id}
+      >
         {definition.renderControls ? (
           definition.renderControls(data, updateValues, {
             id,

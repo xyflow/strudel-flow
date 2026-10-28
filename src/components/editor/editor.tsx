@@ -58,9 +58,9 @@ export default function Editor() {
             edgeTypes={edgeTypes}
             colorMode={colorMode}
             panActivationKeyCode={null}
-            minZoom={0.2}
+            minZoom={0.05}
             fitView
-            fitViewOptions={{ padding: 0.3, maxZoom: 1 }}
+            fitViewOptions={{ padding: 0.3, minZoom: 0.05, maxZoom: 1 }}
           >
             <EditorToolbar onAddNode={onAddNode} />
           </ReactFlow>

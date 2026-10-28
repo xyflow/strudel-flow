@@ -29,7 +29,7 @@ export function PresetPopover() {
     setLink(getShareUrl(capturePatch()));
     setStatus('Patch loaded');
     requestAnimationFrame(() => {
-      void fitView({ padding: 0.3, maxZoom: 1 });
+      void fitView({ padding: 0.3, minZoom: 0.05, maxZoom: 1 });
     });
   };
   const copy = async () => {

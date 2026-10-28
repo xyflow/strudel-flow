@@ -25,7 +25,7 @@ export const initialNodes: AppNode[] = [
     type: 'synth-select-node',
     position: { x: 560, y: 25 },
     data: {
-      title: 'Voice',
+      title: 'Sound',
       icon: 'Waves',
       state: 'running',
       sound: 'triangle',
@@ -35,7 +35,10 @@ export const initialNodes: AppNode[] = [
     id: 'filter_1',
     type: 'lpf-node',
     position: { x: 560, y: 255 },
-    data: { title: 'Filter', icon: 'Filter', state: 'running', lpf: '1500 1' },
+    data: {
+      title: 'Filter', icon: 'Filter', state: 'running',
+      calls: [{ name: 'lpf', args: [1500] }, { name: 'lpq', args: [1] }],
+    },
   },
 ];
 

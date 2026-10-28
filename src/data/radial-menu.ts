@@ -7,6 +7,6 @@ export const radialMenuItems = [
 ].map((category) => ({
   ...category,
   items: Object.values(nodeDefinitions).filter(
-    (node) => node.category === category.category,
+    (node) => !node.menuHidden && node.category === category.category,
   ),
 }));
