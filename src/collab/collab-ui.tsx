@@ -51,6 +51,10 @@ export function PresenceChips() {
   );
 }
 
+function isLocalAddress() {
+  return ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+}
+
 function syncLabel(errorMs: number | null, synced: boolean) {
   if (!synced) return 'Measuring clock…';
   if (errorMs === null) return 'In sync when playing';
@@ -129,6 +133,13 @@ export function CollabPopover() {
                 {copied ? 'Copied' : 'Copy'}
               </Button>
             </div>
+            {isLocalAddress() && (
+              <p className="mt-1.5 text-muted-foreground">
+                This link only works on this computer. To invite someone on
+                your network, run <code>pnpm dev:lan</code> and open the app
+                at its network address.
+              </p>
+            )}
 
             <div className="mt-4 space-y-1.5">
               <div className="flex items-center gap-2">

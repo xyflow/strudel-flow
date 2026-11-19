@@ -63,11 +63,16 @@ export function getTransport(): Transport | null {
   return session?.binding.getTransport() ?? null;
 }
 
+/**
+ * The room server. By default it's /collab on the app's own origin, which the
+ * Vite dev and preview servers proxy to the room server (see vite.config.js).
+ * Static hosting needs VITE_COLLAB_URL pointing at the deployed room server.
+ */
 export function collabServerUrl() {
   const configured = import.meta.env.VITE_COLLAB_URL as string | undefined;
   if (configured) return configured;
   const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-  return `${protocol}://${window.location.hostname}:1234`;
+  return `${protocol}://${window.location.host}/collab`;
 }
 
 function peersFrom(states: { clientId: number; user?: Peer }[], me: User) {

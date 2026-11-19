@@ -4,14 +4,35 @@
     {
       "name": "room-server",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["server/index.ts"],
+      "runtimeArgs": [
+        "server/index.ts"
+      ],
       "port": 1234
     },
     {
       "name": "app",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["vite", "--port", "5173", "--strictPort"],
+      "runtimeArgs": [
+        "vite",
+        "--port",
+        "5173",
+        "--strictPort"
+      ],
       "port": 5173
+    },
+    {
+      "name": "app-lan",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--mode",
+        "lan",
+        "--port",
+        "5173",
+        "--strictPort"
+      ],
+      "port": 5173,
+      "url": "https://localhost:5173"
     }
   ]
 }
