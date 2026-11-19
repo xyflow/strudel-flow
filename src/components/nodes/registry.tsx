@@ -3,12 +3,7 @@ import { createDefinitionComponent } from './shared/definition-node';
 import type { XYPosition } from '@xyflow/react';
 import { nanoid } from 'nanoid';
 import type { AppNode, AppNodeType, WorkflowNodeData } from './types';
-export type {
-  AppNode,
-  AppNodeType,
-  WorkflowNodeData,
-  WorkflowNodeProps,
-} from './types';
+export type { AppNode, AppNodeType, WorkflowNodeData } from './types';
 const discovered = import.meta.glob<NodeDefinition>('./**/*.node.{ts,tsx}', {
   eager: true,
   import: 'default',

@@ -20,7 +20,7 @@ export type SchedulerInternals = {
 };
 
 /** Map an AudioContext time to performance.now() time at the speaker. */
-export function audioTimeToPerf(ctx: AudioContext, audioTime: number): number {
+function audioTimeToPerf(ctx: AudioContext, audioTime: number): number {
   const stamp = ctx.getOutputTimestamp?.();
   if (stamp?.performanceTime && stamp.contextTime !== undefined) {
     return stamp.performanceTime + (audioTime - stamp.contextTime) * 1000;

@@ -13,7 +13,7 @@ import { createServerClock, type ClockStats, type ServerClock } from './clock';
 import { saveUser, type User } from './identity';
 import { adoptGraph, type ViewMode } from './ownership';
 
-export type Peer = User;
+type Peer = User;
 
 type CollabState = {
   room: string | null;
@@ -38,12 +38,12 @@ export const useCollabStore = create<CollabState>(() => ({
   transportRevision: 0,
 }));
 
-export type Session = {
+// Leaving a room is a page navigation, which tears all of this down.
+type Session = {
   room: string;
   me: User;
   doc: Y.Doc;
   provider: HocuspocusProvider;
-  socket: HocuspocusProviderWebsocket;
   binding: Binding;
   clock: ServerClock;
 };
@@ -160,17 +160,6 @@ export async function joinRoom(room: string, me: User): Promise<Session> {
     }));
   }
 
-  session = { room, me, doc, provider, socket, binding, clock };
+  session = { room, me, doc, provider, binding, clock };
   return session;
-}
-
-export function leaveRoom() {
-  if (!session) return;
-  session.clock.stop();
-  session.binding.unbind();
-  session.provider.destroy();
-  session.socket.destroy();
-  session.doc.destroy();
-  session = null;
-  useCollabStore.setState({ status: 'idle', peers: [], room: null });
 }

@@ -18,7 +18,7 @@ import type { Edge } from '@xyflow/react';
 import type { AppNode } from '@/components/nodes/types';
 import { edgeOwner, nodeOwner, ownersById, type ViewMode } from './ownership';
 
-export const LOCAL_ORIGIN = 'strudel-together:local';
+const LOCAL_ORIGIN = 'strudel-together:local';
 
 export type BoundState = {
   nodes: AppNode[];
@@ -32,7 +32,7 @@ export type BoundState = {
   toggle: () => void;
 };
 
-export type BindableStore = {
+type BindableStore = {
   getState(): BoundState;
   setState(partial: Partial<BoundState>): void;
   subscribe(
@@ -48,7 +48,7 @@ export type Transport = {
   cps: number;
 };
 
-export function cpsOf(cpm: string, bpc: string) {
+function cpsOf(cpm: string, bpc: string) {
   return (parseInt(cpm) || 120) / (parseInt(bpc) || 4) / 60;
 }
 
