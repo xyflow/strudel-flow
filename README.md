@@ -2,7 +2,7 @@
 
 Jam remotely on one [Strudel](https://strudel.cc) piece in a node graph. Everyone in a room hears the combined mix, in time, but each player only sees their own nodes.
 
-A fork of [xyflow/strudel-flow](https://github.com/xyflow/strudel-flow) with a small room server. AGPL-3.0, like Strudel and strudel-flow. If you host it for other people, link them to your source.
+Source: [msandlerespi/strudel-flow-together](https://github.com/msandlerespi/strudel-flow-together), a fork of [xyflow/strudel-flow](https://github.com/xyflow/strudel-flow) with a small room server. AGPL-3.0, like Strudel and strudel-flow. If you host it for other people, link them to your source.
 
 ## Run it locally
 

@@ -9,7 +9,7 @@ import { ControlButton } from './control-button';
 // AGPL-3.0: a hosted, modified version must offer its users its own source.
 const SOURCE_URL =
   (import.meta.env.VITE_SOURCE_URL as string | undefined) ||
-  'https://github.com/xyflow/strudel-flow';
+  'https://github.com/msandlerespi/strudel-flow-together';
 
 export function AppInfoPopover() {
   return (
