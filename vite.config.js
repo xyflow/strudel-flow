@@ -30,9 +30,5 @@ export default defineConfig(({ mode }) => {
     },
     server: { host: lan ? true : undefined, proxy: collabProxy },
     preview: { proxy: collabProxy },
-    base:
-      process.env.VERCEL_ENV === 'production'
-        ? 'https://flow-machine-xyflow.vercel.app/'
-        : '/',
   };
 });

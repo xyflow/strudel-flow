@@ -90,7 +90,7 @@ function JoinScreen({ room, onJoined }: { room: string; onJoined: () => void }) 
         </Button>
         <p className="mt-3 min-h-4 text-[11px] text-muted-foreground" role="status">
           {state === 'slow'
-            ? `Still trying to reach ${collabServerUrl()}. Is the room server running?`
+            ? `Still connecting to ${collabServerUrl()}. If the room server was asleep, this can take up to a minute.`
             : `Room ${room}`}
         </p>
       </form>

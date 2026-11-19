@@ -37,10 +37,19 @@ The LAN mode uses HTTPS because browsers only allow Strudel's audio worklets on 
 pnpm test
 ```
 
-## Deploying
+## Deploying (Vercel + Render)
 
-- Build the app (`pnpm build`) and host `dist/` on any static host. Set `VITE_COLLAB_URL` to your room server, e.g. `wss://rooms.example.com`.
-- Run `node server/index.ts` on any host that supports WebSockets. It reads `PORT` and `DB_PATH`.
+The app is static and goes on Vercel. The room server keeps rooms in one long-running process with open WebSockets, so it goes on an always-running host. `render.yaml` sets it up on Render's free plan using `server/Dockerfile`.
+
+1. **Room server on Render.** Dashboard: *New → Blueprint*, then pick this repo, which reads `render.yaml`. When it's live, note its URL, e.g. `https://strudel-together-rooms.onrender.com`.
+2. **App on Vercel.** *Add New → Project*, then import this repo (Vite is detected). Under *Environment Variables* add:
+   - `VITE_COLLAB_URL` = `wss://strudel-together-rooms.onrender.com` (your Render URL, with `wss://`)
+   - `VITE_SOURCE_URL` = this repo's GitHub URL (the About panel links to it, as the AGPL requires)
+3. Deploy. Changing either variable later needs a redeploy, because Vite bakes them into the build.
+
+Free-plan behaviour: the server sleeps after 15 idle minutes and takes about a minute to wake (the join screen says so and keeps retrying). It has no disk, so a room is lost once everyone has left and the server sleeps or restarts. While anyone has the room open, their browser restores it to a restarted server. For durable rooms, use a paid Render plan with a disk at `/data`.
+
+Any other WebSocket host works too: run `server/Dockerfile` (or `node server/index.ts` on Node 22.18+). It reads `PORT` and `DB_PATH`.
 
 ---
 

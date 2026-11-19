@@ -1,6 +1,9 @@
 // The live connection to a jam room: Y.Doc + Hocuspocus provider + binding +
 // server clock. One session per page.
-import { HocuspocusProvider } from '@hocuspocus/provider';
+import {
+  HocuspocusProvider,
+  HocuspocusProviderWebsocket,
+} from '@hocuspocus/provider';
 import * as Y from 'yjs';
 import { create } from 'zustand';
 import { useAppStore } from '@/store/app-store';
@@ -40,6 +43,7 @@ export type Session = {
   me: User;
   doc: Y.Doc;
   provider: HocuspocusProvider;
+  socket: HocuspocusProviderWebsocket;
   binding: Binding;
   clock: ServerClock;
 };
@@ -98,8 +102,14 @@ export async function joinRoom(room: string, me: User): Promise<Session> {
   let resolveSynced: () => void;
   const synced = new Promise<void>((resolve) => (resolveSynced = resolve));
 
-  const provider = new HocuspocusProvider({
+  // Retry at least every 5 s (default backs off to 30 s), so joining is quick
+  // once a sleeping free-tier server wakes up.
+  const socket = new HocuspocusProviderWebsocket({
     url: collabServerUrl(),
+    maxDelay: 5000,
+  });
+  const provider = new HocuspocusProvider({
+    websocketProvider: socket,
     name: room,
     document: doc,
     onStatus: ({ status }) =>
@@ -113,6 +123,8 @@ export async function joinRoom(room: string, me: User): Promise<Session> {
     onAwarenessChange: ({ states }) =>
       useCollabStore.setState({ peers: peersFrom(states, me) }),
   });
+  // We passed our own socket, so the provider won't attach to it by itself.
+  provider.attach();
   provider.awareness?.setLocalStateField('user', me);
 
   await synced;
@@ -141,7 +153,7 @@ export async function joinRoom(room: string, me: User): Promise<Session> {
     }));
   }
 
-  session = { room, me, doc, provider, binding, clock };
+  session = { room, me, doc, provider, socket, binding, clock };
   return session;
 }
 
@@ -150,6 +162,7 @@ export function leaveRoom() {
   session.clock.stop();
   session.binding.unbind();
   session.provider.destroy();
+  session.socket.destroy();
   session.doc.destroy();
   session = null;
   useCollabStore.setState({ status: 'idle', peers: [], room: null });

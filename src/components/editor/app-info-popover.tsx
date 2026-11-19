@@ -6,6 +6,11 @@ import {
 } from '@/components/ui/popover';
 import { ControlButton } from './control-button';
 
+// AGPL-3.0: a hosted, modified version must offer its users its own source.
+const SOURCE_URL =
+  (import.meta.env.VITE_SOURCE_URL as string | undefined) ||
+  'https://github.com/xyflow/strudel-flow';
+
 export function AppInfoPopover() {
   return (
     <Popover>
@@ -50,13 +55,17 @@ export function AppInfoPopover() {
           </a>
           .
         </p>
+        <p className="mt-3 text-muted-foreground">
+          Strudel Together adds remote jam rooms to Strudel Flow. Free software
+          under the AGPL-3.0.
+        </p>
         <a
-          href="https://github.com/xyflow/strudel-flow"
+          href={SOURCE_URL}
           target="_blank"
           rel="noreferrer"
-          className="mt-3 inline-flex text-foreground underline underline-offset-2"
+          className="mt-2 inline-flex text-foreground underline underline-offset-2"
         >
-          Contribute on GitHub
+          Source code
         </a>
       </PopoverContent>
     </Popover>

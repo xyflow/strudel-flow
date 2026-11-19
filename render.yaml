@@ -1,0 +1,20 @@
+# Render Blueprint for the Strudel Together room server.
+# Render dashboard: New > Blueprint > pick this repo.
+#
+# Free plan: the server sleeps after 15 minutes without traffic and takes about
+# a minute to wake. It has no persistent disk, so saved rooms are lost when it
+# sleeps or restarts. A room survives a restart while anyone still has it open,
+# because their browser re-sends it on reconnect. For durable rooms, switch to
+# a paid plan, add a disk mounted at /data, and keep DB_PATH=/data/rooms.sqlite.
+services:
+  - type: web
+    name: strudel-together-rooms
+    runtime: docker
+    plan: free
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: ./server
+    healthCheckPath: /
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - server/**
