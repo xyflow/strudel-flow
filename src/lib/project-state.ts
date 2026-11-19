@@ -1,9 +1,3 @@
-import LZString from 'lz-string';
-const {
-  compressToEncodedURIComponent,
-  decompressFromEncodedURIComponent,
-  decompressFromBase64,
-} = LZString;
 import type { Node, Edge, ColorMode } from '@xyflow/react';
 
 export interface ProjectState {
@@ -16,47 +10,6 @@ export interface ProjectState {
   colorMode: ColorMode;
   cpm: string;
   bpc?: string;
-}
-
-function encodeState(state: ProjectState): string {
-  return compressToEncodedURIComponent(JSON.stringify(state));
-}
-
-function decodeState(encoded: string): ProjectState | null {
-  try {
-    const json =
-      decompressFromEncodedURIComponent(encoded) ||
-      decompressFromBase64(encoded);
-    if (!json) return null;
-    return validateState(JSON.parse(json));
-  } catch (error) {
-    console.error('Failed to decode state:', error);
-    return null;
-  }
-}
-
-export function getShareUrl(
-  state: ProjectState,
-  baseUrl = window.location.href,
-): string {
-  const url = new URL(baseUrl);
-  url.searchParams.delete('state');
-  url.hash = `patch=${encodeState(state)}`;
-  return url.toString();
-}
-
-export function loadFromUrl(href = window.location.href): ProjectState | null {
-  const url = new URL(href);
-  const legacy = url.searchParams.get('state');
-  if (legacy) {
-    try {
-      return stateFromJson(decompressFromBase64(legacy) || '');
-    } catch {
-      return null;
-    }
-  }
-  const param = new URLSearchParams(url.hash.slice(1)).get('patch');
-  return param ? decodeState(param) : null;
 }
 
 function validateState(value: unknown): ProjectState | null {
@@ -124,7 +77,7 @@ export function stateFromJson(json: string): ProjectState | null {
 
 export function downloadState(
   state: ProjectState,
-  filename = 'strudel-flow-project.json',
+  filename = 'strudel-together-patch.json',
 ): void {
   const blob = new Blob([stateToJson(state)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);

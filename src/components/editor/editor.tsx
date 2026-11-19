@@ -6,7 +6,6 @@ import { nodeTypes } from '@/components/nodes/registry';
 import deleteEdge from '@/components/edges/delete-edge';
 import { useAppStore } from '@/store/app-store';
 import { EditorToolbar } from './toolbar';
-import { useUrlState } from '@/hooks/use-url-state';
 import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useThemeCss } from '@/hooks/use-theme-css';
@@ -16,7 +15,6 @@ import { EmptyPartHint } from '@/collab/collab-ui';
 const edgeTypes = { default: deleteEdge };
 
 export default function Editor() {
-  useUrlState();
   useWorkflowRunner();
   useKeyboardShortcuts();
 

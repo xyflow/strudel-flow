@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { Copy, Download, Folder, Upload } from 'lucide-react';
+import { Download, Folder, Upload } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { capturePatch, applyPatch } from '@/lib/patch-state';
-import { downloadState, getShareUrl, stateFromJson } from '@/lib/project-state';
+import { downloadState, stateFromJson } from '@/lib/project-state';
 import type { ProjectState } from '@/lib/project-state';
 import { PatchGallery } from './patch-gallery';
 import { PatternPanel } from './pattern-panel';
@@ -17,7 +17,6 @@ import { useAppStore } from '@/store/app-store';
 
 export function PresetPopover() {
   const name = useAppStore((state) => state.name);
-  const [link, setLink] = useState('');
   const [status, setStatus] = useState('');
   const input = useRef<HTMLInputElement>(null);
   const { fitView } = useReactFlow();
@@ -26,29 +25,15 @@ export function PresetPopover() {
       setStatus('Could not load this patch.');
       return;
     }
-    setLink(getShareUrl(capturePatch()));
     setStatus('Patch loaded');
     requestAnimationFrame(() => {
       void fitView({ padding: 0.3, maxZoom: 1 });
     });
   };
-  const copy = async () => {
-    const url = getShareUrl(capturePatch());
-    setLink(url);
-    try {
-      await navigator.clipboard.writeText(url);
-      setStatus('Link copied');
-    } catch {
-      setStatus('Select and copy the link below.');
-    }
-  };
   return (
     <Popover
       onOpenChange={(open) => {
-        if (open) {
-          setLink(getShareUrl(capturePatch()));
-          setStatus('');
-        }
+        if (open) setStatus('');
       }}
     >
       <PopoverTrigger asChild>
@@ -73,12 +58,8 @@ export function PresetPopover() {
           className="w-full rounded-md border bg-muted/30 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
         <div className="my-3 flex gap-1">
-          <Button variant="secondary" size="sm" onClick={copy}>
-            <Copy className="size-3.5" />
-            Copy link
-          </Button>
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={() =>
               downloadState(
@@ -127,18 +108,12 @@ export function PresetPopover() {
             }}
           />
         </div>
-        <input
-          aria-label="Shareable patch link"
-          value={link}
-          readOnly
-          onFocus={(event) => event.target.select()}
-          className="w-full rounded-md border bg-background/50 px-2 py-2 font-mono text-[10px] text-muted-foreground"
-        />
         <p
           role="status"
           className="my-2 min-h-4 text-[11px] text-muted-foreground"
         >
-          {status || 'Export your patch or copy a link to share.'}
+          {status ||
+            'Export saves your patch as a file. Import loads one back in.'}
         </p>
         <PatchGallery onLoad={(patch) => loadPatch(patch.state)} />
         <div className="border-t pt-3">

@@ -21,7 +21,7 @@ Open the app, click the people icon, then **Start a room**, and send the link. T
 
 - **Sync.** Each room is a Yjs document on a [Hocuspocus](https://github.com/ueberdosis/hocuspocus) server (`server/index.ts`). `src/collab/binding.ts` diffs the app's Zustand store against the doc after every change, so every existing edit path syncs without changes.
 - **Ownership.** Each node carries `data.owner`. The binding never writes or deletes another player's nodes. Loading a patch or pressing undo only touches your own part.
-- **Hidden view.** The canvas, the code panel, exports and share links show only your nodes. Audio is compiled from everyone's nodes, so you hear the whole piece. This is UI-level hiding: the data does reach both browsers. The room toggle "Hide each other's work" switches to a fully shared canvas.
+- **Hidden view.** The canvas, the code panel and exported patch files show only your nodes. Audio is compiled from everyone's nodes, so you hear the whole piece. This is UI-level hiding: the data does reach both browsers. The room toggle "Hide each other's work" switches to a fully shared canvas.
 - **Same bar on both machines.** Play/stop and tempo are shared. `src/collab/clock.ts` estimates the server clock NTP-style, and `src/collab/align.ts` keeps Strudel's scheduler on the room's cycle (anchor time + cps), correcting drift over 20 ms.
 - **Trust.** The Code node runs your partner's Strudel/JS in your browser. Only jam with people you trust; room ids are unguessable.
 
