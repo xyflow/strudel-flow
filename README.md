@@ -17,12 +17,6 @@ pnpm dev      # app on http://localhost:5173
 
 Open the app, click the people icon, then **Start a room**, and send the link. To try two players on one machine, open `?room=test&as=Alice` and `?room=test&as=Bob` in two tabs.
 
-### Two computers on one network
-
-Run `pnpm dev:lan` instead of `pnpm dev`, along with `pnpm server`, on one computer. Vite prints a `Network:` address such as `https://192.168.1.66:5173`. Open that address, not `localhost`, on **both** computers, so invite links point somewhere the other computer can reach.
-
-The LAN mode uses HTTPS because browsers only allow Strudel's audio worklets on secure pages, and `http://<LAN-IP>` isn't one. The certificate is self-signed, so each browser warns once; choose *Advanced → Proceed* (Chrome/Edge) or *Accept the Risk* (Firefox). The room connection goes through the same address (`/collab`, proxied to the room server), so only port 5173 needs to be reachable. Guest or café Wi-Fi often blocks devices from reaching each other.
-
 ## How it works
 
 - **Sync.** Each room is a Yjs document on a [Hocuspocus](https://github.com/ueberdosis/hocuspocus) server (`server/index.ts`). `src/collab/binding.ts` diffs the app's Zustand store against the doc after every change, so every existing edit path syncs without changes.
