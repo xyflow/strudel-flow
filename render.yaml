@@ -1,12 +1,42 @@
-# Render Blueprint for the Strudel Together room server.
+# Render Blueprint: the whole of Strudel Together on Render.
 # Render dashboard: New > Blueprint > pick this repo.
 #
-# Free plan: the server sleeps after 15 minutes without traffic and takes about
+#  - strudel-together        static site with the app (free, never sleeps)
+#  - strudel-together-rooms  room server (free web service, Docker)
+#
+# When you create the Blueprint, Render asks for two values (sync: false):
+#  - VITE_COLLAB_URL: the room server's address. It's normally
+#    https://strudel-together-rooms.onrender.com; Render adds a suffix if that
+#    name is taken. After the first deploy, check the room server's URL on its
+#    dashboard page. If it differs, update this variable on the static site and
+#    redeploy it. https:// and wss:// both work.
+#  - VITE_SOURCE_URL: your public repo's URL (the AGPL requires the live site
+#    to link to its source).
+# Vite bakes both into the build, so changing either needs a redeploy of the
+# static site.
+#
+# Free room server: it sleeps after 15 minutes without traffic and takes about
 # a minute to wake. It has no persistent disk, so saved rooms are lost when it
 # sleeps or restarts. A room survives a restart while anyone still has it open,
 # because their browser re-sends it on reconnect. For durable rooms, switch to
 # a paid plan, add a disk mounted at /data, and keep DB_PATH=/data/rooms.sqlite.
 services:
+  - type: web
+    name: strudel-together
+    runtime: static
+    buildCommand: npx -y pnpm@9.11.0 install --frozen-lockfile && npx -y pnpm@9.11.0 build
+    staticPublishPath: ./dist
+    buildFilter:
+      ignoredPaths:
+        - server/**
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      - key: VITE_COLLAB_URL
+        sync: false
+      - key: VITE_SOURCE_URL
+        sync: false
+
   - type: web
     name: strudel-together-rooms
     runtime: docker

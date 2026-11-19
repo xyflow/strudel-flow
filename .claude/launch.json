@@ -33,6 +33,18 @@
       ],
       "port": 5173,
       "url": "https://localhost:5173"
+    },
+    {
+      "name": "app-built",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "preview",
+        "--port",
+        "4173",
+        "--strictPort"
+      ],
+      "port": 4173
     }
   ]
 }

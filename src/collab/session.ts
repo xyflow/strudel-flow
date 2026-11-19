@@ -71,10 +71,17 @@ export function getTransport(): Transport | null {
  * The room server. By default it's /collab on the app's own origin, which the
  * Vite dev and preview servers proxy to the room server (see vite.config.js).
  * Static hosting needs VITE_COLLAB_URL pointing at the deployed room server.
+ * Either https:// or wss:// works, so the URL a host shows can be pasted as is.
  */
 export function collabServerUrl() {
-  const configured = import.meta.env.VITE_COLLAB_URL as string | undefined;
-  if (configured) return configured;
+  const configured = (
+    import.meta.env.VITE_COLLAB_URL as string | undefined
+  )?.trim();
+  if (configured) {
+    return configured.replace(/^http(s?):\/\//i, (_, secure: string) =>
+      secure ? 'wss://' : 'ws://',
+    );
+  }
   const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
   return `${protocol}://${window.location.host}/collab`;
 }

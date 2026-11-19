@@ -37,19 +37,22 @@ The LAN mode uses HTTPS because browsers only allow Strudel's audio worklets on 
 pnpm test
 ```
 
-## Deploying (Vercel + Render)
+## Deploying on Render
 
-The app is static and goes on Vercel. The room server keeps rooms in one long-running process with open WebSockets, so it goes on an always-running host. `render.yaml` sets it up on Render's free plan using `server/Dockerfile`.
+`render.yaml` is a Render Blueprint that sets up both parts, both on free plans:
 
-1. **Room server on Render.** Dashboard: *New → Blueprint*, then pick this repo, which reads `render.yaml`. When it's live, note its URL, e.g. `https://strudel-together-rooms.onrender.com`.
-2. **App on Vercel.** *Add New → Project*, then import this repo (Vite is detected). Under *Environment Variables* add:
-   - `VITE_COLLAB_URL` = `wss://strudel-together-rooms.onrender.com` (your Render URL, with `wss://`)
-   - `VITE_SOURCE_URL` = this repo's GitHub URL (the About panel links to it, as the AGPL requires)
-3. Deploy. Changing either variable later needs a redeploy, because Vite bakes them into the build.
+- **strudel-together**: the app, as a static site. It's served from Render's CDN and never sleeps.
+- **strudel-together-rooms**: the room server, a web service built from `server/Dockerfile`. The room server needs a long-running process with open WebSockets, which is why it isn't a static or serverless host.
 
-Free-plan behaviour: the server sleeps after 15 idle minutes and takes about a minute to wake (the join screen says so and keeps retrying). It has no disk, so a room is lost once everyone has left and the server sleeps or restarts. While anyone has the room open, their browser restores it to a restarted server. For durable rooms, use a paid Render plan with a disk at `/data`.
+1. In the Render dashboard choose *New → Blueprint* and pick this repo.
+2. Render asks for two values:
+   - `VITE_COLLAB_URL`: the room server's address. Enter `https://strudel-together-rooms.onrender.com` (`wss://` works too).
+   - `VITE_SOURCE_URL`: this repo's public URL. The About panel links to it, as the AGPL requires.
+3. After the first deploy, open the room server's page in the dashboard and check its URL. If Render added a suffix because the name was taken, set `VITE_COLLAB_URL` on the static site to the real URL and redeploy the static site. Vite bakes both values into the build, so any change needs a redeploy.
 
-Any other WebSocket host works too: run `server/Dockerfile` (or `node server/index.ts` on Node 22.18+). It reads `PORT` and `DB_PATH`.
+**Free-plan behaviour.** The room server sleeps after 15 idle minutes and takes about a minute to wake; the join screen says so and keeps retrying. It has no disk, so a room is lost once everyone has left and the server sleeps or restarts. While anyone has the room open, their browser restores it to a restarted server. For durable rooms, use a paid plan with a disk mounted at `/data`.
+
+Any other host works too: put `dist/` on a static host, with `VITE_COLLAB_URL` set at build time, and run `server/Dockerfile` (or `node server/index.ts` on Node 22.18+) anywhere that supports WebSockets. The server reads `PORT` and `DB_PATH`.
 
 ---
 
