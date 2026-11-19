@@ -1,5 +1,4 @@
 import { Panel } from '@xyflow/react';
-import logo from '@/assets/logo.svg?raw';
 import { Plus, X } from 'lucide-react';
 import type { MouseEventHandler } from 'react';
 import { ControlButton } from './control-button';
@@ -31,19 +30,9 @@ export function EditorToolbar({
         position="top-left"
         className="m-4! flex h-12 items-center gap-2.5 sm:m-6!"
       >
-        <a
-          href="https://xyflow.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="xyflow website"
-          className="rounded-lg transition-opacity hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
-        >
-          <span
-            aria-hidden="true"
-            className="block size-10 text-foreground"
-            dangerouslySetInnerHTML={{ __html: logo }}
-          />
-        </a>
+        <span className="text-sm font-semibold tracking-tight text-foreground">
+          Strudel Together
+        </span>
         <PresenceChips />
       </Panel>
 

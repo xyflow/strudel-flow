@@ -11,11 +11,13 @@ const SOURCE_URL =
   (import.meta.env.VITE_SOURCE_URL as string | undefined) ||
   'https://github.com/msandlerespi/strudel-flow-together';
 
+const link = 'text-foreground underline underline-offset-2';
+
 export function AppInfoPopover() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <ControlButton title="About Strudel Flow">
+        <ControlButton title="About Strudel Together">
           <Info className="size-4" />
         </ControlButton>
       </PopoverTrigger>
@@ -24,10 +26,11 @@ export function AppInfoPopover() {
         align="end"
         className="w-72 rounded-lg text-xs leading-relaxed"
       >
-        <h3 className="mb-2 text-sm font-semibold">Strudel Flow</h3>
+        <h3 className="mb-2 text-sm font-semibold">Strudel Together</h3>
         <p className="mb-3 text-muted-foreground">
-          Connect instruments, sounds, and effects to build repeating patterns,
-          then change them while they play.
+          Make music together from anywhere. Start a room with the people icon
+          and send the link. Everyone hears the whole piece, but each of you
+          only sees your own part.
         </p>
         <ul className="space-y-2 text-muted-foreground">
           <li>Tap the pads, then press play.</li>
@@ -40,30 +43,30 @@ export function AppInfoPopover() {
             space to add a connected node.
           </li>
           <li>
-            Drag a dial up or down to change effects . Hold Shift for fine
+            Drag a dial up or down to change effects. Hold Shift for fine
             control.
           </li>
         </ul>
         <p className="mt-4 border-t pt-3 text-muted-foreground">
           Powered by{' '}
-          <a href="https://strudel.cc" className="text-foreground underline">
+          <a href="https://strudel.cc" className={link}>
             Strudel
+          </a>
+          . Built on{' '}
+          <a href="https://github.com/xyflow/strudel-flow" className={link}>
+            Strudel Flow
           </a>{' '}
-          and made by the creators of{' '}
-          <a href="https://reactflow.dev" className="text-foreground underline">
+          by xyflow, using{' '}
+          <a href="https://reactflow.dev" className={link}>
             React Flow
           </a>
-          .
-        </p>
-        <p className="mt-3 text-muted-foreground">
-          Strudel Together adds remote jam rooms to Strudel Flow. Free software
-          under the AGPL-3.0.
+          . Free software under the AGPL-3.0.
         </p>
         <a
           href={SOURCE_URL}
           target="_blank"
           rel="noreferrer"
-          className="mt-2 inline-flex text-foreground underline underline-offset-2"
+          className={`mt-2 inline-flex ${link}`}
         >
           Source code
         </a>

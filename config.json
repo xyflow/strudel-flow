@@ -1,9 +1,0 @@
-{
-  "id": "strudel-flow",
-  "name": "Strudel Flow",
-  "skipBuild": true,
-  "description": "A visual drum machine and pattern sequencer built with Strudel and React Flow.",
-  "tags": [],
-  "hidden": true,
-  "published": false
-}

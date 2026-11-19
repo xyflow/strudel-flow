@@ -25,4 +25,3 @@ dist-ssr
 
 # Room server database
 data/
-server/data/

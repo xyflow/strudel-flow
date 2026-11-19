@@ -1,6 +1,6 @@
 {
   "name": "strudel-together",
-  "version": "2.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "Jam remotely on one Strudel piece in a node graph, each player seeing only their own part. A fork of strudel-flow.",
   "scripts": {
