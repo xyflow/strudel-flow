@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { createGraphHistory, type GraphSnapshot } from '@/lib/graph-history';
 import { useAppStore } from '@/store/app-store';
+import { isApplyingRemote } from '@/collab/binding';
+import { mergeOwnGraph } from '@/collab/ownership';
+import { getMe } from '@/collab/session';
 
 export function useGraphHistory() {
   const history = useRef<ReturnType<typeof createGraphHistory> | null>(null);
@@ -31,6 +34,11 @@ export function useGraphHistory() {
       }
       if (state.nodes === previous.nodes && state.edges === previous.edges)
         return;
+      // Changes from the jam partner aren't yours to undo.
+      if (isApplyingRemote()) {
+        history.current?.rebase(graph);
+        return;
+      }
       if (!batch) {
         batch = {};
         queueMicrotask(() => {
@@ -54,8 +62,13 @@ export function useGraphHistory() {
 
   const restore = useCallback((direction: 'undo' | 'redo') => {
     if (interacting.current) return;
-    const graph: GraphSnapshot | undefined = history.current?.[direction]();
-    if (!graph) return;
+    const snapshot: GraphSnapshot | undefined = history.current?.[direction]();
+    if (!snapshot) return;
+    // In a jam room, undo only moves your own nodes; everyone else's stay live.
+    const me = getMe();
+    const graph = me
+      ? mergeOwnGraph(snapshot, useAppStore.getState(), me)
+      : snapshot;
     restoring.current = true;
     try {
       useAppStore.setState({

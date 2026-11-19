@@ -35,6 +35,11 @@ export function createGraphHistory(initial: GraphSnapshot, limit = 100) {
       future = [];
       lastGroup = undefined;
     },
+    /** Accept a change without making it an undo step (e.g. a partner's edit). */
+    rebase(graph: GraphSnapshot) {
+      current = structuredClone(graph);
+      key = graphKey(graph);
+    },
     record(graph: GraphSnapshot, group?: object) {
       const nextKey = graphKey(graph);
       if (nextKey !== key) {

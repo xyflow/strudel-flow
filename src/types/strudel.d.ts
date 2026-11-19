@@ -1,12 +1,15 @@
 declare module '@strudel/web' {
   export type StrudelSession = {
-    scheduler: { now: () => number };
+    // `now` is public; the rest are Cyclist internals used by
+    // src/collab/align.ts to keep jam partners on the same cycle.
+    scheduler: { now: () => number } & import('@/collab/align').SchedulerInternals;
     state: { evalError?: unknown };
   };
 
   export function initStrudel(): Promise<StrudelSession>;
   export function evaluate(code: string): Promise<unknown>;
   export function hush(): void;
+  export function getAudioContext(): AudioContext;
   export function samples(source: string): Promise<unknown>;
   export function transpiler(
     code: string,

@@ -1,29 +1,35 @@
 import { useAppStore } from '@/store/app-store';
 import { nodeTypes, type AppNode } from '@/components/nodes/registry';
 import type { ProjectState } from './project-state';
+import { getMe, getView } from '@/collab/session';
+import { adoptGraph, ownedBy, visibleGraph } from '@/collab/ownership';
 
 export function capturePatch(): ProjectState {
   const {
     name,
     author,
     description,
-    nodes,
-    edges,
     theme,
     colorMode,
     cpm,
     bpc,
   } = useAppStore.getState();
+  // In a jam room, exports and links contain only what you can see.
+  const me = getMe();
+  const all = useAppStore.getState();
+  const { nodes, edges } = me
+    ? visibleGraph(all.nodes, all.edges, me, getView())
+    : all;
   return {
     name: name.trim() || 'Untitled patch',
     author: author.trim(),
     description: description.trim(),
-    nodes: nodes.map(({ id, type, position, data }) => ({
-      id,
-      type,
-      position,
-      data,
-    })),
+    nodes: nodes.map(({ id, type, position, data }) => {
+      // Room ownership is meaningless outside the room.
+      const rest = { ...data };
+      delete rest.owner;
+      return { id, type, position, data: rest };
+    }),
     edges: edges.map(
       ({ id, source, target, sourceHandle, targetHandle, type }) => ({
         id,
@@ -49,6 +55,11 @@ export function applyPatch(state: ProjectState): boolean {
     )
   )
     return false;
+  const me = getMe();
+  if (me) {
+    applyPatchToMyPart(state, me);
+    return true;
+  }
   useAppStore.setState({
     graphRevision: useAppStore.getState().graphRevision + 1,
     name: state.name ?? 'Untitled patch',
@@ -64,4 +75,29 @@ export function applyPatch(state: ProjectState): boolean {
     error: null,
   });
   return true;
+}
+
+/**
+ * In a jam room, a loaded patch replaces only your own part. Its nodes get
+ * fresh ids (so two players can load the same patch) and your ownership.
+ * Tempo, play state and the patch name are shared, so they stay as they are.
+ */
+function applyPatchToMyPart(state: ProjectState, me: string) {
+  const current = useAppStore.getState();
+  const others = current.nodes.filter((node) => !ownedBy(node, me));
+  const otherIds = new Set(others.map((node) => node.id));
+  const mine = adoptGraph(state.nodes as AppNode[], state.edges, me);
+  useAppStore.setState({
+    graphRevision: current.graphRevision + 1,
+    nodes: [...others, ...mine.nodes],
+    edges: [
+      ...current.edges.filter(
+        (edge) => otherIds.has(edge.source) && otherIds.has(edge.target),
+      ),
+      ...mine.edges,
+    ],
+    theme: state.theme,
+    colorMode: state.colorMode,
+    error: null,
+  });
 }

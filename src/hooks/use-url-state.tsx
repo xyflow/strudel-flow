@@ -2,9 +2,13 @@ import { useEffect } from 'react';
 import { getShareUrl, loadFromUrl } from '@/lib/project-state';
 import { applyPatch, capturePatch } from '@/lib/patch-state';
 import { useAppStore } from '@/store/app-store';
+import { getSession } from '@/collab/session';
 
 export function useUrlState() {
   useEffect(() => {
+    // In a jam room the room is the saved state. Writing the graph into the
+    // URL would also put your partner's hidden part into a copyable link.
+    if (getSession()) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let loading = false;
     let lastPatch = '';

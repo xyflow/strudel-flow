@@ -7,16 +7,34 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useMemo } from 'react';
 import { useAppStore } from '@/store/app-store';
+import { generateOutput } from '@/lib/strudel';
+import { useVisibleGraph } from '@/collab/use-visible-graph';
+import { useCollabStore } from '@/collab/session';
 
 export function PatternPanel() {
-  const pattern = useAppStore((s) => s.pattern) || 'No pattern.';
+  const fullPattern = useAppStore((s) => s.pattern);
+  const cpm = useAppStore((s) => s.cpm);
+  const bpc = useAppStore((s) => s.bpc);
+  const privateRoom = useCollabStore(
+    (s) => s.room !== null && s.view === 'private',
+  );
+  const { nodes, edges } = useVisibleGraph();
+  // In a private jam room, show only the code for your own part.
+  const ownPattern = useMemo(
+    () => (privateRoom ? generateOutput(nodes, edges, cpm, bpc) : null),
+    [privateRoom, nodes, edges, cpm, bpc],
+  );
+  const pattern = (ownPattern ?? fullPattern) || 'No pattern.';
   const { copy: handleCopy, status } = useCopyText(pattern);
 
   return (
     <div className="flex w-full min-w-0 flex-col ">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm font-medium">Strudel code</span>
+        <span className="text-sm font-medium">
+          {privateRoom ? 'Your Strudel code' : 'Strudel code'}
+        </span>
         <Popover>
           <PopoverTrigger asChild>
             <Button

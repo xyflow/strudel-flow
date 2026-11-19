@@ -9,6 +9,8 @@ import { useAppStore } from '@/store/app-store';
 import { PlayPauseButton } from './play-pause-button';
 import { ZoomSlider } from './zoom-slider';
 import { PresetPopover } from './preset-popover';
+import { CollabPopover, PresenceChips } from '@/collab/collab-ui';
+import { useCollabStore } from '@/collab/session';
 
 export function EditorToolbar({
   onAddNode,
@@ -21,6 +23,7 @@ export function EditorToolbar({
   const setBpc = useAppStore((state) => state.setBpc);
   const error = useAppStore((state) => state.error);
   const setError = useAppStore((state) => state.setError);
+  const inRoom = useCollabStore((state) => state.room !== null);
 
   return (
     <>
@@ -41,6 +44,7 @@ export function EditorToolbar({
             dangerouslySetInnerHTML={{ __html: logo }}
           />
         </a>
+        <PresenceChips />
       </Panel>
 
       <Panel
@@ -102,7 +106,11 @@ export function EditorToolbar({
           className="m-0! mt-36! flex max-w-[min(420px,90vw)] sm:mt-24! items-start gap-3 rounded-md border border-destructive/40 bg-card p-3 text-xs"
           role="alert"
         >
-          <span>Couldn’t play this patch. {error}</span>
+          <span>
+            Couldn’t play this patch. {error}
+            {inRoom &&
+              ' It may come from your partner’s part.'}
+          </span>
           <button
             aria-label="Dismiss playback error"
             onClick={() => setError(null)}
@@ -123,6 +131,7 @@ export function EditorToolbar({
         >
           <Plus className="size-4" aria-hidden="true" />
         </ControlButton>
+        <CollabPopover />
         <PresetPopover />
         <AppearancePopover />
         <AppInfoPopover />

@@ -1,4 +1,44 @@
-# Strudel Flow
+# Strudel Together
+
+Jam remotely on one [Strudel](https://strudel.cc) piece in a node graph. Everyone in a room hears the combined mix, in time, but each player only sees their own nodes.
+
+A fork of [xyflow/strudel-flow](https://github.com/xyflow/strudel-flow) with a small room server. AGPL-3.0, like Strudel and strudel-flow. If you host it for other people, link them to your source.
+
+## Run it locally
+
+You need Node 22.18 or later. pnpm is pinned in `package.json`; `npx pnpm@9.11.0` works if pnpm isn't installed.
+
+```sh
+pnpm install
+pnpm --dir server install
+pnpm server   # room server on ws://localhost:1234 (rooms saved in data/rooms.sqlite)
+pnpm dev      # app on http://localhost:5173
+```
+
+Open the app, click the people icon, then **Start a room**, and send the link. To try two players on one machine, open `?room=test&as=Alice` and `?room=test&as=Bob` in two tabs.
+
+## How it works
+
+- **Sync.** Each room is a Yjs document on a [Hocuspocus](https://github.com/ueberdosis/hocuspocus) server (`server/index.ts`). `src/collab/binding.ts` diffs the app's Zustand store against the doc after every change, so every existing edit path syncs without changes.
+- **Ownership.** Each node carries `data.owner`. The binding never writes or deletes another player's nodes. Loading a patch or pressing undo only touches your own part.
+- **Hidden view.** The canvas, the code panel, exports and share links show only your nodes. Audio is compiled from everyone's nodes, so you hear the whole piece. This is UI-level hiding: the data does reach both browsers. The room toggle "Hide each other's work" switches to a fully shared canvas.
+- **Same bar on both machines.** Play/stop and tempo are shared. `src/collab/clock.ts` estimates the server clock NTP-style, and `src/collab/align.ts` keeps Strudel's scheduler on the room's cycle (anchor time + cps), correcting drift over 20 ms.
+- **Trust.** The Code node runs your partner's Strudel/JS in your browser. Only jam with people you trust; room ids are unguessable.
+
+## Tests
+
+```sh
+pnpm test
+```
+
+## Deploying
+
+- Build the app (`pnpm build`) and host `dist/` on any static host. Set `VITE_COLLAB_URL` to your room server, e.g. `wss://rooms.example.com`.
+- Run `node server/index.ts` on any host that supports WebSockets. It reads `PORT` and `DB_PATH`.
+
+---
+
+## Upstream: Strudel Flow
 
 A visual drum machine and pattern sequencer built with [Strudel.cc](https://strudel.cc), [React Flow](https://reactflow.dev), and styled using [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/). Create complex musical patterns by connecting instrument nodes to effect nodes with a drag-and-drop interface.
 

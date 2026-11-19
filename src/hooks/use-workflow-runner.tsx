@@ -7,9 +7,12 @@ import {
   evaluate,
   hush,
   samples,
+  getAudioContext,
   type StrudelSession,
 } from '@strudel/web';
 import { setSchedulerNow } from '@/lib/strudel-clock';
+import { getSession, getTransport, useCollabStore } from '@/collab/session';
+import { createAligner, prepareStart } from '@/collab/align';
 
 const ready: Promise<StrudelSession> = initStrudel().then(
   (session: StrudelSession) => {
@@ -28,6 +31,12 @@ samples('github:tidalcycles/dirt-samples');
 
 async function evaluateAudio(pattern: string) {
   const session = await ready;
+  // In a jam room, start on the cycle the room is on, not at cycle 0.
+  const room = getSession();
+  const transport = getTransport();
+  if (room && transport) {
+    prepareStart(session.scheduler, transport, getAudioContext(), room.clock);
+  }
   await evaluate(pattern);
   if (session.state.evalError) throw session.state.evalError;
 }
@@ -95,6 +104,42 @@ function createPlaybackEngine(adapter: PlaybackAdapter) {
     },
   };
 }
+// While playing in a jam room, measure how far this browser is from the
+// room's cycle and nudge the scheduler back when it drifts.
+function useRoomAlignment(isPlaying: boolean) {
+  const inRoom = useCollabStore((state) => state.room !== null);
+  const transportRevision = useCollabStore((state) => state.transportRevision);
+  useEffect(() => {
+    if (!inRoom || !isPlaying) {
+      useCollabStore.setState({ alignErrorMs: null });
+      return;
+    }
+    const aligner = createAligner();
+    let cancelled = false;
+    const check = async () => {
+      const session = await ready;
+      const room = getSession();
+      const transport = getTransport();
+      if (cancelled || !room || !transport) return;
+      const errorMs = aligner.check(
+        session.scheduler,
+        transport,
+        getAudioContext(),
+        room.clock,
+      );
+      if (errorMs !== null) useCollabStore.setState({ alignErrorMs: errorMs });
+    };
+    // Check quickly after a start or tempo change, then settle down.
+    const soon = [150, 400, 800].map((ms) => window.setTimeout(check, ms));
+    const interval = window.setInterval(check, 2000);
+    return () => {
+      cancelled = true;
+      soon.forEach(clearTimeout);
+      clearInterval(interval);
+    };
+  }, [inRoom, isPlaying, transportRevision]);
+}
+
 export function useWorkflowRunner() {
   const engine = useRef<ReturnType<typeof createPlaybackEngine> | null>(null);
   const nodes = useAppStore((state) => state.nodes);
@@ -104,6 +149,7 @@ export function useWorkflowRunner() {
   const setPattern = useAppStore((state) => state.setPattern);
   const isPlaying = useAppStore((state) => state.isPlaying);
   const setError = useAppStore((state) => state.setError);
+  useRoomAlignment(isPlaying);
 
   const compiled = useMemo(() => {
     try {

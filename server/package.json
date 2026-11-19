@@ -1,0 +1,21 @@
+{
+  "name": "strudel-together-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Room server for Strudel Together: Yjs sync (Hocuspocus), SQLite persistence and a clock for phase alignment.",
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "dev": "node --watch index.ts",
+    "start": "node index.ts"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "dependencies": {
+    "@hocuspocus/extension-database": "4.8.0",
+    "@hocuspocus/server": "4.8.0",
+    "y-protocols": "1.0.7",
+    "yjs": "13.6.33"
+  }
+}

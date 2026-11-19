@@ -10,6 +10,8 @@ import { useUrlState } from '@/hooks/use-url-state';
 import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useThemeCss } from '@/hooks/use-theme-css';
+import { useVisibleGraph } from '@/collab/use-visible-graph';
+import { EmptyPartHint } from '@/collab/collab-ui';
 
 const edgeTypes = { default: deleteEdge };
 
@@ -18,25 +20,20 @@ export default function Editor() {
   useWorkflowRunner();
   useKeyboardShortcuts();
 
-  const {
-    nodes,
-    edges,
-    colorMode,
-    theme,
-    onNodesChange,
-    onEdgesChange,
-    onConnect,
-  } = useAppStore(
-    useShallow((state) => ({
-      nodes: state.nodes,
-      edges: state.edges,
-      colorMode: state.colorMode,
-      theme: state.theme,
-      onNodesChange: state.onNodesChange,
-      onEdgesChange: state.onEdgesChange,
-      onConnect: state.onConnect,
-    })),
-  );
+  const { colorMode, theme, onNodesChange, onEdgesChange, onConnect } =
+    useAppStore(
+      useShallow((state) => ({
+        colorMode: state.colorMode,
+        theme: state.theme,
+        onNodesChange: state.onNodesChange,
+        onEdgesChange: state.onEdgesChange,
+        onConnect: state.onConnect,
+      })),
+    );
+  // In a jam room with private view this is only your own part. Changes from
+  // React Flow are keyed by id, so the store handlers still apply them to the
+  // full graph, which is what gets played.
+  const { nodes, edges } = useVisibleGraph();
   useThemeCss(theme);
 
   return (
@@ -63,6 +60,7 @@ export default function Editor() {
             fitViewOptions={{ padding: 0.3, maxZoom: 1 }}
           >
             <EditorToolbar onAddNode={onAddNode} />
+            {nodes.length === 0 && <EmptyPartHint />}
           </ReactFlow>
         </div>
       )}
