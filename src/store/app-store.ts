@@ -17,8 +17,6 @@ import { findConnectedComponents } from '@/lib/graph-utils';
 
 type AppState = {
   name: string;
-  author: string;
-  description: string;
   graphRevision: number;
   nodes: AppNode[];
   edges: Edge[];
@@ -53,8 +51,6 @@ export const useAppStore = create<AppStore>()(
   subscribeWithSelector((set, get) => ({
     graphRevision: 0,
     name: 'Untitled patch',
-    author: '',
-    description: '',
     nodes: initialNodes,
     edges: initialEdges,
     theme: 'caffeine',

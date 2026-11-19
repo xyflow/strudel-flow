@@ -5,16 +5,8 @@ import { getMe, getView } from '@/collab/session';
 import { adoptGraph, ownedBy, visibleGraph } from '@/collab/ownership';
 
 export function capturePatch(): ProjectState {
-  const {
-    name,
-    author,
-    description,
-    theme,
-    colorMode,
-    cpm,
-    bpc,
-  } = useAppStore.getState();
-  // In a jam room, exports and links contain only what you can see.
+  const { name, theme, colorMode, cpm, bpc } = useAppStore.getState();
+  // In a jam room, an export contains only what you can see.
   const me = getMe();
   const all = useAppStore.getState();
   const { nodes, edges } = me
@@ -22,8 +14,6 @@ export function capturePatch(): ProjectState {
     : all;
   return {
     name: name.trim() || 'Untitled patch',
-    author: author.trim(),
-    description: description.trim(),
     nodes: nodes.map(({ id, type, position, data }) => {
       // Room ownership is meaningless outside the room.
       const rest = { ...data };
@@ -63,8 +53,6 @@ export function applyPatch(state: ProjectState): boolean {
   useAppStore.setState({
     graphRevision: useAppStore.getState().graphRevision + 1,
     name: state.name ?? 'Untitled patch',
-    author: state.author ?? '',
-    description: state.description ?? '',
     nodes: state.nodes as AppNode[],
     edges: state.edges,
     theme: state.theme,

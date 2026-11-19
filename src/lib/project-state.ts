@@ -2,8 +2,6 @@ import type { Node, Edge, ColorMode } from '@xyflow/react';
 
 export interface ProjectState {
   name?: string;
-  author?: string;
-  description?: string;
   nodes: Node[];
   edges: Edge[];
   theme: string;
@@ -26,13 +24,8 @@ function validateState(value: unknown): ProjectState | null {
       (!Number.isFinite(Number(state.bpc)) || Number(state.bpc) <= 0))
   )
     return null;
-  if (
-    ['name', 'author', 'description'].some((key) => {
-      const field = (value as Record<string, unknown>)[key];
-      return field !== undefined && typeof field !== 'string';
-    })
-  )
-    return null;
+  const name = (value as Record<string, unknown>).name;
+  if (name !== undefined && typeof name !== 'string') return null;
   const ids = new Set<string>();
   for (const node of state.nodes) {
     if (

@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { capturePatch, applyPatch } from '@/lib/patch-state';
 import { downloadState, stateFromJson } from '@/lib/project-state';
 import type { ProjectState } from '@/lib/project-state';
-import { PatchGallery } from './patch-gallery';
 import { PatternPanel } from './pattern-panel';
 import { ControlButton } from './control-button';
 import { useAppStore } from '@/store/app-store';
@@ -115,7 +114,6 @@ export function PresetPopover() {
           {status ||
             'Export saves your patch as a file. Import loads one back in.'}
         </p>
-        <PatchGallery onLoad={(patch) => loadPatch(patch.state)} />
         <div className="border-t pt-3">
           <PatternPanel />
         </div>
