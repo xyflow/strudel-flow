@@ -56,6 +56,14 @@ export function loadUser(href = window.location.href): User {
   };
 }
 
+/**
+ * `&listen`: the person running a model player, listening in under the
+ * model's identity (agent/README.md). That tab must not seed the room.
+ */
+export function isListening(href = window.location.href): boolean {
+  return new URL(href).searchParams.has('listen');
+}
+
 export function roomFromUrl(href = window.location.href): string | null {
   const room = new URL(href).searchParams.get('room');
   return room && /^[A-Za-z0-9_-]{1,64}$/.test(room) ? room : null;

@@ -112,6 +112,16 @@ export const PRESETS = [
   { label: 'Descending', steps: [0, 6, 5, 4] },
 ];
 
+/**
+ * Limits of the Chords node's controls. The default progression and the
+ * presets have 4 chords; the UI can add chords but not remove them.
+ */
+export const MIN_STEPS = 4;
+export const MAX_STEPS = 16;
+/** The chord editor offers scale degrees 0-13: two octaves. */
+export const NOTE_SLOTS = 14;
+export const SCALES = ['major', 'minor'] as const;
+
 export const DEFAULTS = {
   selectedKey: 'C',
   octave: 4,

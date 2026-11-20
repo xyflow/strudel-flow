@@ -14,7 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { KEY_OPTIONS, SCALE_TYPE_OPTIONS } from '@/data/sounds';
+import { KEY_OPTIONS, OCTAVES, SCALE_TYPE_OPTIONS } from '@/data/sounds';
+import { STEPS as PAD_STEPS } from '@/components/nodes/instruments/pad/pad';
 
 interface KeyScaleOctaveControlsProps {
   selectedKey: string;
@@ -94,8 +95,8 @@ function KeyScaleOctaveControls({
         <Stepper
           label="Octave"
           value={octave}
-          min={1}
-          max={8}
+          min={OCTAVES.min}
+          max={OCTAVES.max}
           onChange={onOctaveChange}
         />
       </div>
@@ -116,8 +117,8 @@ function PadControls({
           <Stepper
             label="Steps"
             value={steps}
-            min={1}
-            max={16}
+            min={PAD_STEPS.min}
+            max={PAD_STEPS.max}
             onChange={onStepsChange}
           />
         </div>

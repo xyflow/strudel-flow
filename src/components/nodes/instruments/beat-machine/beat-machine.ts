@@ -1,4 +1,7 @@
-import type { CellState } from '../../shared/modifiers';
+import type {
+  CellState,
+  ModifierGroups,
+} from '../../shared/modifier-options';
 
 export type BeatMachineData = {
   steps?: number;
@@ -43,6 +46,21 @@ const patternToString = (
 };
 
 export const DEFAULT_STEPS = 8;
+
+/** What the Beats node's controls allow. */
+export const STEPS = { min: 1, max: 32 } as const;
+export const STEP_MODIFIERS: ModifierGroups = {
+  Speed: [
+    { value: '*2', label: '*2' },
+    { value: '*3', label: '*3' },
+    { value: '*4', label: '*4' },
+  ],
+  Elongate: [
+    { value: '@2', label: '@2' },
+    { value: '@3', label: '@3' },
+    { value: '@4', label: '@4' },
+  ],
+};
 
 export function generatePattern(data: BeatMachineData, strudelString: string) {
   const modifiersEnabled =

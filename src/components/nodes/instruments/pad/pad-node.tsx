@@ -4,7 +4,8 @@ import { NOTES, DEFAULTS, createDefaultGrid } from './pad';
 import { useState, useEffect } from 'react';
 import { getSchedulerNow } from '@/lib/strudel-clock';
 
-import { CellState, ModifierDropdown } from '../../shared/modifiers';
+import { ModifierDropdown } from '../../shared/modifiers';
+import type { CellState } from '../../shared/modifier-options';
 import { AccordionControls } from '@/components/nodes/shared/accordion-controls';
 
 export function PadNode({

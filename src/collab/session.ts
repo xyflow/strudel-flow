@@ -10,7 +10,7 @@ import { useAppStore } from '@/store/app-store';
 import { initialEdges, initialNodes } from '@/data/workflow-data';
 import { bindStoreToDoc, type Binding, type Transport } from './binding';
 import { createServerClock, type ClockStats, type ServerClock } from './clock';
-import { saveUser, type User } from './identity';
+import { isListening, saveUser, type User } from './identity';
 import { adoptGraph, type ViewMode } from './ownership';
 
 type Peer = User;
@@ -150,8 +150,9 @@ export async function joinRoom(room: string, me: User): Promise<Session> {
   });
 
   // The first player into an empty room gets the starter patch. Later players
-  // start with an empty canvas (and hear the others' parts).
-  if (binding.nodeCount() === 0) {
+  // start with an empty canvas (and hear the others' parts). Someone listening
+  // in as a model player never adds it: it would become the model's part.
+  if (binding.nodeCount() === 0 && !isListening()) {
     const starter = adoptGraph(initialNodes, initialEdges, me.id);
     useAppStore.setState((state) => ({
       nodes: starter.nodes,

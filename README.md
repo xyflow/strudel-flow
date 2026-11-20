@@ -25,6 +25,10 @@ Open the app, click the people icon, then **Start a room**, and send the link. T
 - **Same bar on both machines.** Play/stop and tempo are shared. `src/collab/clock.ts` estimates the server clock NTP-style, and `src/collab/align.ts` keeps Strudel's scheduler on the room's cycle (anchor time + cps), correcting drift over 20 ms.
 - **Trust.** The Code node runs your partner's Strudel/JS in your browser. Only jam with people you trust; room ids are unguessable.
 
+## Play with a model
+
+An AI model can join a room as an ordinary player: it runs on your machine, connects through the MCP server in `agent/`, and plays by writing Strudel code, limited to what the visual nodes can produce. Your partner just sees another player. With Claude Code, run `/jam <room link> as <name> — <how to play>` in this repo. See [agent/README.md](agent/README.md).
+
 ## Tests
 
 ```sh
@@ -68,6 +72,8 @@ export default defineNode({
 ```
 
 `generate(values, input)` returns Strudel code. `values` holds the current parameter values and `input` the connected pattern. Effects usually append to `input`; instruments return a pattern of their own. For controls beyond knobs, text fields and selects (a grid, a keyboard), pass a React `component`. Node data syncs to the room automatically.
+
+Model players write nodes as code. A knob or select effect is covered automatically, since its calls are its parameters' labels. Any other node needs a `your-name.code.ts` next to it that reads its code back into node data (see the instruments' `*.code.ts` files and `src/model-player/spec.ts`). `pnpm test` fails until it has one. Then run `pnpm test -u` to regenerate `docs/model-player-rules.md`.
 
 ## Credits
 

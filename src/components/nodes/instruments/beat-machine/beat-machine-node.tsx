@@ -8,12 +8,18 @@ import { DRUM_CATEGORIES } from '@/data/sounds';
 import { CategorySelectItems } from '@/components/nodes/shared/category-select-items';
 import type { CustomControlsProps } from '../../define-node';
 import type { BeatMachineData } from './beat-machine';
-import { createDefaultRows, DEFAULT_STEPS } from './beat-machine';
+import {
+  createDefaultRows,
+  DEFAULT_STEPS,
+  STEP_MODIFIERS,
+  STEPS,
+} from './beat-machine';
 import type { BeatMachineRow } from './beat-machine';
 import { Switch } from '@/components/ui/switch';
 import { AccordionControls } from '@/components/nodes/shared/accordion-controls';
 import { Stepper } from '@/components/nodes/shared/stepper';
-import { CellState, ModifierDropdown } from '../../shared/modifiers';
+import { ModifierDropdown } from '../../shared/modifiers';
+import type { CellState } from '../../shared/modifier-options';
 
 function SequencerRow({
   row,
@@ -75,18 +81,7 @@ function SequencerRow({
                   onModifierSelect={(modifier) =>
                     onModifierSelect(rowIndex, step, modifier)
                   }
-                  modifierGroups={{
-                    Speed: [
-                      { value: '*2', label: '*2' },
-                      { value: '*3', label: '*3' },
-                      { value: '*4', label: '*4' },
-                    ],
-                    Elongate: [
-                      { value: '@2', label: '@2' },
-                      { value: '@3', label: '@3' },
-                      { value: '@4', label: '@4' },
-                    ],
-                  }}
+                  modifierGroups={STEP_MODIFIERS}
                 />
               )}
             </div>
@@ -121,7 +116,7 @@ export function BeatMachineNode({
   });
 
   const setSteps = (newSteps: number) => {
-    if (newSteps < 1 || newSteps > 32) return;
+    if (newSteps < STEPS.min || newSteps > STEPS.max) return;
     const newRows = rows.map((row) => {
       let newPattern = row.pattern.slice(0, newSteps);
       if (newPattern.length < newSteps) {
@@ -222,8 +217,8 @@ export function BeatMachineNode({
           <Stepper
             label="Steps"
             value={steps}
-            min={1}
-            max={32}
+            min={STEPS.min}
+            max={STEPS.max}
             onChange={setSteps}
           />
           <Stepper

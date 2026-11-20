@@ -21,12 +21,32 @@ function isSoundSource(node: AppNode): boolean {
   return category === 'Instruments';
 }
 
+/** One `$:` line of the output, and the connected nodes it came from. */
+export type CompiledLine = {
+  nodeIds: string[];
+  /** The line, commented out when every source in it is paused. */
+  code: string;
+  paused: boolean;
+};
+
 export function generateOutput(
   nodes: AppNode[],
   edges: Edge[],
   cpm: string,
   bpc: string,
 ): string {
+  const lines = compileLines(nodes, edges);
+  if (lines.length === 0) return '';
+  return `${tempoLine(cpm, bpc)}\n${lines.map((line) => line.code).join('\n')}`;
+}
+
+export function tempoLine(cpm: string, bpc: string) {
+  const bpm = parseInt(cpm) || 120;
+  const beatsPerCycle = parseInt(bpc) || 4;
+  return `setcpm(${bpm}/${beatsPerCycle})`;
+}
+
+export function compileLines(nodes: AppNode[], edges: Edge[]): CompiledLine[] {
   const nodesById = new Map(nodes.map((node) => [node.id, node]));
   const nodePatterns: Record<string, string> = {};
   for (const node of nodes) {
@@ -45,7 +65,7 @@ export function generateOutput(
   }
 
   const components = findConnectedComponents(nodes, edges);
-  const finalPatterns: { pattern: string; paused: boolean }[] = [];
+  const lines: CompiledLine[] = [];
 
   for (const componentNodeIds of components) {
     const componentNodes = componentNodeIds
@@ -87,28 +107,18 @@ export function generateOutput(
     }
 
     if (pattern) {
-      finalPatterns.push({
-        pattern: optimizeSoundCalls(pattern),
+      const line = `$: ${optimizeSoundCalls(pattern)}`;
+      lines.push({
+        nodeIds: componentNodeIds,
+        code: allSourcesPaused
+          ? line
+              .split('\n')
+              .map((part) => `// ${part}`)
+              .join('\n')
+          : line,
         paused: allSourcesPaused,
       });
     }
   }
-
-  if (finalPatterns.length === 0) return '';
-
-  const result = finalPatterns
-    .map(({ pattern, paused }) => {
-      const line = `$: ${pattern}`;
-      return paused
-        ? line
-            .split('\n')
-            .map((part) => `// ${part}`)
-            .join('\n')
-        : line;
-    })
-    .join('\n');
-
-  const bpm = parseInt(cpm) || 120;
-  const beatsPerCycle = parseInt(bpc) || 4;
-  return `setcpm(${bpm}/${beatsPerCycle})\n${result}`;
+  return lines;
 }

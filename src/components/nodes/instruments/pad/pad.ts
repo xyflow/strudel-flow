@@ -1,4 +1,4 @@
-import type { CellState } from '../../shared/modifiers';
+import type { CellState } from '../../shared/modifier-options';
 
 export type PadData = {
   steps?: number;
@@ -11,6 +11,9 @@ export type PadData = {
 };
 
 export const NOTES = ['0', '1', '2', '3', '4', '5', '6', '7'];
+
+/** The Steps control's range. The grid has one row per step. */
+export const STEPS = { min: 1, max: 16 } as const;
 
 function applyColumnModifier(pattern: string, modifier: CellState): string {
   return modifier.type === 'modifier' ? `${pattern}${modifier.value}` : pattern;

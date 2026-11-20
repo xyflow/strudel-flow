@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath } from 'url';
 import process from 'node:process';
+import { nodeStubs } from './agent/node-stubs.js';
 
 // Without VITE_COLLAB_URL the app reaches the room server at /collab on its
 // own origin; in local dev and preview this forwards it to the room server.
@@ -15,7 +16,12 @@ const collabProxy = {
 };
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    // Unit tests load node definitions in Node (see agent/node-stubs.js).
+    ...(process.env.VITEST ? [nodeStubs()] : []),
+  ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

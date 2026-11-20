@@ -265,6 +265,9 @@ export const KEY_OPTIONS = [
   { value: 'B', label: 'B' },
 ];
 
+/** The Octave control used by the Chords and Pad nodes. */
+export const OCTAVES = { min: 1, max: 8 } as const;
+
 export const SCALE_TYPE_OPTIONS = [
   { value: 'major', label: 'Major' },
   { value: 'minor', label: 'Minor' },

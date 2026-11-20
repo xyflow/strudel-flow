@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "..",
+    "paths": { "@/*": ["./src/*"] },
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "target": "ES2022",
+    "types": ["node", "vite/client"]
+  },
+  "include": ["./*.ts", "../src"]
+}

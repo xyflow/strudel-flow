@@ -9,10 +9,13 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest run",
-    "server": "node server/index.ts"
+    "server": "node server/index.ts",
+    "model-player": "node agent/start.mjs",
+    "check:agent": "tsc -p agent"
   },
   "dependencies": {
     "@hocuspocus/provider": "4.8.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-context-menu": "^2.3.7",
     "@radix-ui/react-dropdown-menu": "^2.1.12",
@@ -31,11 +34,13 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.10",
     "yjs": "13.6.33",
+    "zod": "^4.6.7",
     "zustand": "^5.0.1"
   },
   "license": "AGPL-3.0-or-later",
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.10",
+    "@types/node": "^24",
     "@types/react": "^18.2.53",
     "@types/react-dom": "^18.2.18",
     "@typescript-eslint/eslint-plugin": "^6.20.0",

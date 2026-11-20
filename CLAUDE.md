@@ -24,6 +24,8 @@ pnpm is pinned. On this machine (Node 26, no corepack) use `npx -y pnpm@9.11.0 <
 - `src/hooks/use-workflow-runner.tsx`: evaluates the code, plus room alignment.
 - `server/index.ts`: Hocuspocus, `node:sqlite` persistence, stateless ping→pong clock. Runs with plain `node` (types are stripped).
 - `render.yaml` (static site + Docker room server), `server/Dockerfile`.
+- `agent/`: the model player, an MCP server (`agent/mcp.ts`, `room.ts`) that joins rooms as an ordinary player. `agent/start.mjs` builds it with Vite on every start; `agent/node-stubs.js` swaps out the React/audio imports so node definitions load in Node (vitest uses it too). `/jam` is `.claude/commands/jam.md`. See `agent/README.md`.
+- `src/model-player/`: model code → visual nodes. `syntax.ts` parses, `decode.ts` maps a line to nodes, `apply.ts` edits the model's own nodes and checks the result with `compileLines`, `rules.ts` generates `docs/model-player-rules.md`. Per-node specs are the `*.code.ts` files next to the nodes.
 
 ## Rules not to break
 - The binding never writes or deletes another player's nodes. Undo and patch import touch only your own part.
@@ -34,7 +36,8 @@ pnpm is pinned. On this machine (Node 26, no corepack) use `npx -y pnpm@9.11.0 <
 
 ## Workflow
 - Pushing `main` deploys the live site. Work on a branch and merge via PR.
-- Keep `pnpm test` passing. `src/collab/binding.test.ts` covers sync, ownership, transport and undo merging.
+- Keep `pnpm test` passing. `src/collab/binding.test.ts` covers sync, ownership, transport and undo merging. `src/model-player/*.test.ts` covers model code: every node needs a code spec, and 400 random person-built lines must round-trip exactly.
+- Changing a node's controls or generator: keep its limits in the node's plain `.ts` module (the UI and its `*.code.ts` share them), then `pnpm test -u` to regenerate `docs/model-player-rules.md`. `pnpm check:agent` type-checks `agent/`.
 - To test two players in one browser, open two tabs: `?room=test&as=Alice` and `?room=test&as=Bob`.
 
 ## Parallel sessions / worktrees

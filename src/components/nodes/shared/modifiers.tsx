@@ -4,34 +4,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-export type CellState = { type: 'off' } | { type: 'modifier'; value: string };
-const DEFAULT_MODIFIER_GROUPS = {
-  Replicate: [
-    { value: '!2', label: '!2' },
-    { value: '!3', label: '!3' },
-    { value: '!4', label: '!4' },
-  ],
-  Slow: [
-    { value: '/2', label: '/2' },
-    { value: '/3', label: '/3' },
-    { value: '/4', label: '/4' },
-  ],
-  Elongate: [
-    { value: '@2', label: '@2' },
-    { value: '@3', label: '@3' },
-    { value: '@4', label: '@4' },
-  ],
-  Speed: [
-    { value: '*2', label: '*2' },
-    { value: '*3', label: '*3' },
-    { value: '*4', label: '*4' },
-  ],
-};
+import {
+  DEFAULT_MODIFIER_GROUPS,
+  type CellState,
+  type ModifierGroups,
+} from './modifier-options';
 
 interface ModifierDropdownProps {
   currentState: CellState;
   onModifierSelect: (modifier: CellState) => void;
-  modifierGroups?: Record<string, { value: string; label: string }[]>;
+  modifierGroups?: ModifierGroups;
 }
 
 export function ModifierDropdown({

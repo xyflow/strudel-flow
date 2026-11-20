@@ -6,6 +6,9 @@ import {
   chordLabels,
   PRESETS,
   DEFAULTS,
+  MAX_STEPS,
+  NOTE_SLOTS,
+  SCALES,
 } from './chord';
 import { useRef, useState } from 'react';
 import { AccordionControls } from '@/components/nodes/shared/accordion-controls';
@@ -227,7 +230,7 @@ export function ChordNode({
   const chords = chordNotes(data);
   const tones = chords[activeStep] ?? [];
   const noteSlots = Math.max(
-    14,
+    NOTE_SLOTS,
     Math.ceil((Math.max(0, ...chords.flat()) + 1) / 7) * 7,
   );
   const changeSteps = (next: number[]) =>
@@ -321,7 +324,7 @@ export function ChordNode({
       <div className="flex items-center gap-2">
         <button
           aria-label="Add chord step"
-          disabled={steps.length >= 16}
+          disabled={steps.length >= MAX_STEPS}
           onClick={() => {
             changeNotes([
               ...chords,
@@ -345,7 +348,7 @@ export function ChordNode({
           },
           octave: data.octave ?? DEFAULTS.octave,
           onOctaveChange: (octave) => onChange({ octave }),
-          allowedScales: ['major', 'minor'],
+          allowedScales: [...SCALES],
         }}
       />
     </div>
