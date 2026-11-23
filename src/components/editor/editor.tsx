@@ -10,6 +10,7 @@ import { useUrlState } from '@/hooks/use-url-state';
 import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useThemeCss } from '@/hooks/use-theme-css';
+import { fitViewOptions } from './fit-view-options';
 
 const edgeTypes = { default: deleteEdge };
 
@@ -18,25 +19,17 @@ export default function Editor() {
   useWorkflowRunner();
   useKeyboardShortcuts();
 
-  const {
-    nodes,
-    edges,
-    colorMode,
-    theme,
-    onNodesChange,
-    onEdgesChange,
-    onConnect,
-  } = useAppStore(
-    useShallow((state) => ({
-      nodes: state.nodes,
-      edges: state.edges,
-      colorMode: state.colorMode,
-      theme: state.theme,
-      onNodesChange: state.onNodesChange,
-      onEdgesChange: state.onEdgesChange,
-      onConnect: state.onConnect,
-    })),
-  );
+  const { nodes, edges, theme, onNodesChange, onEdgesChange, onConnect } =
+    useAppStore(
+      useShallow((state) => ({
+        nodes: state.nodes,
+        edges: state.edges,
+        theme: state.theme,
+        onNodesChange: state.onNodesChange,
+        onEdgesChange: state.onEdgesChange,
+        onConnect: state.onConnect,
+      })),
+    );
   useThemeCss(theme);
 
   return (
@@ -56,11 +49,11 @@ export default function Editor() {
             onConnect={onConnect}
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
-            colorMode={colorMode}
+            elevateEdgesOnSelect={false}
             panActivationKeyCode={null}
             minZoom={0.2}
             fitView
-            fitViewOptions={{ padding: 0.3, maxZoom: 1 }}
+            fitViewOptions={fitViewOptions}
           >
             <EditorToolbar onAddNode={onAddNode} />
           </ReactFlow>

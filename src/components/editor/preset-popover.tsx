@@ -14,6 +14,7 @@ import { PatchGallery } from './patch-gallery';
 import { PatternPanel } from './pattern-panel';
 import { ControlButton } from './control-button';
 import { useAppStore } from '@/store/app-store';
+import { fitViewOptions } from './fit-view-options';
 
 export function PresetPopover() {
   const name = useAppStore((state) => state.name);
@@ -29,7 +30,7 @@ export function PresetPopover() {
     setLink(getShareUrl(capturePatch()));
     setStatus('Patch loaded');
     requestAnimationFrame(() => {
-      void fitView({ padding: 0.3, maxZoom: 1 });
+      void fitView(fitViewOptions);
     });
   };
   const copy = async () => {

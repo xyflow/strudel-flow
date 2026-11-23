@@ -1,10 +1,13 @@
 .radial-menu {
   --radial-card: var(--card, #fff);
   --radial-accent: var(--secondary, #f0d591);
-  --radial-border: color-mix(
-    in srgb,
-    var(--secondary, #f0d591) 22%,
-    var(--border, #d4d4dc)
+  --radial-border: light-dark(
+    color-mix(in srgb, var(--secondary, #f0d591) 22%, var(--border, #d4d4dc)),
+    color-mix(in srgb, var(--secondary-foreground, #eee) 14%, var(--border, #444))
+  );
+  --radial-hover-border: light-dark(
+    var(--secondary, #f0d591),
+    color-mix(in srgb, var(--secondary-foreground, #eee) 21%, var(--border, #444))
   );
   --radial-ring: var(--ring, #7777f0);
   position: relative;
@@ -14,20 +17,6 @@
   font-family: Arial, Helvetica, sans-serif;
   letter-spacing: normal;
   outline: none;
-}
-.dark .radial-menu {
-  --radial-border: color-mix(
-    in srgb,
-    var(--secondary-foreground, #eee) 14%,
-    var(--border, #444)
-  );
-}
-.dark .radial-menu__item:hover .radial-menu__item-surface {
-  stroke: color-mix(
-    in srgb,
-    var(--secondary-foreground, #eee) 21%,
-    var(--border, #444)
-  );
 }
 .radial-menu *,
 .radial-menu *::before,
@@ -69,7 +58,7 @@
 .radial-menu__item:hover .radial-menu__item-surface,
 .radial-menu__item:focus-visible .radial-menu__item-surface {
   fill: var(--radial-accent);
-  stroke: var(--secondary, #f0d591);
+  stroke: var(--radial-hover-border);
 }
 .radial-menu__item:focus-visible .radial-menu__item-surface {
   stroke: var(--radial-ring);

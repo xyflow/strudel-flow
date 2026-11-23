@@ -1,4 +1,5 @@
 import { Check, Settings2 } from 'lucide-react';
+import { useLayoutEffect, useState } from 'react';
 import {
   Popover,
   PopoverContent,
@@ -8,11 +9,43 @@ import { themes } from '@/data/css/themes';
 import { useAppStore } from '@/store/app-store';
 import { ControlButton } from './control-button';
 
+const colorModes = ['system', 'light', 'dark'] as const;
+type ColorMode = (typeof colorModes)[number];
+const colorModeKey = 'strudel-flow:color-mode';
+
+function loadColorMode(): ColorMode {
+  try {
+    const saved = window.localStorage.getItem(colorModeKey);
+    if (saved === 'light' || saved === 'dark') return saved;
+  } catch {
+    // Storage may be unavailable in some browsing contexts.
+  }
+  return 'system';
+}
+
 export function AppearancePopover() {
   const theme = useAppStore((state) => state.theme);
-  const colorMode = useAppStore((state) => state.colorMode);
   const setTheme = useAppStore((state) => state.setTheme);
-  const setColorMode = useAppStore((state) => state.setColorMode);
+  const [colorMode, setColorMode] = useState(loadColorMode);
+
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    if (colorMode === 'system') {
+      delete root.dataset.theme;
+    } else {
+      root.dataset.theme = colorMode;
+    }
+
+    try {
+      if (colorMode === 'system') {
+        window.localStorage.removeItem(colorModeKey);
+      } else {
+        window.localStorage.setItem(colorModeKey, colorMode);
+      }
+    } catch {
+      // The current selection still applies when storage is unavailable.
+    }
+  }, [colorMode]);
 
   return (
     <Popover>
@@ -27,9 +60,9 @@ export function AppearancePopover() {
         aria-label="Appearance settings"
         className="nowheel max-h-[calc(100dvh-100px)] w-[min(420px,calc(100vw-24px))] overflow-y-auto rounded-lg p-4"
       >
-        <h3 className="mb-3 text-sm font-medium">Appearance</h3>
+        <h3 className="mb-3 text-sm font-medium">Color mode</h3>
         <div role="group" aria-label="Color mode" className="mb-4 flex gap-2">
-          {(['system', 'light', 'dark'] as const).map((mode) => (
+          {colorModes.map((mode) => (
             <button
               key={mode}
               type="button"
