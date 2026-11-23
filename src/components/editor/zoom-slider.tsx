@@ -2,6 +2,7 @@ import { Maximize, Minus, Plus } from 'lucide-react';
 import { Panel, useReactFlow, PanelProps } from '@xyflow/react';
 import { cn } from '@/lib/utils';
 import { ControlButton } from './control-button';
+import { fitViewOptions } from './fit-view-options';
 
 type ZoomSliderProps = Omit<PanelProps, 'children'>;
 export function ZoomSlider({ className, ...props }: ZoomSliderProps) {
@@ -23,7 +24,7 @@ export function ZoomSlider({ className, ...props }: ZoomSliderProps) {
       </ControlButton>
       <ControlButton
         title="Fit patch"
-        onClick={() => fitView({ duration: 300, padding: 0.3, maxZoom: 1 })}
+        onClick={() => fitView({ ...fitViewOptions, duration: 300 })}
       >
         <Maximize className="size-4" />
       </ControlButton>

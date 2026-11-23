@@ -10,7 +10,6 @@ export function capturePatch(): ProjectState {
     nodes,
     edges,
     theme,
-    colorMode,
     cpm,
     bpc,
   } = useAppStore.getState();
@@ -35,7 +34,6 @@ export function capturePatch(): ProjectState {
       }),
     ),
     theme,
-    colorMode,
     cpm,
     bpc,
   };
@@ -57,7 +55,6 @@ export function applyPatch(state: ProjectState): boolean {
     nodes: state.nodes as AppNode[],
     edges: state.edges,
     theme: state.theme,
-    colorMode: state.colorMode,
     cpm: state.cpm,
     bpc: state.bpc ?? '4',
     isPlaying: false,
