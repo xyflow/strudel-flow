@@ -3,6 +3,7 @@ import type { CellState } from '../../shared/modifiers';
 
 export type PadData = {
   noteTemplate?: string;
+  noteFunction?: 'note' | 'n';
   noteRows?: string[];
   importedScale?: boolean;
   steps?: number;
@@ -34,7 +35,7 @@ export function generatePattern(data: PadData, strudelString: string) {
   if (data.noteTemplate !== undefined) {
     const pattern = data.importedScale
       ? `n(${JSON.stringify(importedGridPattern(data))}).scale(${JSON.stringify(`${data.selectedKey ?? 'C'}${data.octave ?? 3}:${data.selectedScaleType ?? 'chromatic'}`)})`
-      : `note(${JSON.stringify(importedGridPattern(data))})`;
+      : `${data.noteFunction ?? 'note'}(${JSON.stringify(importedGridPattern(data))})`;
     return strudelString ? `${strudelString}.${pattern}` : pattern;
   }
   const grid = data.grid || createDefaultGrid();

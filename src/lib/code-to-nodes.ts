@@ -1,4 +1,7 @@
-import { createImportedPad } from '@/components/nodes/instruments/pad/imported-notes';
+import {
+  createImportedPad,
+  importedGridPattern,
+} from '@/components/nodes/instruments/pad/imported-notes';
 import { signals } from './strudel-calls';
 import { nanoid } from 'nanoid';
 import type { Edge } from '@xyflow/react';
@@ -13,7 +16,7 @@ export function codeToNodes(
   beatsPerCycle = 4,
 ) {
   if (edges.some((edge) => edge.target === node.id))
-    throw new Error('Disconnect the Code node’s input before converting.');
+    throw new Error('Cannot replace a node with an input.');
   const { pattern, setup, samples, cps } = parsePatternProgram(code);
   const created: AppNode[] = [];
   const connections: Edge[] = [];
@@ -28,8 +31,8 @@ export function codeToNodes(
     : node.position.y;
   const state = node.data.state ?? 'running';
   const position = (depth: number, lane: number) => ({
-    x: node.position.x + depth * 420,
-    y: y + lane * 400,
+    x: node.position.x + depth * 650,
+    y: y + lane * 700,
   });
   function connect(source: string, target: string, targetHandle?: string) {
     connections.push({
@@ -76,15 +79,21 @@ export function codeToNodes(
     const sound =
       call &&
       ['s', 'sound'].includes(call.name) &&
+      call.args.length === 1 &&
       typeof call.args[0] === 'string'
         ? call.args[0]
         : undefined;
     const notes =
-      call?.name === 'note' && typeof call.args[0] === 'string'
+      ['note', 'n'].includes(call?.name ?? '') &&
+      call?.args.length === 1 &&
+      typeof call.args[0] === 'string' &&
+      !call.rawStrings?.includes(0)
         ? call.args[0]
         : undefined;
     if (signal || sound !== undefined) type = 'synth-select-node';
-    if (notes !== undefined) type = 'pad-node';
+    const pad = notes !== undefined ? createImportedPad(notes) : undefined;
+    const canUsePad = pad && importedGridPattern(pad) === notes;
+    if (canUsePad) type = 'pad-node';
     created.push({
       id,
       type,
@@ -93,12 +102,14 @@ export function codeToNodes(
         title:
           signal || sound !== undefined
             ? 'Sound'
-            : notes !== undefined
+            : canUsePad
               ? 'Pad'
               : (part.call?.name ?? part.expression),
         ...(signal ? { signal } : {}),
-        ...(sound !== undefined ? { sound, soundCall: call?.name } : {}),
-        ...(notes !== undefined ? createImportedPad(notes) : {}),
+        ...(sound !== undefined
+          ? { sound, soundCall: call?.name, rawSound: call?.rawStrings?.includes(0) }
+          : {}),
+        ...(canUsePad ? { ...pad, noteFunction: call?.name } : {}),
         argumentSlots: argumentOutputs.map((item) => item.argument),
         state,
         argumentBranch,

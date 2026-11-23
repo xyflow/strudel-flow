@@ -11,7 +11,7 @@ pnpm dev
 
 ## Convert Strudel code
 
-Paste a pattern into a Code node and choose **Convert to nodes**. Sound calls use the existing Sound node, notes use the existing Pad grid, and sample libraries get their own Samples nodes. Nested stacks connect directly into effects. Modulation and callback expressions connect through separate parameter inputs.
+Copy Strudel code and paste it onto the canvas to create nodes. To add effects to a pattern, select a node and paste a chain such as `.gain(0.8).room(0.3)`. Select nodes and copy them to get Strudel code you can paste into Strudel. Sound calls use the existing Sound node, notes use the existing Pad grid, and sample libraries get their own Samples nodes. Nested stacks connect directly into effects. Modulation and callback expressions connect through separate parameter inputs.
 
 A numeric `setcps` sets the top tempo: BPM = cycles per second × 60 × beats per cycle. Imported Pad grids retain the original rhythm; changing the step count starts a new sequence with the chosen number of steps. Conversion is undoable.
 

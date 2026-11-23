@@ -10,6 +10,9 @@ import {
 } from '@/components/ui/select';
 import { SYNTH_CATEGORIES } from '@/data/sounds';
 import { cn } from '@/lib/utils';
+import { soundMap } from '@strudel/web';
+import { useEffect, useState } from 'react';
+import { signals } from '@/lib/strudel-calls';
 import { CategorySelectItems } from '@/components/nodes/shared/category-select-items';
 
 const waveforms = [
@@ -28,6 +31,10 @@ export function SynthSelectNode({
   onChange,
 }: CustomControlsProps<VoiceData>) {
   const sound = data.sound || DEFAULT_SOUND;
+  const [available, setAvailable] = useState<string[]>([]);
+  useEffect(() => soundMap.subscribe((sounds) => setAvailable(Object.keys(sounds).sort())), []);
+  const tokens = [...sound.matchAll(/[a-zA-Z_][\w-]*/g)];
+  const isPattern = tokens.length > 1 || /[^\w-]/.test(sound);
 
   const handleValueChange = (value: string) => {
     onChange({ sound: value });
@@ -60,7 +67,30 @@ export function SynthSelectNode({
           </button>
         ))}
       </div>
-      <Select value={sound} onValueChange={handleValueChange}>
+      {isPattern && (
+        <div className="flex flex-col gap-2">
+          <input
+            aria-label="Sound pattern"
+            className="nodrag nopan w-full rounded border bg-background px-2 py-1 font-mono text-xs"
+            value={sound}
+            onChange={(event) => handleValueChange(event.target.value)}
+          />
+          {tokens.map((token, index) => (
+            <label key={index} className="flex items-center gap-2 text-xs text-muted-foreground">
+              Sound {index + 1}
+              <select
+                aria-label={`Sound ${index + 1}`}
+                className="nodrag nopan min-w-0 flex-1 rounded border bg-background p-1 text-foreground"
+                value={token[0]}
+                onChange={(event) => handleValueChange(sound.slice(0, token.index) + event.target.value + sound.slice(token.index! + token[0].length))}
+              >
+                {[...new Set([token[0], ...available])].map((name) => <option key={name} value={name}>{name}</option>)}
+              </select>
+            </label>
+          ))}
+        </div>
+      )}
+      {!isPattern && <Select value={sound} onValueChange={handleValueChange}>
         <SelectTrigger
           aria-label="Voice sound"
           className="w-full border-0 bg-muted/50 text-xs"
@@ -86,8 +116,9 @@ export function SynthSelectNode({
               </SelectItem>
             ))}
           <CategorySelectItems categories={SYNTH_CATEGORIES} />
+          {(data.signal ? signals : available).filter((name) => !waveforms.some((wave) => wave.value === name) && !SYNTH_CATEGORIES.some((category) => category.options.includes(name)) && name !== sound).map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}
         </SelectContent>
-      </Select>
+      </Select>}
     </div>
   );
 }

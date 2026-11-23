@@ -17,10 +17,11 @@ export function generateOutput(
   edges: Edge[],
   cpm: string,
   bpc: string,
+  options: { clipboard?: boolean; fragment?: boolean; includeTempo?: boolean } = {},
 ): string {
   const nodesById = new Map(nodes.map((node) => [node.id, node]));
   const components = findConnectedComponents(nodes, edges);
-  const finalPatterns: { pattern: string; paused: boolean }[] = [];
+  const finalPatterns: { pattern: string; paused: boolean; setup: string }[] = [];
 
   for (const componentNodeIds of components) {
     const componentNodes = componentNodeIds
@@ -49,10 +50,10 @@ export function generateOutput(
       const input =
         inputs.length > 1
           ? `stack(${inputs.join(', ')})`
-          : (inputs[0] ?? '');
+          : (inputs[0] ?? (options.fragment && nodeDefinitions[node.type]?.category === 'Audio Effects' ? '__flow_input__' : ''));
       const source = isSoundSource(node);
       const silent = source
-        ? !allPaused && node.data.state === 'paused'
+        ? !options.clipboard && !allPaused && node.data.state === 'paused'
         : audioInputs.length > 0 && !inputs.length;
       const data =
         bindings.length && Array.isArray(node.data.calls)
@@ -97,17 +98,31 @@ export function generateOutput(
         ...ordered
           .filter((node) => node.type === 'samples-node')
           .map((node) =>
-            `await samples(${serializeLiteral(node.data.source ?? node.data.sampleMap)});`,
+            `${options.clipboard ? '' : 'await '}samples(${serializeLiteral(node.data.source ?? node.data.sampleMap)});`,
           ),
         ...new Set(ordered.map((node) => String(node.data.setup ?? ''))),
       ].filter(Boolean).join('\n');
-      if (setup.trim())
+      if (setup.trim() && !options.clipboard)
         pattern = `(await (async () => {\n${setup}\nreturn ${pattern};\n})())`;
-      finalPatterns.push({ pattern, paused: allPaused });
+      finalPatterns.push({ pattern, paused: allPaused, setup });
     }
   }
 
   if (finalPatterns.length === 0) return '';
+
+  if (options.clipboard) {
+    if (options.fragment) {
+      if (finalPatterns.length !== 1 || finalPatterns[0].setup ||
+          !finalPatterns[0].pattern.startsWith('__flow_input__.'))
+        throw new Error('Select one connected chain of effects to copy.');
+      return finalPatterns[0].pattern.slice('__flow_input__'.length);
+    }
+    const setup = [...new Set(finalPatterns.map((item) => item.setup).filter(Boolean))];
+    const patterns = finalPatterns.map((item) => item.pattern);
+    const pattern = patterns.length === 1 ? patterns[0] : `stack(${patterns.join(', ')})`;
+    if (options.includeTempo) setup.unshift(`setcps(${(Number(cpm) || 120) / (60 * (Number(bpc) || 4))})`);
+    return [...setup, pattern].join('\n');
+  }
 
   const result = finalPatterns
     .map(({ pattern, paused }) => {

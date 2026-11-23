@@ -16,7 +16,34 @@ export function parseProgram(code: string) {
   return { statements: body, expression: last.expression };
 }
 
-export function parsePatternProgram(code: string) {
+function numericValue(expression: Expression): number | undefined {
+  if (expression.type === 'Literal' && typeof expression.value === 'number')
+    return expression.value;
+  if (expression.type !== 'BinaryExpression') return undefined;
+  const left = numericValue(expression.left as Expression);
+  const right = numericValue(expression.right);
+  if (left === undefined || right === undefined) return undefined;
+  if (expression.operator === '+') return left + right;
+  if (expression.operator === '-') return left - right;
+  if (expression.operator === '*') return left * right;
+  if (expression.operator === '/') return left / right;
+  return undefined;
+}
+
+export function parsePatternProgram(code: string): { pattern: PatternPart; setup: string; samples: { source?: string; sampleMap?: Record<string, string | string[]> }[]; cps?: number } {
+  const program = parse(code, { ecmaVersion: 'latest' });
+  const labelled = program.body.filter((statement) =>
+    statement.type === 'LabeledStatement' && statement.label.name === '$' && statement.body.type === 'ExpressionStatement',
+  );
+  if (labelled.length) {
+    const setup = program.body.filter((statement) => !labelled.includes(statement))
+      .map((statement) => code.slice(statement.start, statement.end)).join('\n');
+    const patterns = labelled.map((statement) => {
+      if (statement.type !== 'LabeledStatement' || statement.body.type !== 'ExpressionStatement') return '';
+      return code.slice(statement.body.expression.start, statement.body.expression.end);
+    });
+    return parsePatternProgram(`${setup}\nstack(${patterns.join(', ')})`);
+  }
   const { statements, expression } = parseProgram(code);
   let cps: number | undefined;
   const samples: {
@@ -32,14 +59,12 @@ export function parsePatternProgram(code: string) {
         : null;
     if (call?.callee.type === 'Identifier' && call.arguments.length === 1) {
       const arg = call.arguments[0];
-      if (
-        call.callee.name === 'setcps' &&
-        arg.type === 'Literal' &&
-        typeof arg.value === 'number' &&
-        arg.value > 0
-      ) {
-        cps = arg.value;
-        continue;
+      if (['setcps', 'setcpm'].includes(call.callee.name) && arg.type !== 'SpreadElement') {
+        const value = numericValue(arg);
+        if (value !== undefined && Number.isFinite(value) && value > 0) {
+          cps = call.callee.name === 'setcpm' ? value / 60 : value;
+          continue;
+        }
       }
       if (call.callee.name === 'samples') {
         if (arg.type === 'Literal' && typeof arg.value === 'string') {
