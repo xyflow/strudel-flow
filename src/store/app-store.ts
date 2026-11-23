@@ -1,14 +1,10 @@
 import { create } from 'zustand';
-import { subscribeWithSelector } from 'zustand/middleware';
 import {
   addEdge,
-  applyEdgeChanges,
-  applyNodeChanges,
-  ColorMode,
-  OnConnect,
-  OnEdgesChange,
-  OnNodesChange,
-  Edge,
+  type OnConnect,
+  type OnEdgesChange,
+  type OnNodesChange,
+  type Edge,
 } from '@xyflow/react';
 
 import type { AppNode } from '@/components/nodes/registry';
@@ -22,7 +18,6 @@ type AppState = {
   graphRevision: number;
   nodes: AppNode[];
   edges: Edge[];
-  colorMode: ColorMode;
   theme: string;
   cpm: string;
   bpc: string;
@@ -37,7 +32,6 @@ type AppActions = {
   setPattern: (pattern: string) => void;
   toggle: () => void;
   setError: (error: string | null) => void;
-  setColorMode: (colorMode: ColorMode) => void;
   onNodesChange: OnNodesChange<AppNode>;
   removeNode: (nodeId: string) => void;
   setGroupState: (nodeId: string, state: 'running' | 'paused') => void;
@@ -49,112 +43,82 @@ type AppActions = {
 
 type AppStore = AppState & AppActions;
 
-export const useAppStore = create<AppStore>()(
-  subscribeWithSelector((set, get) => ({
-    graphRevision: 0,
-    name: 'Untitled patch',
-    author: '',
-    description: '',
-    nodes: initialNodes,
-    edges: initialEdges,
-    theme: 'caffeine',
-    colorMode: 'system',
-    cpm: '120',
-    bpc: '4',
-    pattern: '',
-    isPlaying: false,
-    error: null,
-    setCpm: (cpm) => set({ cpm }),
-    setBpc: (bpc) => set({ bpc }),
-    setPattern: (pattern) => set({ pattern }),
-    toggle: () =>
-      set((state) => ({ isPlaying: !state.isPlaying, error: null })),
-    setError: (error) => set({ error, ...(error ? { isPlaying: false } : {}) }),
+export const useAppStore = create<AppStore>()((set, get) => ({
+  graphRevision: 0,
+  name: 'Untitled patch',
+  author: '',
+  description: '',
+  nodes: initialNodes,
+  edges: initialEdges,
+  theme: 'caffeine',
+  cpm: '120',
+  bpc: '4',
+  pattern: '',
+  isPlaying: false,
+  error: null,
+  setCpm: (cpm) => set({ cpm }),
+  setBpc: (bpc) => set({ bpc }),
+  setPattern: (pattern) => set({ pattern }),
+  toggle: () =>
+    set((state) => ({ isPlaying: !state.isPlaying, error: null })),
+  setError: (error) => set({ error, ...(error ? { isPlaying: false } : {}) }),
 
-    onNodesChange: (changes) => {
-      set({ nodes: applyNodeChanges(changes, get().nodes) });
-    },
+  onNodesChange: (changes) =>
+    set((state) => ({ nodes: changes.applyTo(state.nodes) })),
 
-    removeNode: (nodeId) =>
-      set((state) => ({
-        nodes: state.nodes.filter((node) => node.id !== nodeId),
-        edges: state.edges.filter(
-          (edge) => edge.source !== nodeId && edge.target !== nodeId,
-        ),
-      })),
+  removeNode: (nodeId) =>
+    set((state) => ({
+      nodes: state.nodes.filter((node) => node.id !== nodeId),
+      edges: state.edges.filter(
+        (edge) => edge.source !== nodeId && edge.target !== nodeId,
+      ),
+    })),
 
-    setGroupState: (nodeId, playbackState) =>
-      set((state) => {
-        const group = new Set(
-          findConnectedComponents(state.nodes, state.edges).find((ids) =>
-            ids.includes(nodeId),
-          ) ?? [nodeId],
-        );
-        return {
-          nodes: state.nodes.map((node) =>
-            group.has(node.id)
-              ? { ...node, data: { ...node.data, state: playbackState } }
-              : node,
-          ),
-        };
-      }),
-
-    onEdgesChange: (changes) =>
-      set({ edges: applyEdgeChanges(changes, get().edges) }),
-
-    onConnect: (connection) => {
-      if (connection.source === connection.target) return;
-      const { source, target, sourceHandle, targetHandle } = connection;
-      set({
-        edges: addEdge(
-          {
-            id: `${source}-${target}`,
-            source,
-            target,
-            type: 'default',
-            ...(sourceHandle ? { sourceHandle } : {}),
-            ...(targetHandle ? { targetHandle } : {}),
-          },
-          get().edges,
-        ),
-      });
-    },
-
-    setTheme: (theme) => set({ theme }),
-
-    setColorMode: (colorMode) => set({ colorMode }),
-
-    updateNodeData: (nodeId, updates) =>
-      set((state) => ({
+  setGroupState: (nodeId, playbackState) =>
+    set((state) => {
+      const group = new Set(
+        findConnectedComponents(state.nodes, state.edges).find((ids) =>
+          ids.includes(nodeId),
+        ) ?? [nodeId],
+      );
+      return {
         nodes: state.nodes.map((node) =>
-          node.id === nodeId
-            ? { ...node, data: { ...node.data, ...updates } }
+          group.has(node.id)
+            ? { ...node, data: { ...node.data, state: playbackState } }
             : node,
         ),
-      })),
-  })),
-);
+      };
+    }),
 
-const systemAppearance = window.matchMedia('(prefers-color-scheme: dark)');
-function applyColorMode() {
-  const { colorMode } = useAppStore.getState();
-  document.documentElement.classList.toggle(
-    'dark',
-    colorMode === 'dark' ||
-      (colorMode === 'system' && systemAppearance.matches),
-  );
-}
-const unsubscribeAppearance = useAppStore.subscribe(
-  (state) => state.colorMode,
-  applyColorMode,
-  {
-    fireImmediately: true,
+  onEdgesChange: (changes) =>
+    set((state) => ({ edges: changes.applyTo(state.edges) })),
+
+  onConnect: (connection) => {
+    if (connection.source === connection.target) return;
+    const { source, target, sourceHandle, targetHandle } = connection;
+    set({
+      edges: addEdge(
+        {
+          id: `${source}-${target}`,
+          source,
+          target,
+          type: 'default',
+          ...(sourceHandle ? { sourceHandle } : {}),
+          ...(targetHandle ? { targetHandle } : {}),
+        },
+        get().edges,
+      ),
+    });
   },
-);
-systemAppearance.addEventListener('change', applyColorMode);
-if (import.meta.hot) {
-  import.meta.hot.dispose(() => {
-    unsubscribeAppearance();
-    systemAppearance.removeEventListener('change', applyColorMode);
-  });
-}
+
+  setTheme: (theme) => set({ theme }),
+
+  updateNodeData: (nodeId, updates) =>
+    set((state) => ({
+      nodes: state.nodes.map((node) =>
+        node.id === nodeId
+          ? { ...node, data: { ...node.data, ...updates } }
+          : node,
+      ),
+    })),
+}));

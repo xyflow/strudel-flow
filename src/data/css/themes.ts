@@ -15,6 +15,12 @@ function declarations(variables: Record<string, string>) {
 export const themeStyles: Record<string, string> = {};
 
 for (const preset of presets) {
-  themeStyles[preset.name] =
-    `:root{${declarations(preset.light)}}.dark{${declarations(preset.dark)}}`;
+  const dark = declarations(preset.dark);
+  themeStyles[preset.name] = `
+    :root { ${declarations(preset.light)} }
+    :root[data-theme='dark'] { ${dark} }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) { ${dark} }
+    }
+  `;
 }
