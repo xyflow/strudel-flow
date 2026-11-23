@@ -1,6 +1,11 @@
+import { importedGridPattern } from './imported-notes';
 import type { CellState } from '../../shared/modifiers';
 
 export type PadData = {
+  noteTemplate?: string;
+  noteFunction?: 'note' | 'n';
+  noteRows?: string[];
+  importedScale?: boolean;
   steps?: number;
   mode?: 'arp' | 'chord';
   octave?: number;
@@ -27,6 +32,12 @@ export const createDefaultGrid = (): boolean[][] =>
   Array.from({ length: 16 }, () => Array(8).fill(false));
 
 export function generatePattern(data: PadData, strudelString: string) {
+  if (data.noteTemplate !== undefined) {
+    const pattern = data.importedScale
+      ? `n(${JSON.stringify(importedGridPattern(data))}).scale(${JSON.stringify(`${data.selectedKey ?? 'C'}${data.octave ?? 3}:${data.selectedScaleType ?? 'chromatic'}`)})`
+      : `${data.noteFunction ?? 'note'}(${JSON.stringify(importedGridPattern(data))})`;
+    return strudelString ? `${strudelString}.${pattern}` : pattern;
+  }
   const grid = data.grid || createDefaultGrid();
   const columnModifiers = data.columnModifiers || {};
 

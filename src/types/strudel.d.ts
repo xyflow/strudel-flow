@@ -1,4 +1,7 @@
 declare module '@strudel/web' {
+  export const soundMap: {
+    subscribe(listener: (sounds: Record<string, unknown>) => void): () => void;
+  };
   export type StrudelSession = {
     scheduler: { now: () => number };
     state: { evalError?: unknown };

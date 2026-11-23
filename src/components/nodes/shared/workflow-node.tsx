@@ -53,6 +53,19 @@ function WorkflowNode({
         aria-label="Patch output"
         style={{ top: 28 }}
       />
+      {(Array.isArray(data.argumentSlots)
+        ? (data.argumentSlots as number[])
+        : []
+      ).map((argument, index) => (
+        <BaseHandle
+          key={argument}
+          id={`argument:${argument}`}
+          position={Position.Left}
+          type="target"
+          aria-label={`Modulation input ${argument + 1}`}
+          style={{ top: 70 + index * 28 }}
+        />
+      ))}
       <header className="mb-1 flex h-12 items-center gap-3 px-3">
         <h3 className="flex-1 text-[11px] font-semibold tracking-[.16em] uppercase">
           {data.title}

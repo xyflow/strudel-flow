@@ -55,7 +55,7 @@ export function EditorToolbar({
             aria-label="Tempo in beats per minute"
             title="Tempo"
             min={1}
-            max={200}
+            max={1000}
             value={cpm}
             onChange={(event) => {
               const value = event.target.valueAsNumber;

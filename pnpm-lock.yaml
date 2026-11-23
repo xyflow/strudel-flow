@@ -35,6 +35,9 @@ importers:
       '@xyflow/react':
         specifier: ^13.0.2
         version: 13.0.2(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(use-sync-external-store@1.7.0(react@19.0.0))
+      acorn:
+        specifier: 8.15.0
+        version: 8.15.0
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1

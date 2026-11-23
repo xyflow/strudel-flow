@@ -1,6 +1,7 @@
 import type { CustomControlsProps } from '../../define-node';
 import type { PadData } from './pad';
 import { NOTES, DEFAULTS, createDefaultGrid } from './pad';
+import { createImportedPad, importedGridPattern } from './imported-notes';
 import { useState, useEffect } from 'react';
 import { getSchedulerNow } from '@/lib/strudel-clock';
 
@@ -14,6 +15,12 @@ export function PadNode({
   isMuted,
 }: CustomControlsProps<PadData>) {
   const [activeStep, setActiveStep] = useState(-1);
+  const pattern =
+    data.noteTemplate === undefined ? undefined : importedGridPattern(data);
+  const [draft, setDraft] = useState(pattern ?? '');
+  useEffect(() => {
+    setDraft(pattern ?? '');
+  }, [pattern]);
 
   const steps = data.steps || DEFAULTS.steps;
 
@@ -37,6 +44,7 @@ export function PadNode({
   const selectedKey = data.selectedKey || DEFAULTS.selectedKey;
   const selectedScaleType =
     data.selectedScaleType || DEFAULTS.selectedScaleType;
+  const notes = data.noteRows ?? NOTES;
   const grid = data.grid || createDefaultGrid();
   const columnModifiers = data.columnModifiers || {};
   const handleToggleCell = (stepIdx: number, noteIdx: number) => {
@@ -57,6 +65,21 @@ export function PadNode({
 
   return (
     <div className="flex flex-col gap-2 p-3 bg-card text-card-foreground rounded-lg w-full max-w-full overflow-hidden">
+      {pattern !== undefined && (
+        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+          Pattern
+          <input
+            aria-label="Pad pattern"
+            className="nodrag nopan w-full rounded border bg-background px-2 py-1 font-mono text-foreground"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onBlur={() => {
+              if (draft !== pattern) onChange({ ...createImportedPad(draft), importedScale: false, columnModifiers: {} });
+            }}
+            onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }}
+          />
+        </label>
+      )}
       <div className="flex gap-1 w-full nodrag">
         {Array.from({ length: steps }, (_, stepIdx) => (
           <div key={stepIdx} className="flex flex-col gap-1 items-center">
@@ -65,7 +88,7 @@ export function PadNode({
                 stepIdx === activeStep ? 'bg-primary' : 'bg-card-foreground/20'
               }`}
             />
-            {NOTES.map((_, noteIdx) => {
+            {notes.map((note, noteIdx) => {
               const on = grid[stepIdx]?.[noteIdx] || false;
               return (
                 <button
@@ -73,7 +96,7 @@ export function PadNode({
                   className={`${getButtonClasses(on)} w-12 h-10`}
                   onClick={() => handleToggleCell(stepIdx, noteIdx)}
                   aria-pressed={on}
-                  title={`Note ${noteIdx + 1}, Step ${stepIdx + 1}`}
+                  title={`Note ${note}, Step ${stepIdx + 1}`}
                 />
               );
             })}
@@ -90,11 +113,29 @@ export function PadNode({
         <AccordionControls
           keyScaleOctaveProps={{
             selectedKey,
-            onKeyChange: (key) => onChange({ selectedKey: key }),
+            onKeyChange: (key) =>
+              onChange({
+                selectedKey: key,
+                ...(data.noteTemplate !== undefined
+                  ? { importedScale: true }
+                  : {}),
+              }),
             selectedScale: selectedScaleType,
-            onScaleChange: (scale) => onChange({ selectedScaleType: scale }),
+            onScaleChange: (scale) =>
+              onChange({
+                selectedScaleType: scale,
+                ...(data.noteTemplate !== undefined
+                  ? { importedScale: true }
+                  : {}),
+              }),
             octave,
-            onOctaveChange: (oct) => onChange({ octave: oct }),
+            onOctaveChange: (oct) =>
+              onChange({
+                octave: oct,
+                ...(data.noteTemplate !== undefined
+                  ? { importedScale: true }
+                  : {}),
+              }),
           }}
           padControlsProps={{
             steps,

@@ -1,4 +1,7 @@
+import { programNodes } from './shared/program-nodes';
 import type { NodeDefinition } from './define-node';
+import { simpleNode } from './simple-node';
+import type { SimpleNode } from '@/lib/strudel-calls';
 import { createDefinitionComponent } from './shared/definition-node';
 import type { XYPosition } from '@xyflow/react';
 import { nanoid } from 'nanoid';
@@ -9,17 +12,34 @@ export type {
   WorkflowNodeData,
   WorkflowNodeProps,
 } from './types';
-const discovered = import.meta.glob<NodeDefinition>('./**/*.node.{ts,tsx}', {
-  eager: true,
-  import: 'default',
-});
+const discovered = import.meta.glob<NodeDefinition | SimpleNode>(
+  './**/*.node.{ts,tsx}',
+  {
+    eager: true,
+    import: 'default',
+  },
+);
 const registered: Record<string, NodeDefinition> = Object.create(null);
-for (const definition of Object.values(discovered)) {
+for (const [path, value] of Object.entries(discovered)) {
+  const definition =
+    typeof value.generatePattern === 'function'
+      ? (value as NodeDefinition)
+      : simpleNode(
+          `${path.split('/').pop()!.replace(/\.node\.tsx?$/, '')}-node`,
+          value as SimpleNode,
+        );
   if (Object.prototype.hasOwnProperty.call(registered, definition.id)) {
     throw new Error(`Duplicate node ID: ${definition.id}`);
   }
   registered[definition.id] = definition;
 }
+for (const [id, values, category] of [
+  ['pattern-call-node', { s: 'bd sd' }, 'Instruments'],
+  ['effect-call-node', { gain: 1 }, 'Audio Effects'],
+] as const) {
+  registered[id] = { ...simpleNode(id, values, category), menuHidden: true };
+}
+for (const definition of programNodes) registered[definition.id] = definition;
 export const nodeDefinitions = Object.fromEntries(
   Object.entries(registered).sort(
     ([, a], [, b]) =>
